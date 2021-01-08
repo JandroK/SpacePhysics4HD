@@ -1,6 +1,5 @@
 #include "Space4HD.h"
 #define PI 3.14159265
-#define RADTODEG 57.29577958f
 
 void Body::AddForces(fPoint force)
 {
@@ -34,33 +33,44 @@ void Body::ResetTorque()
 	torque = 0;
 }
 
-void Body::RotateBody(fPoint pointsCollision[], int numPoints, fPoint axis)
+void Body::SetCollisions(int _numPoints, fPoint _bodyPointsCollision[])
+{
+	numPoints = _numPoints;
+	for (int i = 0; i < numPoints; i++)
+	{
+		bodyPointsCollision[i] = _bodyPointsCollision[i];
+	}
+}
+
+void Body::RotateBody(fPoint pointsCollision[])
 {
 	for (int i = 0; i < numPoints; i++)
 	{
 		float posX = (bodyPointsCollision[i].x * cos(angularPosition)) - (bodyPointsCollision[i].y * sin(angularPosition));//Matrix rotation
 		float posY = (bodyPointsCollision[i].x * sin(angularPosition)) + (bodyPointsCollision[i].y * cos(angularPosition));
-		pointsCollision[i].x = posX + axis.x;//+axis change base
-		pointsCollision[i].y = posY + axis.y;
+		pointsCollision[i].x = posX + axisCM.x;//+axisCM change base
+		pointsCollision[i].y = posY + axisCM.y;
 	}
 }
-float Body::GetRotation() const
-{
-	return  RADTODEG*angularPosition;
-}
 
-fPoint PhysicsEngine::ForceGrav(float mass)
+fPoint PhysicsEngine::ForceGrav(float mass, float hight)
 {
+	if (hight < positionPlanetA + rangeRadiusPlanetA)
+		gravity = gravityEarth + abs(hight-positionPlanetA) * slopeEarth;
+	else if (hight > positionPlanetB - rangeRadiusPlanetB)
+		gravity = gravityMoon  + abs(hight-positionPlanetB) * slopeMoon;
+
 	fPoint fg;
 	fg.x = 0;
-	fg.y = mass * GRAVITY;
+	fg.y = mass * gravity;
+
 	return fg;
 }
 
-fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float Cd)
+fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd)
 {
 	float fdModule;
-	fdModule = 0.5 * density * velRelative * velRelative * surface * Cd;
+	fdModule = 0.5 * density * velRelative * velRelative * surface * cd;
 	fPoint fd;
 	fd.x = -fdModule * dirVelocity.x;
 	fd.y = -fdModule * dirVelocity.y;
@@ -90,4 +100,11 @@ fPoint PhysicsEngine::NormalizeVector(fPoint distance)
 	normalize.x = distance.x / CalculateModule(distance);
 	normalize.y = distance.y / CalculateModule(distance);
 	return normalize ;
+}
+
+void PhysicsEngine::Step(float dt)
+{
+	// VelocityVerletLinear();
+	// VelocityVerletAngular();
+	// IsInsidePolygons();
 }

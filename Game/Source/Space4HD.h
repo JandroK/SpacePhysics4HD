@@ -2,7 +2,14 @@
 #include "List.h"
 #include "Collisions.h"
 
-#define GRAVITY 9.81f //LA GRAVEDAD SERÁ VARIABLE, ESTE DEFINE SE ELIMINARÁ
+#define RADTODEG 57.29577958f
+
+enum class BodyType
+{
+	STATIC_BODY = 0,
+	KINEMATIC_BODY,
+	DYNAMIC_BODY
+};
 
 class Body
 {
@@ -14,8 +21,8 @@ public:
 	void AddTorque(float torqueCM);
 
 	// Rotations
-	void RotateBody(fPoint pointsCollision[], int numPoints, fPoint axis);
-	float GetRotation() const;
+	void RotateBody(fPoint pointsCollision[]);
+	
 
 	// Accelerations
 	void CalculateAcceleration();
@@ -25,21 +32,48 @@ public:
 	void ResetForces();
 	void ResetTorque();
 
-	// Properties
-	fPoint position;
+	// Geters
+	fPoint GetPosition() { return position; };
+	fPoint GetVelocity() { return velocity; };
+	fPoint GetAcceleration() { return acceleration; };
+	BodyType GetType() { return type; };
+	float GetRotation() const { return  RADTODEG * angularPosition; };
+
+	//Seters
+	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
+	void SetAxisCM(fPoint axis) { axisCM = axis; };
+
+private:
+
+	//General properties
+	float mass = 0;
+	BodyType type = BodyType::STATIC_BODY;
+	bool active = true;
+	fPoint axisCM;
+
+	// Properties linal
+	fPoint position = { 0,0 };
 	fPoint velocity = { 0,0 };
 	fPoint acceleration = { 0,0 };
+
+	// Properties angular
 	float angularPosition = 0;
 	float angularVelocity = 0;
 	float angularAcceleration = 0;
+
+	// Forces
 	fPoint forces = { 0,0 };
 	float torque = 0;
-	float mass;
+
+	// Properties for ForceDrag
+	float surface = 0; 
+	float cd = 0; 
 
 	// Collisions
 	int numPoints = 0;
 	fPoint *bodyPointsCollision = new fPoint [numPoints];
 };
+
 
 class Ship : public Body
 {
@@ -47,8 +81,7 @@ public:
 	float health;
 	float fuel;
 	int ammo; //munición
-	float surface; // surface for calculate Fdrag
-	float cd; // cd for calculate Fdrag
+
 	void LaunchMissiles();
 };
 
@@ -62,13 +95,13 @@ public:
 	List<Body*> asteroids;
 	List<Body*> missiles;
 
-	fPoint ForceGrav(float mass);
-	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float Cd);
-	//iPoint ForceAeroLift();
-	//iPoint ForceHydroBuoy();
-	//iPoint ForceHydroDrag();
+	fPoint ForceGrav(float mass, float hight); // masa del objeto y distancia a la superfície del planeta
+	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd);
+	//fPoint ForceAeroLift();
+	//fPoint ForceHydroBuoy();
+	//fPoint ForceHydroDrag();
 
-	void Step(); //Step physics: apply current physics & integrate & solve collisions advance one frame
+	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
 	//Remember to reset current forces/momentum of each body.
 
 	void VelocityVerletLinear(fPoint& position, fPoint& velocity, fPoint acceleration, float dt);
@@ -77,6 +110,30 @@ public:
 	float CalculateModule(fPoint distance);
 	fPoint NormalizeVector(fPoint distance);
 
-} Space4HD; // Instantiate PhysicsEngine as a global variable
+	// Geters
+	float GetCurrentGravity() { return gravity; };
 
+	// Seters
+	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; };
+	void SetGravityPlanetB(float gravity) { gravityMoon  = gravity; };
+	void SetPositionAndRangePlanetA(float position, float radius) { positionPlanetA = position, rangeRadiusPlanetA = radius; };
+	void SetPositionAndRangePlanetB(float position, float radius) { positionPlanetB = position, rangeRadiusPlanetB = radius; };
 
+private:
+
+	// Gravedades iniciales
+	float gravityEarth = 10;
+	float gravityMoon = 2;
+	float gravity = 0;
+
+	// Posiciones iniciales de la superfície de los planetas y el rango de alcance de su campo gravitatorio
+	float positionPlanetA = 0;
+	float positionPlanetB = 0;
+	float rangeRadiusPlanetA = 0;
+	float rangeRadiusPlanetB = 0;
+
+	// Inclinación de la recta: gravedad en la superfície entre la altura máxima a la afecta la gravedad
+	float slopeEarth = - gravityEarth / rangeRadiusPlanetA;
+	float slopeMoon  = - gravityMoon  / rangeRadiusPlanetB;
+
+} world; // Instantiate PhysicsEngine as a global variable

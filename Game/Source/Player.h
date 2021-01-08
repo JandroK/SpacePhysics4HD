@@ -33,8 +33,8 @@ struct PlayerData
 	SDL_Rect rectPlayer = {0,0,0,0};
 
 	SDL_Texture* texture;
-	static const int numPoints = 6;
-	iPoint pointsCollision[numPoints] = { { 0,0 },{45 , 0},{ 45,-26 },{45 ,-54 }, {0, -54},{0, -26} };
+	static const int numPoints = 3;
+	iPoint pointsCollision[numPoints] = { { 0, 74 },{86, 42},{ -86, 42 } };
 
 };
 

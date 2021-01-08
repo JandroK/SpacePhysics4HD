@@ -248,7 +248,7 @@ void Player::GodModeControls(float dt)
 {
 	if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)velGodMode = 20;
 	else velGodMode = 10;
-		if (godMode == true)
+	if (godMode == true)
 	{
 		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= velGodMode;
 		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += velGodMode;
