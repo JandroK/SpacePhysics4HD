@@ -1,15 +1,13 @@
 <!-- Config file for the game -->
 <!-- L01: DONE 1: Create configuration file-->
 <config>
-  <app>
+  <app framerate_cap="60">
     <title>Game Development Testbed</title>
     <organization>UPC</organization>
   </app>
-
   <renderer>
     <vsync value="false"/>
   </renderer>
-
   <window>
     <resolution width="1920" height="1080" scale="1"/>
     <fullscreen value="false"/>
@@ -17,4 +15,8 @@
     <resizable value="false"/>
     <fullscreen_window value="false"/>
   </window>
+  <audio>
+    <music volume="50" />
+    <fx volume="50" />
+  </audio>
 </config>

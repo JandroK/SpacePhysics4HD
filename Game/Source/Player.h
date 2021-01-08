@@ -96,8 +96,7 @@ private:
 	int levelScene;
 
 	float gravity = 0.3f;
-	float velY = 0;
-	float velX = 0;
+	float velGodMode = 0;
 
 	Animation* idleAnim= new Animation();
 	Animation* flyAnim = new Animation();

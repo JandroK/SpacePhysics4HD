@@ -146,9 +146,6 @@ bool Player::Update(float dt)
 	return true;
 }
 
-
-
-
 void Player::SpeedAnimationCheck(float dt)
 {
 	idleAnim->speed = (dt * 5) ;
@@ -158,7 +155,6 @@ void Player::SpeedAnimationCheck(float dt)
 	turboAnim->speed = (dt * 9) ;
 	
 }
-
 
 void Player::CameraPlayer()
 {
@@ -250,13 +246,14 @@ void Player::PlayerControls(float dt)
 
 void Player::GodModeControls(float dt)
 {
-
-	if (godMode == true)
+	if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)velGodMode = 20;
+	else velGodMode = 10;
+		if (godMode == true)
 	{
-		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= 10; 
-		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += 10; 
-		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)playerData.position.x -= 10; 
-		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)playerData.position.x += 10; 
+		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)playerData.position.x -= velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)playerData.position.x += velGodMode;
 	}
 }
 
