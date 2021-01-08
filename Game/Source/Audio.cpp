@@ -160,6 +160,19 @@ unsigned int Audio::LoadFx(const char* path)
 
 	return ret;
 }
+bool Audio::Unload1Fx(int index)
+{
+	bool ret = false;
+
+	if (fx[index] != nullptr)
+	{
+		Mix_FreeChunk(fx[index]);
+		fx[index] = nullptr;
+		ret = true;
+	}
+
+	return ret;
+}
 
 // Play WAV
 bool Audio::PlayFx(unsigned int id, int repeat)
