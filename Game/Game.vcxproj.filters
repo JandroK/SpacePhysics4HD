@@ -18,6 +18,8 @@
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\Space4HD.cpp" />
     <ClCompile Include="Source\Collisions.cpp" />
+    <ClCompile Include="Source\Timer.cpp" />
+    <ClCompile Include="Source\PerfTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Window.h" />
@@ -59,6 +61,8 @@
     <ClInclude Include="Source\Animation.h" />
     <ClInclude Include="Source\Space4HD.h" />
     <ClInclude Include="Source\Collisions.h" />
+    <ClInclude Include="Source\Timer.h" />
+    <ClInclude Include="Source\PerfTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="External">

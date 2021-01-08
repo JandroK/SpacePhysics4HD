@@ -36,7 +36,9 @@ bool Player::Start()
 	godMode = true;
 
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
-	playerData.position = { WINDOW_W/2-114, 10530 };
+
+	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
+	playerData.position = { WINDOW_W/2- (playerData.rectPlayer.w>>1), 10538 };
 	playerData.state = IDLE;
 
 
@@ -65,7 +67,7 @@ bool Player::Start()
 	atakAnim->speed = 0.10f;
 
 
-	idleAnim->PushBack({ 0 ,0, 229, 169 });
+	idleAnim->PushBack({ 0 ,0, playerData.rectPlayer.w, playerData.rectPlayer.h });
 	
 	for (int i = 0; i < 6; i++)
 		flyAnim->PushBack({ 312 + (78 * i),0, 78, 78 });
@@ -144,9 +146,6 @@ bool Player::Update(float dt)
 	return true;
 }
 
-
-
-
 void Player::SpeedAnimationCheck(float dt)
 {
 	idleAnim->speed = (dt * 5) ;
@@ -156,7 +155,6 @@ void Player::SpeedAnimationCheck(float dt)
 	turboAnim->speed = (dt * 9) ;
 	
 }
-
 
 void Player::CameraPlayer()
 {
@@ -248,13 +246,14 @@ void Player::PlayerControls(float dt)
 
 void Player::GodModeControls(float dt)
 {
-
-	if (godMode == true)
+	if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)velGodMode = 20;
+	else velGodMode = 10;
+		if (godMode == true)
 	{
-		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= 10; 
-		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += 10; 
-		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)playerData.position.x -= 10; 
-		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)playerData.position.x += 10; 
+		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)playerData.position.x -= velGodMode;
+		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)playerData.position.x += velGodMode;
 	}
 }
 

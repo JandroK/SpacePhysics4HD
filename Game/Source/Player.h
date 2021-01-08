@@ -30,10 +30,10 @@ struct PlayerData
 	uint *stateShoot = 0;
 	iPoint* shootPosition;
 	iPoint* shootPointsCollision;
+	SDL_Rect rectPlayer = {0,0,0,0};
 
 	SDL_Texture* texture;
 	static const int numPoints = 6;
-
 	iPoint pointsCollision[numPoints] = { { 0,0 },{45 , 0},{ 45,-26 },{45 ,-54 }, {0, -54},{0, -26} };
 
 };
@@ -96,8 +96,7 @@ private:
 	int levelScene;
 
 	float gravity = 0.3f;
-	float velY = 0;
-	float velX = 0;
+	float velGodMode = 0;
 
 	Animation* idleAnim= new Animation();
 	Animation* flyAnim = new Animation();
