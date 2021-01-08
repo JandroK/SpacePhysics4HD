@@ -35,6 +35,9 @@ public:
 private:
 	SDL_Texture* imgBgSpace;
 	SDL_Texture* imgBgEarth;
+	
+	SDL_Texture* imgPlatform;
+	SDL_Rect rectPlatform;
 };
 
 #endif // __SCENE_H__

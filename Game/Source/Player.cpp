@@ -36,7 +36,9 @@ bool Player::Start()
 	godMode = true;
 
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
-	playerData.position = { WINDOW_W/2-114, 10530 };
+
+	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
+	playerData.position = { WINDOW_W/2- (playerData.rectPlayer.w>>1), 10538 };
 	playerData.state = IDLE;
 
 
@@ -65,7 +67,7 @@ bool Player::Start()
 	atakAnim->speed = 0.10f;
 
 
-	idleAnim->PushBack({ 0 ,0, 229, 169 });
+	idleAnim->PushBack({ 0 ,0, playerData.rectPlayer.w, playerData.rectPlayer.h });
 	
 	for (int i = 0; i < 6; i++)
 		flyAnim->PushBack({ 312 + (78 * i),0, 78, 78 });

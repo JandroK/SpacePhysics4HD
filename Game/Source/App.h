@@ -3,9 +3,14 @@
 
 #include "Module.h"
 #include "List.h"
+#include "PerfTimer.h"
+#include "Timer.h"
 
 #include "PugiXml/src/pugixml.hpp"
 
+#define CONFIG_FILENAME		"config.xml"
+#define SAVE_STATE_FILENAME "save_game.xml"
+	
 // Modules
 class Window;
 class Input;
@@ -46,10 +51,24 @@ public:
 	const char* GetTitle() const;
 	const char* GetOrganization() const;
 
+	// Methods to request Load / Save
+	void LoadGameRequest();
+	void SaveGameRequest() const;
+	void LoadConfigRequested();
+	void SaveConfigRequested() const;
+
+	void SetLastScene(Module* scene) { lastScene = scene; }
+	float GetCapMs();
+
+	int GetFramerate();
+
+	int GetFramesOnLastSecond() { return framesOnLastSecond; };
+	
+
 private:
 
 	// Load config file
-	bool LoadConfig();
+	pugi::xml_node LoadConfig(pugi::xml_document&) const;
 
 	// Call modules before each loop iteration
 	void PrepareUpdate();
@@ -66,6 +85,12 @@ private:
 	// Call modules after each loop iteration
 	bool PostUpdate();
 
+	// Load / Save
+	bool LoadGame(const SString _filename);
+	bool SaveGame(const SString _filename) const;
+
+
+
 public:
 
 	// Modules
@@ -76,6 +101,7 @@ public:
 	Audio* audio;
 	Scene* scene;
 	Player* player;
+	//ModuleFonts* fonts;
 
 private:
 
@@ -83,7 +109,7 @@ private:
 	char** args;
 	SString title;
 	SString organization;
-
+	int framerate;
 	List<Module *> modules;
 
 	// TODO 2: Create new variables from pugui namespace:
@@ -94,7 +120,37 @@ private:
 	pugi::xml_node configApp;
 
 	uint frames;
-	float dt;
+	PerfTimer ptimer;
+	uint64 frameCount = 0;
+
+	Timer startupTime;
+	Timer frameTime;
+	Timer lastSecFrameTime;
+	uint32 lastSecFrameCount = 0;
+	uint32 prevLastSecFrameCount = 0;
+	uint32 framesOnLastSecond = 0;
+	uint32 lastFrameMs = 0;
+	float dt = 0.0f;
+	float perfTime;
+	float oldLastFrame = 0.0f;
+	float timeFramesSecond = 0.0f;
+	float	cappedMs = -1;
+
+	mutable bool saveGameRequested;
+	bool loadGameRequested;
+
+	pugi::xml_document stateFile;
+	pugi::xml_node rootStateFile;
+
+	mutable bool saveConfigRequested;
+	bool loadConfigRequested;
+	SString filenameGame = "save_game.xml";
+	SString filenameConfig = "config.xml";
+
+	float fPS = 0;
+	bool changeFPS=false;
+
+	Module* lastScene;
 };
 
 extern App* app;
