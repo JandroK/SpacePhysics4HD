@@ -5,7 +5,7 @@
 
 #include "Animation.h"
 #include "p2Point.h"
-
+#include "Body.h"
 
 enum State {
 
@@ -93,6 +93,7 @@ public:
 
 private:
 	
+	Body *ship;
 	int levelScene;
 
 	float gravity = 0.3f;

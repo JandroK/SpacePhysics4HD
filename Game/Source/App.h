@@ -16,6 +16,7 @@ class Window;
 class Input;
 class Render;
 class Textures;
+class Physics;
 class Audio;
 class Scene;
 class Player;
@@ -98,6 +99,7 @@ public:
 	Input* input;
 	Render* render;
 	Textures* tex;
+	Physics* physics;
 	Audio* audio;
 	Scene* scene;
 	Player* player;

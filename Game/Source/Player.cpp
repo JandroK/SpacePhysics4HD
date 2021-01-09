@@ -3,7 +3,7 @@
 #include "Render.h"
 #include "Input.h"
 #include "App.h"
-
+#include "Physics.h"
 
 #include "Log.h"
 #include "Defs.h"
@@ -26,6 +26,7 @@ Player::~Player()
 
 bool Player::Start() 
 {
+	ship = app->physics->CreateBody();
 
 	idleAnim = new Animation();
 	flyAnim = new Animation();

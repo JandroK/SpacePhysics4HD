@@ -1,56 +1,27 @@
 #include "Space4HD.h"
 #define PI 3.14159265
 
-void Body::AddForces(fPoint force)
-{
-	forces.x += force.x;
-	forces.y += force.y;
-}
-void Body::AddTorque(fPoint force, fPoint distance)// una fuerza que genera un torque
-{
-	torque += (force.x*distance.y)-(forces.y*distance.x);
-}
-void Body::AddTorque(float torqueCM)// un torque puro aplicado al centro de masas
-{
-	torque += torqueCM;
-}
-void Body::CalculateAcceleration()
-{
-	acceleration.x = forces.x / mass;
-	acceleration.y = forces.y / mass;
-}
-void Body::CalculateAngularAcceleration(float radio)
-{
-	float inercia = mass * radio * radio;
-	angularAcceleration = torque / inercia;
-}
-void Body::ResetForces()
-{
-	forces = { 0,0 };
-}
-void Body::ResetTorque()
-{
-	torque = 0;
-}
 
-void Body::SetCollisions(int _numPoints, fPoint _bodyPointsCollision[])
+void PhysicsEngine::CalculateAcceleration()
 {
-	numPoints = _numPoints;
-	for (int i = 0; i < numPoints; i++)
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
 	{
-		bodyPointsCollision[i] = _bodyPointsCollision[i];
+		item->data->GetAcceleration().x = item->data->GetForces().x / item->data->GetMass();
+		item->data->GetAcceleration().y = item->data->GetForces().y / item->data->GetMass();
 	}
 }
-
-void Body::RotateBody(fPoint pointsCollision[])
+void PhysicsEngine::CalculateAngularAcceleration()
 {
-	for (int i = 0; i < numPoints; i++)
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
 	{
-		float posX = (bodyPointsCollision[i].x * cos(angularPosition)) - (bodyPointsCollision[i].y * sin(angularPosition));//Matrix rotation
-		float posY = (bodyPointsCollision[i].x * sin(angularPosition)) + (bodyPointsCollision[i].y * cos(angularPosition));
-		pointsCollision[i].x = posX + axisCM.x;//+axisCM change base
-		pointsCollision[i].y = posY + axisCM.y;
+		float inercia = item->data->GetMass() * item->data->GetRadio() * item->data->GetRadio();
+		item->data->GetAccelerationAngular() = item->data->GetTorque() / inercia;
 	}
+	//item->data->GetRadio() es la distancia del CM al punto de aplicación de la fuerza
 }
 
 fPoint PhysicsEngine::ForceGrav(float mass, float hight)
@@ -96,14 +67,14 @@ void PhysicsEngine::CollisionFlatSurface(Body bodyA)
 	float lostEnergy = 0.8;
 	bodyA.SetVelocity({bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
 }
-void PhysicsEngine::Collision(Body bodyA, Body bodyB)
+void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 {
-	fPoint velBodyA = bodyA.GetVelocity();
-	fPoint velBodyB = bodyB.GetVelocity();
-	fPoint axisBodyA = bodyA.GetAxis();
-	fPoint axisBodyB = bodyB.GetAxis();
-	float masBodyA = bodyA.GetMass();
-	float masBodyB = bodyB.GetMass();
+	fPoint velBodyA = bodyA->GetVelocity();
+	fPoint velBodyB = bodyB->GetVelocity();
+	fPoint axisBodyA = bodyA->GetAxis();
+	fPoint axisBodyB = bodyB->GetAxis();
+	float masBodyA = bodyA->GetMass();
+	float masBodyB = bodyB->GetMass();
 
 	float jointMass = 2 * masBodyB / (masBodyA + masBodyB);
 	fPoint subtractionVel = velBodyA - velBodyB;
@@ -121,8 +92,8 @@ void PhysicsEngine::Collision(Body bodyA, Body bodyB)
 
 	fPoint newVelB = velBodyB - (subtractionAxis * k);
 
-	bodyA.SetVelocity(newVelA);
-	bodyB.SetVelocity(newVelB);
+	bodyA->SetVelocity(newVelA);
+	bodyB->SetVelocity(newVelB);
 }
 float PhysicsEngine::CalculateModule(fPoint distance)
 {
@@ -136,9 +107,46 @@ fPoint PhysicsEngine::NormalizeVector(fPoint distance)
 	return normalize ;
 }
 
+void PhysicsEngine::AddBody(Body* body)
+{
+	bodies.Add(body);
+}
+
+void PhysicsEngine::deleteBody(Body* body)
+{
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		if (item->data == body)
+		{
+			bodies.Del(item);
+		}
+	}
+}
+
 void PhysicsEngine::Step(float dt)
 {
-	// VelocityVerletLinear();
-	// VelocityVerletAngular();
-	// IsInsidePolygons();
+	CalculateAcceleration();
+	CalculateAngularAcceleration();
+
+	ListItem<Body*>* item;
+
+	for (item= bodies.start; item !=NULL; item=item->next)
+	{
+		VelocityVerletLinear(item->data->GetPosition(), item->data->GetVelocity(), item->data->GetAcceleration(), dt);
+		VelocityVerletAngular(item->data->GetPositionAngular(), item->data->GetVelocityAngular(), item->data->GetAccelerationAngular(),dt);
+	}
+	ListItem<Body*>* item2;
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		for (item2 = item->next; item2 != NULL; item2 = item2->next)
+		{
+			if (IsInsidePolygons(item->data->GetPointsCollision(), item->data->GetNumPoints(), item2->data->GetPointsCollision(), item2->data->GetNumPoints()))
+			{
+				//if(superficie plana == true) CollisionFlatSurface(item->data);
+				Collision(item->data,item2->data);
+			}
+		}
+	}
 }
