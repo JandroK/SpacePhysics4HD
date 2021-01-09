@@ -36,12 +36,15 @@ public:
 	fPoint GetPosition() { return position; };
 	fPoint GetVelocity() { return velocity; };
 	fPoint GetAcceleration() { return acceleration; };
+	fPoint GetAxis() { return axisCM; };
 	BodyType GetType() { return type; };
 	float GetRotation() const { return  RADTODEG * angularPosition; };
+	float GetMass() { return mass; };
 
 	//Seters
 	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
 	void SetAxisCM(fPoint axis) { axisCM = axis; };
+	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
 
 private:
 
@@ -106,6 +109,8 @@ public:
 
 	void VelocityVerletLinear(fPoint& position, fPoint& velocity, fPoint acceleration, float dt);
 	void VelocityVerletAngular(float& angularPosition, float& angularVelocity, float angularAcceleration, float dt);
+	void CollisionFlatSurface(Body bodyA);
+	void Collision(Body bodyA, Body bodyB);
 
 	float CalculateModule(fPoint distance);
 	fPoint NormalizeVector(fPoint distance);

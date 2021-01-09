@@ -90,6 +90,40 @@ void PhysicsEngine::VelocityVerletAngular(float& angularPosition, float& angular
 	angularPosition += angularVelocity * dt + 0.5 * angularAcceleration * dt * dt;
 	angularVelocity += angularAcceleration * dt;
 }
+void PhysicsEngine::CollisionFlatSurface(Body bodyA)
+{
+	fPoint bodyVelocity = bodyA.GetVelocity();
+	float lostEnergy = 0.8;
+	bodyA.SetVelocity({bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+}
+void PhysicsEngine::Collision(Body bodyA, Body bodyB)
+{
+	fPoint velBodyA = bodyA.GetVelocity();
+	fPoint velBodyB = bodyB.GetVelocity();
+	fPoint axisBodyA = bodyA.GetAxis();
+	fPoint axisBodyB = bodyB.GetAxis();
+	float masBodyA = bodyA.GetMass();
+	float masBodyB = bodyB.GetMass();
+
+	float jointMass = 2 * masBodyB / (masBodyA + masBodyB);
+	fPoint subtractionVel = velBodyA - velBodyB;
+	fPoint subtractionAxis = axisBodyA - axisBodyB;
+	fPoint dotProduct = subtractionVel * subtractionAxis;
+	float k = jointMass * (CalculateModule(dotProduct)) / sqrt(CalculateModule(subtractionAxis));
+
+	fPoint newVelA = velBodyA - (subtractionAxis * k);
+
+	float jointMass = 2 * masBodyA / (masBodyA + masBodyB);
+	fPoint subtractionVel = velBodyB - velBodyA;
+	fPoint subtractionAxis = axisBodyB - axisBodyA;
+	fPoint dotProduct = subtractionVel * subtractionAxis;
+	float k = jointMass * (CalculateModule(dotProduct)) / sqrt(CalculateModule(subtractionAxis));
+
+	fPoint newVelB = velBodyB - (subtractionAxis * k);
+
+	bodyA.SetVelocity(newVelA);
+	bodyB.SetVelocity(newVelB);
+}
 float PhysicsEngine::CalculateModule(fPoint distance)
 {
 	return sqrt((distance.x * distance.x) + (distance.y * distance.y));
