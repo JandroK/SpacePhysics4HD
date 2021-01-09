@@ -2,8 +2,18 @@
 #define __SCENE_H__
 
 #include "Module.h"
+#include "Animation.h"
 
 struct SDL_Texture;
+
+struct AnimationPlatform
+{
+	iPoint position;
+	Animation* laserFront = new Animation();
+	Animation* laserBack = new Animation();
+	SDL_Texture* texture;
+	SDL_Texture* textureLaser;
+};
 
 class Scene : public Module
 {
@@ -36,9 +46,11 @@ private:
 	SDL_Texture* imgBgSpace;
 	SDL_Texture* imgBgEarth;
 	
-	SDL_Texture* imgPlatform;
 	SDL_Texture* imgClouds;
 	SDL_Rect rectPlatform;
+
+	AnimationPlatform propulsionPlatform;
+	Animation* idleAnim = new Animation();
 };
 
 #endif // __SCENE_H__
