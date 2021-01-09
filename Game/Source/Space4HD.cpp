@@ -109,7 +109,7 @@ void PhysicsEngine::Collision(Body bodyA, Body bodyB)
 	fPoint subtractionVel = velBodyA - velBodyB;
 	fPoint subtractionAxis = axisBodyA - axisBodyB;
 	fPoint dotProduct = subtractionVel * subtractionAxis;
-	float k = jointMass * (CalculateModule(dotProduct)) / sqrt(CalculateModule(subtractionAxis));
+	float k = jointMass * (CalculateModule(dotProduct)) / pow(CalculateModule(subtractionAxis),2);
 
 	fPoint newVelA = velBodyA - (subtractionAxis * k);
 
@@ -117,7 +117,7 @@ void PhysicsEngine::Collision(Body bodyA, Body bodyB)
 	fPoint subtractionVel = velBodyB - velBodyA;
 	fPoint subtractionAxis = axisBodyB - axisBodyA;
 	fPoint dotProduct = subtractionVel * subtractionAxis;
-	float k = jointMass * (CalculateModule(dotProduct)) / sqrt(CalculateModule(subtractionAxis));
+	float k = jointMass * (CalculateModule(dotProduct)) / pow(CalculateModule(subtractionAxis),2);
 
 	fPoint newVelB = velBodyB - (subtractionAxis * k);
 
