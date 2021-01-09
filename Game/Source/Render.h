@@ -3,7 +3,7 @@
 
 #include "Module.h"
 
-#include "Point.h"
+#include "p2Point.h"
 
 #include "SDL/include/SDL.h"
 

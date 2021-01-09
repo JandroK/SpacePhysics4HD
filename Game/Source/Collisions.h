@@ -2,7 +2,7 @@
 #define __COLLISIONS_H__
 
 #include <iostream>
-#include"Point.h"
+#include"p2Point.h"
 
 class Collisions
 {

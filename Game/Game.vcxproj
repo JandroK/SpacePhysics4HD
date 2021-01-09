@@ -110,6 +110,7 @@
     <ClCompile Include="Source\Window.cpp" />
     <ClInclude Include="Source\Animation.h" />
     <ClInclude Include="Source\Collisions.h" />
+    <ClInclude Include="Source\p2Point.h" />
     <ClInclude Include="Source\PerfTimer.h" />
     <ClInclude Include="Source\Player.h" />
     <ClInclude Include="Source\Queue.h" />
@@ -127,7 +128,6 @@
     <ClInclude Include="Source\List.h" />
     <ClInclude Include="Source\Log.h" />
     <ClCompile Include="Source\Log.cpp" />
-    <ClInclude Include="Source\Point.h" />
     <ClInclude Include="Source\SString.h" />
     <ClInclude Include="Source\DynArray.h" />
     <ClInclude Include="Source\External\PugiXml\src\pugiconfig.hpp" />

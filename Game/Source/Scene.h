@@ -37,6 +37,7 @@ private:
 	SDL_Texture* imgBgEarth;
 	
 	SDL_Texture* imgPlatform;
+	SDL_Texture* imgClouds;
 	SDL_Rect rectPlatform;
 };
 

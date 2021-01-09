@@ -4,7 +4,7 @@
 #include "Textures.h"
 
 #include "Animation.h"
-#include "Point.h"
+#include "p2Point.h"
 
 
 enum State {

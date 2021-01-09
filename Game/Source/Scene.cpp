@@ -34,6 +34,7 @@ bool Scene::Start()
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
 	imgPlatform = app->tex->Load("Assets/Textures/platform.png");
+	imgClouds = app->tex->Load("Assets/Textures/clouds.png");
 	SDL_QueryTexture(imgPlatform, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	//playerData.position = { WINDOW_W / 2 - (playerData.rectPlayer.w >> 1), 10530 };
 	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
@@ -61,6 +62,7 @@ bool Scene::Update(float dt)
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
 	app->player->PostUpdate();
+	app->render->DrawTexture(imgClouds, 0,6620);
 	app->render->DrawTexture(imgPlatform, WINDOW_W / 2 - (rectPlatform.w>>1), 10572);
 
 	return true;
@@ -84,6 +86,7 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(imgBgSpace);
 	app->tex->UnLoad(imgBgEarth);
 	app->tex->UnLoad(imgPlatform);
+	app->tex->UnLoad(imgClouds);
 
 	return true;
 }
