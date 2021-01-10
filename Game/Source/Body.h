@@ -28,34 +28,52 @@ public:
 	// Geters
 	fPoint GetPosition() { return position; };
 	fPoint GetVelocity() { return velocity; };
-	fPoint& GetAcceleration() { return acceleration; };
+	fPoint GetAcceleration() { return acceleration; };
 
 	float& GetPositionAngular() { return angularPosition; };
 	float& GetVelocityAngular() { return angularVelocity; };
 	float& GetAccelerationAngular() { return angularAcceleration; };
 
-	fPoint GetForces() { return forces; };
-	float GetTorque() { return torque; };
-	fPoint GetAxis() { return axisCM; };
-	BodyType GetType() { return type; };
-	float GetRotation() const { return  RADTODEG * angularPosition; };
 	float GetMass() { return mass; };
-	float GetRadio() { return radio; };
+	fPoint GetAxis() { return axisCM; };
+
+	BodyType GetType() { return type; };
+	bool GetActive() { return active; };
+	bool GetIsFlat() { return isFlat; };
+
 	int GetNumPoints() { return numPoints; };
 	fPoint* GetPointsCollision() { return bodyPointsCollision; };
+	float GetRadio() { return radio; };
+	float GetSurface() { return surface; };
+	float GetCoeficientDrag() { return cd; };
+	float GetDensityFluid() { return densityFluid; };
+	fPoint GetVelocityFluid() { return velocityFluid; };
+
+	float GetRotation() const { return  RADTODEG * angularPosition; };
+	fPoint GetForces() { return forces; };
+	float GetTorque() { return torque; };
 
 	//Seters
 	void SetMass(float _mass) { mass = _mass; };
 	void SetPosition(fPoint positionInitial) { position = positionInitial; };
-	void SetRadio(float _radio) { radio = _radio; };
-	void SetBodyType(BodyType _type) { type = _type; };
-	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
-	void SetAxisCM(fPoint axis) { axisCM = axis; };
 	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
+	void SetAcceleration(fPoint _acceleration) { acceleration = _acceleration; };
+	void SetAxisCM(fPoint axis) { axisCM = axis; };
+
+	void SetPositionAngular(float angle) { angularPosition = angle; };
+	void SetVelocityAngular(float velocity) { angularVelocity = velocity; };
+	void SetAccelerationAngular(float _acceleration) { angularAcceleration = _acceleration; };
+
+	void SetBodyType(BodyType _type) { type = _type; };
 	void SetActive(bool _active) { active = _active; };
 	void SetIsFlat(bool _flat) { isFlat = _flat; };
+
+	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
+	void SetRadio(float _radio) { radio = _radio; };
 	void SetSurface(float _surface) { surface = _surface; };
 	void SetCoeficientDrag(float _cd) { cd = _cd; };
+	void SetDensityFluid(float density) { densityFluid = density; };
+	void SetVelocityFluid(fPoint velocity) { velocityFluid = velocity; };
 
 private:
 
@@ -66,6 +84,8 @@ private:
 	fPoint axisCM;
 	bool isFlat = false;
 	float radio = 0;
+	float densityFluid = 1.225f;
+	fPoint velocityFluid = { 0,8 };
 
 	// Properties linal
 	fPoint position = { 0,0 };

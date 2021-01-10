@@ -29,8 +29,8 @@ public:
 	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
 	//Remember to reset current forces/momentum of each body.
 
-	void VelocityVerletLinear(fPoint& position, fPoint& velocity, fPoint acceleration, float dt);
-	void VelocityVerletAngular(float& angularPosition, float& angularVelocity, float angularAcceleration, float dt);
+	void VelocityVerletLinear(Body* body, float dt);
+	void VelocityVerletAngular(Body* body, float dt);
 	void CollisionFlatSurface(Body bodyA);
 	void Collision(Body* bodyA, Body* bodyB);
 
@@ -41,8 +41,8 @@ public:
 	float GetCurrentGravity() { return gravity; };
 
 	// Seters
-	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; };
-	void SetGravityPlanetB(float gravity) { gravityMoon = gravity; };
+	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; slopeEarth = -gravityEarth / rangeRadiusPlanetA; };
+	void SetGravityPlanetB(float gravity) { gravityMoon = gravity; slopeMoon = -gravityMoon / rangeRadiusPlanetB; };
 	void SetPositionAndRangePlanetA(float position, float radius) { positionPlanetA = position, rangeRadiusPlanetA = radius; };
 	void SetPositionAndRangePlanetB(float position, float radius) { positionPlanetB = position, rangeRadiusPlanetB = radius; };
 
@@ -62,7 +62,7 @@ private:
 	float rangeRadiusPlanetB = 0;
 
 	// Inclinación de la recta: gravedad en la superfície entre la altura máxima a la afecta la gravedad
-	float slopeEarth = -gravityEarth / rangeRadiusPlanetA;
-	float slopeMoon = -gravityMoon / rangeRadiusPlanetB;
+	float slopeEarth = 0;
+	float slopeMoon = 0; 
 
 };// world; // Instantiate PhysicsEngine as a global variable
