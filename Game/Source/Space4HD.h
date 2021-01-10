@@ -1,4 +1,3 @@
-#include "p2Point.h"
 #include "List.h"
 #include "Collisions.h"
 #include "Body.h"
@@ -9,8 +8,8 @@ public:
 	PhysicsEngine() {};
 	~PhysicsEngine() {};
 
-	List<Body*> asteroids;
-	List<Body*> missiles;
+	//List<Body*> asteroids;
+	//List<Body*> missiles;
 	List<Body*> bodies;
 
 	void AddBody(Body* body);

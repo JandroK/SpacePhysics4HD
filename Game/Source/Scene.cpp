@@ -110,5 +110,9 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(propulsionPlatform.texture);
 	app->tex->UnLoad(propulsionPlatform.textureLaser);
 
+	delete idleAnim;
+	delete propulsionPlatform.laserBack;
+	delete propulsionPlatform.laserFront;
+
 	return true;
 }

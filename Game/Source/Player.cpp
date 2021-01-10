@@ -36,8 +36,8 @@ bool Player::Start()
 
 	godMode = true;
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
-	fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
-	damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
@@ -151,7 +151,7 @@ bool Player::Update(float dt)
 {
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
-		godMode != godMode;
+		//godMode = !godMode;
 		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
 		ship->SetVelocity({ 0,0 });
@@ -331,8 +331,8 @@ bool Player::CleanUp()
 	if (!active)
 		return true;
 
-	app->audio->Unload1Fx(fireFx);
-//	app->audio->Unload1Fx(damageFx);
+	//app->audio->Unload1Fx(fireFx);
+	//app->audio->Unload1Fx(damageFx);
 	
 	app->tex->UnLoad(playerData.texture);
 	active = false;
@@ -342,6 +342,7 @@ bool Player::CleanUp()
 	delete turboAnim;
 	delete atakAnim;
 	delete damageAnim;
+	delete deadAnim;
 
 	return true;
 }
@@ -369,7 +370,7 @@ void Player::SetHit()
 	{
 		playerData.respawns--;
 		playerData.state = HIT;
-		app->audio->PlayFx(damageFx);
+		//app->audio->PlayFx(damageFx);
 	}
 	
 }

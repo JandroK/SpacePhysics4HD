@@ -135,6 +135,12 @@ void PhysicsEngine::deleteBody(Body* body)
 bool PhysicsEngine::CleanUp()
 {
 	bodies.Clear();
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		delete[] item->data->GetPointsCollision();
+	}
 
 	return true;
 }
