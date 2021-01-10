@@ -76,7 +76,6 @@ bool Scene::Update(float dt)
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
 
-	app->render->camera.y = -(app->player->playerData.position.y-WINDOW_H/2);
 
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
