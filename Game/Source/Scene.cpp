@@ -76,7 +76,6 @@ bool Scene::Update(float dt)
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
 
-
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
 	app->player->PostUpdate();
@@ -109,6 +108,7 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(imgBgEarth);
 	app->tex->UnLoad(imgClouds);
 	app->tex->UnLoad(propulsionPlatform.texture);
+	app->tex->UnLoad(propulsionPlatform.textureLaser);
 
 	return true;
 }

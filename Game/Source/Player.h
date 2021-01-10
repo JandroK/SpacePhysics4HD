@@ -20,7 +20,6 @@ enum State {
 
 struct PlayerData
 {
-	iPoint position;
 	State state;
 
 	Animation* currentAnimation;
@@ -38,7 +37,7 @@ struct PlayerData
 	SDL_Texture* texTurboVelocity;
 
 	static const int numPoints = 3;
-	iPoint pointsCollision[numPoints] = { { 0, 74 },{86, 42},{ -86, 42 } };
+	fPoint pointsCollision[numPoints] = { { 0, 74 },{86, 42},{ -86, 42 } };
 
 };
 
@@ -92,7 +91,7 @@ public:
 
 	PlayerData playerData;
 	bool godMode = false;
-	iPoint* positionInitial= new iPoint(0,0);	
+	fPoint positionInitial;
 	bool win= false;
 
 private:

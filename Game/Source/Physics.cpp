@@ -12,6 +12,10 @@ Physics::~Physics()
 bool Physics::Start()
 {
 	world = new PhysicsEngine();
+	world->SetPositionAndRangePlanetA(PIXEL_TO_METERS(11081), PIXEL_TO_METERS(5650));
+	world->SetPositionAndRangePlanetB(PIXEL_TO_METERS(0), PIXEL_TO_METERS(2300));
+	world->SetGravityPlanetA(10);
+	world->SetGravityPlanetB(2);
 
 	return true;
 }
@@ -36,6 +40,7 @@ bool Physics::PostUpdate()
 bool Physics::CleanUp()
 {
 	bodies.Clear();
+	world->CleanUp();
 
 	return true;
 }

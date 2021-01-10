@@ -42,13 +42,31 @@ bool Player::Start()
 	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
 	playerData.texTurboVelocity = app->tex->Load("Assets/Textures/particle_velocity.png");
 
-	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
-	playerData.position = { WINDOW_W/2- (playerData.rectPlayer.w>>1), 10538 };
-	playerData.state = IDLE;
-
 
 	fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 	damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
+
+	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
+	float posY = 10538;
+	float radio = sqrt((pow(ship->GetAxis().x - playerData.pointsCollision[0].x,2)) + (pow(ship->GetAxis().y - playerData.pointsCollision[0].y, 2)));
+	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
+
+	ship->SetPosition(positionInitial);
+	ship->SetAxisCM({ ship->GetPosition().x + (playerData.rectPlayer.w >> 1), ship->GetPosition().y + (playerData.rectPlayer.h >> 1) });
+	ship->SetMass(100);
+	ship->SetCollisions(playerData.numPoints,playerData.pointsCollision);
+	ship->SetCoeficientDrag(0.82);
+	ship->SetSurface(6);
+	ship->SetRadio(PIXEL_TO_METERS(radio));
+
+	for (int i = 0; i < playerData.numPoints; i++)
+	{
+		playerData.pointsCollision[i].x += ship->GetPosition().x;
+		playerData.pointsCollision[i].y += ship->GetPosition().y;
+	}
+	
+	playerData.state = IDLE;
 
 	playerData.respawns = 3;
 	playerData.fuel = 0;
@@ -111,10 +129,12 @@ bool Player::Awake(pugi::xml_node& config)
 bool Player::LoadState(pugi::xml_node& player) 
 {
 	bool ret=true;
-		playerData.position.x = player.child("position").attribute("x").as_int(playerData.position.x);
-		playerData.position.y = player.child("position").attribute("y").as_int(playerData.position.y);
-		playerData.respawns = player.child("lives").attribute("num_respawns").as_int(playerData.respawns);
-		playerData.fuel = player.child("fuel").attribute("count").as_int(playerData.fuel);
+	float posX = player.child("position").attribute("x").as_int(ship->GetPosition().x);
+	float posY = player.child("position").attribute("y").as_int(ship->GetPosition().y);
+	playerData.respawns = player.child("lives").attribute("num_respawns").as_int(playerData.respawns);
+	playerData.fuel = player.child("fuel").attribute("count").as_int(playerData.fuel);
+
+	ship->SetPosition({ posX,posY });
 	return ret;
 }
 
@@ -124,10 +144,13 @@ bool Player::SaveState(pugi::xml_node& player) const
 	pugi::xml_node coinsPlayer = player.child("coins");
 	pugi::xml_node respawnsPlayer = player.child("lives");
 	
-	positionPlayer.attribute("x").set_value(playerData.position.x);
-	positionPlayer.attribute("y").set_value(playerData.position.y);
+	fPoint pos;
+	positionPlayer.attribute("x").set_value(pos.x);
+	positionPlayer.attribute("y").set_value(pos.y);
 	coinsPlayer.attribute("count").set_value(playerData.fuel);
 	respawnsPlayer.attribute("num_respawns").set_value(playerData.respawns);
+
+	ship->SetPosition(pos);
 	
 	return true;
 }
@@ -139,11 +162,21 @@ bool Player::PreUpdate()
 
 bool Player::Update(float dt) 
 {
+
 	playerData.currentAnimation->Update();
+
+	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+	{
+		godMode != godMode;
+		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
+		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
+		ship->SetVelocity({ 0,0 });
+	}
+
+
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);
 
-	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)godMode = !godMode;
 
 	if (!godMode)PlayerControls(dt);
 	else GodModeControls(dt);
@@ -155,7 +188,7 @@ bool Player::Update(float dt)
 		playerData.state = IDLE;
 		atakAnim->Reset();
 	}
-	
+	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
 	return true;
 }
 
@@ -300,15 +333,19 @@ void Player::PlayerControls(float dt)
 
 void Player::GodModeControls(float dt)
 {
-	if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)velGodMode = 20;
-	else velGodMode = 10;
-	if (godMode == true)
-	{
-		if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)playerData.position.y -= velGodMode;
-		if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)playerData.position.y += velGodMode;
-		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)playerData.position.x -= velGodMode;
-		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)playerData.position.x += velGodMode;
-	}
+	if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)velGodMode = PIXEL_TO_METERS(20);
+	else velGodMode = PIXEL_TO_METERS(10);
+
+	if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+		ship->SetPosition({ ship->GetPosition().x, ship->GetPosition().y - velGodMode });
+	if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+		ship->SetPosition({ ship->GetPosition().x, ship->GetPosition().y + velGodMode });
+	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		ship->SetPosition({ ship->GetPosition().x - velGodMode, ship->GetPosition().y });
+	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		ship->SetPosition({ ship->GetPosition().x + velGodMode, ship->GetPosition().y });
+
+
 }
 
 void Player::MovePlayer(float dt)
@@ -340,6 +377,12 @@ void Player::MovePlayer(float dt)
 
 
 
+bool Player::CleanUp()
+{
+	if (!active)
+		return true;
+}
+
 
 bool Player::CheckGameOver(int level)
 {
@@ -351,7 +394,8 @@ bool Player::CheckGameOver(int level)
 	if (playerData.currentAnimation == deadAnim && playerData.currentAnimation->HasFinished())
 	{
 		playerData.state = DEAD;
-		playerData.position = *positionInitial;
+		ship->SetPosition(positionInitial);
+		ship->SetVelocity({ 0,0 });
 	}
 		
 	return false;

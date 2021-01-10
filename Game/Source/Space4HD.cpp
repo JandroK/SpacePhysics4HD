@@ -8,8 +8,7 @@ void PhysicsEngine::CalculateAcceleration()
 
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
-		item->data->GetAcceleration().x = item->data->GetForces().x / item->data->GetMass();
-		item->data->GetAcceleration().y = item->data->GetForces().y / item->data->GetMass();
+		item->data->SetAcceleration({ item->data->GetForces().x / item->data->GetMass(), item->data->GetForces().y / item->data->GetMass() });
 	}
 }
 void PhysicsEngine::CalculateAngularAcceleration()
@@ -19,17 +18,18 @@ void PhysicsEngine::CalculateAngularAcceleration()
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
 		float inercia = item->data->GetMass() * item->data->GetRadio() * item->data->GetRadio();
-		item->data->GetAccelerationAngular() = item->data->GetTorque() / inercia;
+		item->data->SetAccelerationAngular(item->data->GetTorque() / inercia);
 	}
-	//item->data->GetRadio() es la distancia del CM al punto de aplicación de la fuerza
+	// item->data->GetRadio() es la distancia del CM al punto de aplicación de la fuerza
 }
 
 fPoint PhysicsEngine::ForceGrav(float mass, float hight)
 {
-	if (hight < positionPlanetA + rangeRadiusPlanetA)
-		gravity = gravityEarth + abs(hight-positionPlanetA) * slopeEarth;
-	else if (hight > positionPlanetB - rangeRadiusPlanetB)
-		gravity = gravityMoon  + abs(hight-positionPlanetB) * slopeMoon;
+	if (hight > positionPlanetA - rangeRadiusPlanetA)
+		gravity = gravityEarth + abs(hight - positionPlanetA) * slopeEarth;
+	else if (hight < positionPlanetB + rangeRadiusPlanetB)
+		gravity = -gravityMoon + abs(hight - positionPlanetB) * slopeMoon;
+	else return { 0,0 };
 
 	fPoint fg;
 	fg.x = 0;
@@ -40,6 +40,7 @@ fPoint PhysicsEngine::ForceGrav(float mass, float hight)
 
 fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd)
 {
+	dirVelocity = NormalizeVector(dirVelocity);
 	float fdModule;
 	fdModule = 0.5 * density * velRelative * velRelative * surface * cd;
 	fPoint fd;
@@ -48,18 +49,21 @@ fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float vel
 	return fd;
 }
 
-void PhysicsEngine::VelocityVerletLinear(fPoint& position, fPoint& velocity, fPoint acceleration, float dt)
+void PhysicsEngine::VelocityVerletLinear(Body* body, float dt)
 {
-	position.x += velocity.x * dt + 0.5 * acceleration.x * dt * dt;
-	position.y += velocity.y * dt + 0.5 * acceleration.y * dt * dt;
+	float posX = body->GetPosition().x + body->GetVelocity().x * dt + 0.5 * body->GetAcceleration().x * dt * dt;
+	float posY = body->GetPosition().y + body->GetVelocity().y * dt + 0.5 * body->GetAcceleration().y * dt * dt;
+	body->SetPosition({posX,posY});
 
-	velocity.x += acceleration.x * dt;
-	velocity.y += acceleration.y * dt;
+	float velX = body->GetVelocity().x + body->GetAcceleration().x * dt;
+	float velY = body->GetVelocity().y + body->GetAcceleration().y * dt;
+
+	body->SetVelocity({velX,velY});
 }
-void PhysicsEngine::VelocityVerletAngular(float& angularPosition, float& angularVelocity, float angularAcceleration, float dt)
+void PhysicsEngine::VelocityVerletAngular(Body* body, float dt)
 {
-	angularPosition += angularVelocity * dt + 0.5 * angularAcceleration * dt * dt;
-	angularVelocity += angularAcceleration * dt;
+	body->SetPositionAngular(body->GetPositionAngular()+body->GetVelocityAngular()*dt + 0.5* body->GetAccelerationAngular()*dt*dt);
+	body->SetVelocityAngular(body->GetVelocityAngular()+body->GetAccelerationAngular()*dt);
 }
 void PhysicsEngine::CollisionFlatSurface(Body bodyA)
 {
@@ -101,10 +105,13 @@ float PhysicsEngine::CalculateModule(fPoint distance)
 }
 fPoint PhysicsEngine::NormalizeVector(fPoint distance)
 {
+	float module = CalculateModule(distance);
+	if (module == 1 || module == 0) return distance;
+
 	fPoint normalize;
-	normalize.x = distance.x / CalculateModule(distance);
-	normalize.y = distance.y / CalculateModule(distance);
-	return normalize ;
+	normalize.x = distance.x / module;
+	normalize.y = distance.y / module;
+	return normalize;
 }
 
 void PhysicsEngine::AddBody(Body* body)
@@ -125,17 +132,37 @@ void PhysicsEngine::deleteBody(Body* body)
 	}
 }
 
+bool PhysicsEngine::CleanUp()
+{
+	bodies.Clear();
+
+	return true;
+}
+
 void PhysicsEngine::Step(float dt)
 {
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		if (item->data->GetType() == BodyType::DYNAMIC_BODY)
+		{
+			Body* p = item->data;
+			item->data->AddForces(ForceGrav(p->GetMass(),p->GetPosition().y));
+			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
+			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
+		}
+	}
+
 	CalculateAcceleration();
 	CalculateAngularAcceleration();
 
-	ListItem<Body*>* item;
-
 	for (item= bodies.start; item !=NULL; item=item->next)
 	{
-		VelocityVerletLinear(item->data->GetPosition(), item->data->GetVelocity(), item->data->GetAcceleration(), dt);
-		VelocityVerletAngular(item->data->GetPositionAngular(), item->data->GetVelocityAngular(), item->data->GetAccelerationAngular(),dt);
+		VelocityVerletLinear(item->data, dt);
+		VelocityVerletAngular(item->data, dt);
+		item->data->ResetForces();
+		item->data->ResetTorque();
 	}
 	ListItem<Body*>* item2;
 	for (item = bodies.start; item != NULL; item = item->next)
