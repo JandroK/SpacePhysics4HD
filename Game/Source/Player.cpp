@@ -18,7 +18,6 @@ Player::Player(iPoint pPosition, float pVelocity, SDL_Texture* pTexture): Module
 {
 	playerData.state = IDLE;
 	name.Create("player");
-
 }
 
 Player::~Player()
@@ -35,7 +34,9 @@ bool Player::Start()
 	turboAnim = new Animation();
 	turboAnim = new Animation();
 
-	godMode = false;
+	godMode = true;
+	ship->SetBodyType(BodyType::STATIC_BODY);
+
 
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
 	playerData.texLaserFly = app->tex->Load("Assets/Textures/laser_fly.png");
@@ -104,11 +105,10 @@ bool Player::Start()
 	for (int i = 0; i < 2; i++)
 		turboVelocityAnim->PushBack({ 0 ,0+ (237 * i), 207, 237 });
 
-	for (int i = 0; i < 4; i++)
-		damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
+	//for (int i = 0; i < 4; i++)
+	//	damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
 
-	for (int i = 0; i < 1; i++)
-		damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
+
 
 	deadAnim->PushBack({ 1008 + (78 * 1),0, 78, 78 });
 
@@ -124,7 +124,6 @@ bool Player::Awake(pugi::xml_node& config)
 	
 	return true;
 }
-
 
 bool Player::LoadState(pugi::xml_node& player) 
 {
@@ -157,17 +156,17 @@ bool Player::SaveState(pugi::xml_node& player) const
 
 bool Player::PreUpdate() 
 {
+	playerData.currentAnimation->Update();
+
 	return true;
 }
 
 bool Player::Update(float dt) 
 {
 
-	playerData.currentAnimation->Update();
-
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
-		godMode != godMode;
+		godMode = !godMode;
 		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
 		ship->SetVelocity({ 0,0 });
@@ -188,18 +187,21 @@ bool Player::Update(float dt)
 		playerData.state = IDLE;
 		atakAnim->Reset();
 	}
-	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
 	return true;
 }
 
 bool Player::PostUpdate()
 {
+	PlayerMoveAnimation();
+
+	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetPosition().x), METERS_TO_PIXELS(ship->GetPosition().y) };
 	// Draw player 
-	app->render->DrawTexture(playerData.texture, playerData.position.x, playerData.position.y, &playerData.rectPlayer);
+	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer);
 	SDL_Rect rectPlayer;
+
 	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
-	int centerX = playerData.position.x + playerData.rectPlayer.w / 2 - rectPlayer.w / 2;
-	int minYPlayer = playerData.position.y + playerData.rectPlayer.h;
+	int centerX = positionPlayer.x + playerData.rectPlayer.w / 2 - rectPlayer.w / 2;
+	int minYPlayer = positionPlayer.y + playerData.rectPlayer.h;
 
 	switch (playerData.state)
 	{
@@ -215,7 +217,7 @@ bool Player::PostUpdate()
 
 	case TURBO:
 		
-		app->render->DrawTexture(playerData.texTurboVelocity, playerData.position.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w/2, playerData.position.y-17 , &turboVelocityAnim->GetCurrentFrame());
+		app->render->DrawTexture(playerData.texTurboVelocity, positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w/2, positionPlayer.y -17 , &turboVelocityAnim->GetCurrentFrame());
 
 		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer);
 		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer);
@@ -242,7 +244,8 @@ void Player::SpeedAnimationCheck(float dt)
 
 void Player::CameraPlayer()
 {
-	app->render->camera.y = -(app->player->playerData.position.y - WINDOW_H / 2);
+	
+	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
 
 	//// Camera follow the player
 	//int followPositionPalyerX = (WINDOW_W / 2) + (playerData.position.x * -1);
@@ -360,7 +363,6 @@ void Player::MovePlayer(float dt)
 		// Move in state WALK 
 		// Add force ;
 		// Future conditions in state FLY...
-		ship->AddForces({ 0,2 });
 		break;
 
 	case TURBO:
@@ -373,16 +375,6 @@ void Player::MovePlayer(float dt)
 		break;
 	}
 }
-
-
-
-
-bool Player::CleanUp()
-{
-	if (!active)
-		return true;
-}
-
 
 bool Player::CheckGameOver(int level)
 {

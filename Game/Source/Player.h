@@ -104,8 +104,8 @@ private:
 
 	Animation* idleAnim= new Animation();
 	Animation* flyAnim = new Animation();
-	Animation* turboAnim = new Animation( );
-	Animation* turboVelocityAnim = new Animation( );
+	Animation* turboAnim = new Animation();
+	Animation* turboVelocityAnim = new Animation();
 	Animation* atakAnim = new Animation();
 	Animation* damageAnim = new Animation();
 	Animation* deadAnim = new Animation();

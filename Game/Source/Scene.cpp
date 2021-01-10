@@ -73,18 +73,6 @@ bool Scene::Update(float dt)
 	//	app->render->camera.y -= 10;
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
-	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
-	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
-
-	app->render->DrawTexture(imgBgEarth, 0,7346);
-	app->render->DrawTexture(imgBgSpace, 0,0);
-	app->player->PostUpdate();
-	app->render->DrawTexture(imgClouds, 0,6620);
-	app->render->DrawTexture(propulsionPlatform.texture, propulsionPlatform.position.x, propulsionPlatform.position.y);
-	app->render->DrawTexture(propulsionPlatform.textureLaser, 390, 10760, &rect,1,23.5);
-	app->render->DrawTexture(propulsionPlatform.textureLaser, 505, 10800, &rect2,1,22);
-	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
-	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
 	return true;
 }
@@ -96,6 +84,21 @@ bool Scene::PostUpdate()
 
 	if(app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN)
 		ret = false;
+
+	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
+	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
+
+	app->render->DrawTexture(imgBgEarth, 0,7346);
+	app->render->DrawTexture(imgBgSpace, 0,0);
+
+
+	app->player->PostUpdate();
+	app->render->DrawTexture(imgClouds, 0,6620);
+	app->render->DrawTexture(propulsionPlatform.texture, propulsionPlatform.position.x, propulsionPlatform.position.y);
+	app->render->DrawTexture(propulsionPlatform.textureLaser, 390, 10760, &rect,1,23.5);
+	app->render->DrawTexture(propulsionPlatform.textureLaser, 505, 10800, &rect2,1,22);
+	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
+	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
 	return ret;
 }
