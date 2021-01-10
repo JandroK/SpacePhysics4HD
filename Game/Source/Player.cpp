@@ -149,7 +149,13 @@ bool Player::PreUpdate()
 
 bool Player::Update(float dt) 
 {
-	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)godMode != godMode;
+	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+	{
+		godMode != godMode;
+		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
+		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
+		ship->SetVelocity({ 0,0 });
+	}
 
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);

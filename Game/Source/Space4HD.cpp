@@ -28,7 +28,7 @@ fPoint PhysicsEngine::ForceGrav(float mass, float hight)
 	if (hight > positionPlanetA - rangeRadiusPlanetA)
 		gravity = gravityEarth + abs(hight - positionPlanetA) * slopeEarth;
 	else if (hight < positionPlanetB + rangeRadiusPlanetB)
-		gravity = gravityMoon + abs(hight - positionPlanetB) * slopeMoon;
+		gravity = -gravityMoon + abs(hight - positionPlanetB) * slopeMoon;
 	else return { 0,0 };
 
 	fPoint fg;
