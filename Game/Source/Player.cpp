@@ -18,7 +18,6 @@ Player::Player(iPoint pPosition, float pVelocity, SDL_Texture* pTexture): Module
 {
 	playerData.state = IDLE;
 	name.Create("player");
-
 }
 
 Player::~Player()
@@ -33,11 +32,19 @@ bool Player::Start()
 	atakAnim = new Animation();
 	damageAnim = new Animation();
 	turboAnim = new Animation();
+	turboAnim = new Animation();
 
 	godMode = true;
+	ship->SetBodyType(BodyType::STATIC_BODY);
+
+
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
 	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	playerData.texLaserFly = app->tex->Load("Assets/Textures/laser_fly.png");
+	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
+	playerData.texTurboVelocity = app->tex->Load("Assets/Textures/particle_velocity.png");
+
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
@@ -82,22 +89,27 @@ bool Player::Start()
 	atakAnim->loop = false;
 	atakAnim->speed = 0.10f;
 
+	turboVelocityAnim->loop = true;
+	turboVelocityAnim->speed = 0.10f;
+
 
 	idleAnim->PushBack({ 0 ,0, playerData.rectPlayer.w, playerData.rectPlayer.h });
 	
-	for (int i = 0; i < 6; i++)
-		flyAnim->PushBack({ 312 + (78 * i),0, 78, 78 });
+	for (int i = 0; i < 8; i++)
+		flyAnim->PushBack({ 0 + (26 * i),0, 26, 52 });
 
-	for (int i = 0; i < 4; i++)
-		damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
+	for (int i = 0; i < 8; i++)
+		turboAnim->PushBack({ 0 + (26 * i),0, 26, 86 });
 
-	for (int i = 0; i < 1; i++)
-		damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
+	for (int i = 0; i < 2; i++)
+		turboVelocityAnim->PushBack({ 0 ,0+ (237 * i), 207, 237 });
+
+	//for (int i = 0; i < 4; i++)
+	//	damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
+
+
 
 	deadAnim->PushBack({ 1008 + (78 * 1),0, 78, 78 });
-
-	for (int i = 0; i < 4; i++)
-		turboAnim->PushBack({ 1319 + (78 * i),0, 78, 78 });
 
 	playerData.currentAnimation = idleAnim;
 
@@ -111,7 +123,6 @@ bool Player::Awake(pugi::xml_node& config)
 	
 	return true;
 }
-
 
 bool Player::LoadState(pugi::xml_node& player) 
 {
@@ -144,21 +155,27 @@ bool Player::SaveState(pugi::xml_node& player) const
 
 bool Player::PreUpdate() 
 {
+	playerData.currentAnimation->Update();
+
 	return true;
 }
 
 bool Player::Update(float dt) 
 {
+
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
 		//godMode = !godMode;
+
 		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
 		ship->SetVelocity({ 0,0 });
 	}
 
+
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);
+
 
 	if (!godMode)PlayerControls(dt);
 	else GodModeControls(dt);
@@ -170,7 +187,47 @@ bool Player::Update(float dt)
 		playerData.state = IDLE;
 		atakAnim->Reset();
 	}
-	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
+	return true;
+}
+
+bool Player::PostUpdate()
+{
+	PlayerMoveAnimation();
+
+	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetPosition().x), METERS_TO_PIXELS(ship->GetPosition().y) };
+	// Draw player 
+	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer);
+	SDL_Rect rectPlayer;
+
+	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
+	int centerX = positionPlayer.x + playerData.rectPlayer.w / 2 - rectPlayer.w / 2;
+	int minYPlayer = positionPlayer.y + playerData.rectPlayer.h;
+
+	switch (playerData.state)
+	{
+	case IDLE:
+		break;
+
+	case FLY:
+		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 13, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 30, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserFly, centerX-23, minYPlayer - 21, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserFly, centerX+23, minYPlayer - 21, &rectPlayer);
+		break;
+
+	case TURBO:
+		
+		app->render->DrawTexture(playerData.texTurboVelocity, positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w/2, positionPlayer.y -17 , &turboVelocityAnim->GetCurrentFrame());
+
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX - 23, minYPlayer - 21, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX + 23, minYPlayer - 21, &rectPlayer);
+		break;
+
+	default:
+		break;
+	}
 	return true;
 }
 
@@ -181,11 +238,15 @@ void Player::SpeedAnimationCheck(float dt)
 	atakAnim->speed = (dt * 5) ;
 	damageAnim->speed = (dt * 10) ;
 	turboAnim->speed = (dt * 9) ;
+	turboVelocityAnim->speed = (dt * 15) ;
 	
 }
 
 void Player::CameraPlayer()
 {
+	
+	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
+
 	//// Camera follow the player
 	//int followPositionPalyerX = (WINDOW_W / 2) + (playerData.position.x * -1);
 	//int followPositionPalyerY = (WINDOW_H / 2) + (playerData.position.y * -1) + 125;
@@ -229,6 +290,7 @@ void Player::PlayerMoveAnimation()
 
 	case TURBO:
 		playerData.currentAnimation = turboAnim;
+		turboVelocityAnim->Update();
 		break;
 	
 	case HIT:
@@ -314,39 +376,6 @@ void Player::MovePlayer(float dt)
 	}
 }
 
-
-bool Player::PostUpdate() 
-{
-	SDL_Rect rectPlayer;
-	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
-	// Draw player 
-	app->render->DrawTexture(playerData.texture, METERS_TO_PIXELS(ship->GetPosition().x) , METERS_TO_PIXELS(ship->GetPosition().y), &rectPlayer);
-
-	return true;
-}
-
-
-bool Player::CleanUp() 
-{
-	if (!active)
-		return true;
-
-	//app->audio->Unload1Fx(fireFx);
-	//app->audio->Unload1Fx(damageFx);
-	
-	app->tex->UnLoad(playerData.texture);
-	active = false;
-
-	delete idleAnim;
-	delete flyAnim;
-	delete turboAnim;
-	delete atakAnim;
-	delete damageAnim;
-	delete deadAnim;
-
-	return true;
-}
-
 bool Player::CheckGameOver(int level)
 {
 	if (playerData.state==DEADING)
@@ -374,3 +403,28 @@ void Player::SetHit()
 	}
 	
 }
+
+bool Player::CleanUp()
+{
+	if (!active)
+		return true;
+
+	//app->audio->Unload1Fx(fireFx);
+	//	app->audio->Unload1Fx(damageFx);
+
+	app->tex->UnLoad(playerData.texture);
+	app->tex->UnLoad(playerData.texLaserFly);
+	app->tex->UnLoad(playerData.texLaserTurbo);
+	app->tex->UnLoad(playerData.texTurboVelocity);
+	active = false;
+
+	delete idleAnim;
+	delete flyAnim;
+	delete turboAnim;
+	delete turboVelocityAnim;
+	delete atakAnim;
+	delete damageAnim;
+
+	return true;
+}
+

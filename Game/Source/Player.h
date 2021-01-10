@@ -32,6 +32,10 @@ struct PlayerData
 	SDL_Rect rectPlayer = {0,0,0,0};
 
 	SDL_Texture* texture;
+	SDL_Texture* texLaserFly;
+	SDL_Texture* texLaserTurbo;
+	SDL_Texture* texTurboVelocity;
+
 	static const int numPoints = 3;
 	fPoint pointsCollision[numPoints] = { { 0, 74 },{86, 42},{ -86, 42 } };
 
@@ -100,7 +104,8 @@ private:
 
 	Animation* idleAnim= new Animation();
 	Animation* flyAnim = new Animation();
-	Animation* turboAnim = new Animation( );
+	Animation* turboAnim = new Animation();
+	Animation* turboVelocityAnim = new Animation();
 	Animation* atakAnim = new Animation();
 	Animation* damageAnim = new Animation();
 	Animation* deadAnim = new Animation();
