@@ -46,6 +46,8 @@ public:
 	void SetPositionAndRangePlanetA(float position, float radius) { positionPlanetA = position, rangeRadiusPlanetA = radius; };
 	void SetPositionAndRangePlanetB(float position, float radius) { positionPlanetB = position, rangeRadiusPlanetB = radius; };
 
+	bool CleanUp();
+
 private:
 
 	// Gravedades iniciales

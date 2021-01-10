@@ -46,11 +46,16 @@ public:
 
 	//Seters
 	void SetMass(float _mass) { mass = _mass; };
+	void SetPosition(fPoint positionInitial) { position = positionInitial; };
 	void SetRadio(float _radio) { radio = _radio; };
 	void SetBodyType(BodyType _type) { type = _type; };
 	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
 	void SetAxisCM(fPoint axis) { axisCM = axis; };
 	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
+	void SetActive(bool _active) { active = _active; };
+	void SetIsFlat(bool _flat) { isFlat = _flat; };
+	void SetSurface(float _surface) { surface = _surface; };
+	void SetCoeficientDrag(float _cd) { cd = _cd; };
 
 private:
 

@@ -36,6 +36,7 @@ bool Physics::PostUpdate()
 bool Physics::CleanUp()
 {
 	bodies.Clear();
+	world->CleanUp();
 
 	return true;
 }

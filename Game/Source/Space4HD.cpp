@@ -40,6 +40,7 @@ fPoint PhysicsEngine::ForceGrav(float mass, float hight)
 
 fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd)
 {
+	dirVelocity = NormalizeVector(dirVelocity);
 	float fdModule;
 	fdModule = 0.5 * density * velRelative * velRelative * surface * cd;
 	fPoint fd;
@@ -123,6 +124,13 @@ void PhysicsEngine::deleteBody(Body* body)
 			bodies.Del(item);
 		}
 	}
+}
+
+bool PhysicsEngine::CleanUp()
+{
+	bodies.Clear();
+
+	return true;
 }
 
 void PhysicsEngine::Step(float dt)
