@@ -70,3 +70,19 @@ void Physics::DestroyBody(Body* b)
 		item = item->next;
 	}
 }
+
+float Physics::CalculateModule(fPoint distance)
+{
+	return sqrt((distance.x * distance.x) + (distance.y * distance.y));
+}
+
+fPoint Physics::NormalizeVector(fPoint distance)
+{
+	float module = CalculateModule(distance);
+	if (module == 1 || module == 0) return distance;
+
+	fPoint normalize;
+	normalize.x = distance.x / module;
+	normalize.y = distance.y / module;
+	return normalize;
+}

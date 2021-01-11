@@ -34,9 +34,8 @@ bool Player::Start()
 	turboAnim = new Animation();
 	turboAnim = new Animation();
 
-	godMode = true;
-	ship->SetBodyType(BodyType::STATIC_BODY);
-
+	//godMode = true;
+	//ship->SetBodyType(BodyType::STATIC_BODY);
 
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
 	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
@@ -49,11 +48,11 @@ bool Player::Start()
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
 	float posY = 10538;
-	float radio = sqrt((pow(ship->GetAxis().x - playerData.pointsCollision[0].x,2)) + (pow(ship->GetAxis().y - playerData.pointsCollision[0].y, 2)));
-	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
+	playerData.vecDir = { playerData.pointsCollision[0].x, playerData.pointsCollision[0].y };
+	float radio = app->physics->CalculateModule(playerData.vecDir); 
+	playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 
-	ship->SetPosition(positionInitial);
-	ship->SetAxisCM({ ship->GetPosition().x + (playerData.rectPlayer.w >> 1), ship->GetPosition().y + (playerData.rectPlayer.h >> 1) });
+	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetMass(100);
 	ship->SetCollisions(playerData.numPoints,playerData.pointsCollision);
 	ship->SetCoeficientDrag(0.82);
@@ -62,9 +61,12 @@ bool Player::Start()
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
-		playerData.pointsCollision[i].x += ship->GetPosition().x;
-		playerData.pointsCollision[i].y += ship->GetPosition().y;
+		playerData.pointsCollision[i].x += posX;
+		playerData.pointsCollision[i].y += posY;
 	}
+
+	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
+	ship->SetPosition(positionInitial);
 	
 	playerData.state = IDLE;
 
@@ -165,7 +167,7 @@ bool Player::Update(float dt)
 
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
-		//godMode = !godMode;
+		godMode = !godMode;
 
 		if(ship->GetType() == BodyType::DYNAMIC_BODY)ship->SetBodyType(BodyType::STATIC_BODY);
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
@@ -218,7 +220,6 @@ bool Player::PostUpdate()
 	case TURBO:
 		
 		app->render->DrawTexture(playerData.texTurboVelocity, positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w/2, positionPlayer.y -17 , &turboVelocityAnim->GetCurrentFrame());
-
 		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer);
 		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer);
 		app->render->DrawTexture(playerData.texLaserTurbo, centerX - 23, minYPlayer - 21, &rectPlayer);
@@ -239,41 +240,11 @@ void Player::SpeedAnimationCheck(float dt)
 	damageAnim->speed = (dt * 10) ;
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
-	
 }
 
 void Player::CameraPlayer()
 {
-	
 	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
-
-	//// Camera follow the player
-	//int followPositionPalyerX = (WINDOW_W / 2) + (playerData.position.x * -1);
-	//int followPositionPalyerY = (WINDOW_H / 2) + (playerData.position.y * -1) + 125;
-
-	//if (playerData.position.x < (WINDOW_W/2))
-	//	if (app->render->camera.x < 48) followPositionPalyerX = 0;
-
-	//// Camera delimitation x
-	//if (app->render->camera.x <= (playerData.position.x * -1)&& app->render->camera.x >= -((app->map->data.width * app->map->data.tileWidth) - WINDOW_W))
-	//	app->render->camera.x = followPositionPalyerX;
-	//else if (followPositionPalyerX<-1&& followPositionPalyerX>-((app->map->data.width * app->map->data.tileWidth) - WINDOW_W+32))
-	//	app->render->camera.x = followPositionPalyerX;
-
-	//// Reposition right in limit camera in X
-	//if ((playerData.position.x *-1)< -((app->map->data.width * app->map->data.tileWidth) - (WINDOW_W/2) + 32))
-	//	app->render->camera.x = -((app->map->data.width * app->map->data.tileWidth) - WINDOW_W + 32);
-
-	//if ((playerData.position.x *-1)> -(WINDOW_W/2) + 32)
-	//	app->render->camera.x = 0;
-
-	//// Camera delimitation y
-	//if ((app->render->camera.y <= -48) && (app->render->camera.y >= -((app->map->data.height * app->map->data.tileHeight) - (WINDOW_H + (4 * app->map->data.tileHeight)))))
-	//	app->render->camera.y = followPositionPalyerY;
-	//else if ((followPositionPalyerY < -48) && (followPositionPalyerY > -((app->map->data.height * app->map->data.tileHeight) - (WINDOW_H + (4 * app->map->data.tileHeight)))))
-	//	app->render->camera.y = followPositionPalyerY;
-	//if (app->render->camera.y >= -39)
-	//	app->render->camera.y = -39;
 }
 
 void Player::PlayerMoveAnimation()
@@ -314,10 +285,12 @@ void Player::PlayerControls(float dt)
 		&& (playerData.state == State::FLY || playerData.state == State::TURBO))
 	{
 		playerData.state = State::TURBO;
+		ship->AddForces({ playerData.vecDir.x * -3000, playerData.vecDir.y - 3000 });
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
 		playerData.state = State::FLY;
+		ship->AddForces({ playerData.vecDir.x * -2000, playerData.vecDir.y -2000 });
 	}
 	else playerData.state = State::IDLE;
 
@@ -326,9 +299,19 @@ void Player::PlayerControls(float dt)
 	if (!(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 		&& (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT || app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT))
 	{
-		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT); // Add torque;
+		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		{
+			//ship->AddTorque(100);
+			playerData.vecDir = { playerData.pointsCollision[0].x - ship->GetAxis().x, playerData.pointsCollision[0].y - ship->GetAxis().y };
+			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
+		}
 
-		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT); // Add torque;
+		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		{
+			//ship->AddTorque(-100);
+			playerData.vecDir = { playerData.pointsCollision[0].x - ship->GetAxis().x, playerData.pointsCollision[0].y - ship->GetAxis().y };
+			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
+		}
 	}	
 
 	MovePlayer(dt);
@@ -361,13 +344,13 @@ void Player::MovePlayer(float dt)
 
 	case FLY:
 		// Move in state WALK 
-		// Add force ;
+		
 		// Future conditions in state FLY...
 		break;
 
 	case TURBO:
 		// Move in state TURBO 
-		// Add force ;
+		
 		// Future conditions in state TURBO...
 		break;
 

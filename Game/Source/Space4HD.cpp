@@ -57,7 +57,6 @@ void PhysicsEngine::VelocityVerletLinear(Body* body, float dt)
 
 	float velX = body->GetVelocity().x + body->GetAcceleration().x * dt;
 	float velY = body->GetVelocity().y + body->GetAcceleration().y * dt;
-
 	body->SetVelocity({velX,velY});
 }
 void PhysicsEngine::VelocityVerletAngular(Body* body, float dt)
@@ -75,8 +74,8 @@ void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 {
 	fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
-	fPoint axisBodyA = bodyA->GetAxis();
-	fPoint axisBodyB = bodyB->GetAxis();
+	fPoint axisBodyA = { PIXEL_TO_METERS(bodyA->GetAxis().x),PIXEL_TO_METERS(bodyA->GetAxis().y) };
+	fPoint axisBodyB = { PIXEL_TO_METERS(bodyB->GetAxis().x),PIXEL_TO_METERS(bodyB->GetAxis().y) };
 	float masBodyA = bodyA->GetMass();
 	float masBodyB = bodyB->GetMass();
 
@@ -154,7 +153,9 @@ void PhysicsEngine::Step(float dt)
 		if (item->data->GetType() == BodyType::DYNAMIC_BODY)
 		{
 			Body* p = item->data;
-			item->data->AddForces(ForceGrav(p->GetMass(),p->GetPosition().y));
+			fPoint fGrav = ForceGrav(p->GetMass(), p->GetPosition().y);
+			item->data->AddForces(fGrav);
+			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({0,0});
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
 		}
@@ -163,7 +164,7 @@ void PhysicsEngine::Step(float dt)
 	CalculateAcceleration();
 	CalculateAngularAcceleration();
 
-	for (item= bodies.start; item !=NULL; item=item->next)
+	for (item = bodies.start; item !=NULL; item=item->next)
 	{
 		VelocityVerletLinear(item->data, dt);
 		VelocityVerletAngular(item->data, dt);

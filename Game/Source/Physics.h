@@ -22,6 +22,9 @@ public:
 	Body* CreateBody();
 	void DestroyBody(Body* b);
 
+	float CalculateModule(fPoint distance);
+	fPoint NormalizeVector(fPoint distance);
+
 private:
 
 	List<Body*> bodies;

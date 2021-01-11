@@ -27,7 +27,7 @@ void Body::SetCollisions(int _numPoints, fPoint _bodyPointsCollision[])
 	numPoints = _numPoints;
 	for (int i = 0; i < numPoints; i++)
 	{
-		bodyPointsCollision[i] = _bodyPointsCollision[i];
+		//bodyPointsCollision[i] = _bodyPointsCollision[i];
 	}
 }
 
