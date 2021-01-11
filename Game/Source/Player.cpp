@@ -48,16 +48,12 @@ bool Player::Start()
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
 	float posY = 10538;
-	playerData.vecDir = { playerData.pointsCollision[0].x, playerData.pointsCollision[0].y };
-	float radio = app->physics->CalculateModule(playerData.vecDir); 
-	playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
 	ship->SetCoeficientDrag(0.82);
 	ship->SetSurface(6);
-	ship->SetRadio(PIXEL_TO_METERS(radio));
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
@@ -65,6 +61,11 @@ bool Player::Start()
 		playerData.pointsCollisionWorld[i].y += ship->GetAxis().y;
 	}
 	ship->SetCollisions(playerData.pointsCollision, playerData.pointsCollisionWorld);
+
+	playerData.vecDir = { playerData.pointsCollisionWorld[0].x - ship->GetAxis().x , playerData.pointsCollisionWorld[0].y - ship->GetAxis().y };
+	float radio = app->physics->CalculateModule(playerData.vecDir); 
+	playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
+	ship->SetRadio(PIXEL_TO_METERS(radio));
 
 	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
 	ship->SetPosition(positionInitial);
@@ -243,6 +244,11 @@ bool Player::PostUpdate()
 	app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
 	app->render->DrawLine(x3, y3, x1, y1, 255, 0, 0);
 
+	int x4 = METERS_TO_PIXELS(ship->GetAxis().x);
+	int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
+
+	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+
 	return true;
 }
 
@@ -298,13 +304,17 @@ void Player::PlayerControls(float dt)
 	if ((app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 		&& (playerData.state == State::FLY || playerData.state == State::TURBO))
 	{
+		playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - METERS_TO_PIXELS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - METERS_TO_PIXELS(ship->GetAxis().y) };
+		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::TURBO;
-		ship->AddForces({ playerData.vecDir.x * -3000, playerData.vecDir.y - 3000 });
+		ship->AddForces({ playerData.vecDir.x * 3000, playerData.vecDir.y * 3000 });
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
+		playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - METERS_TO_PIXELS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - METERS_TO_PIXELS(ship->GetAxis().y) };
+		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::FLY;
-		ship->AddForces({ playerData.vecDir.x * -2000, playerData.vecDir.y -2000 });
+		ship->AddForces({ playerData.vecDir.x * 2000, playerData.vecDir.y * 2000 });
 	}
 	else playerData.state = State::IDLE;
 
@@ -316,15 +326,11 @@ void Player::PlayerControls(float dt)
 		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		{
 			ship->AddTorque(100);
-			playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - PIXEL_TO_METERS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - PIXEL_TO_METERS(ship->GetAxis().y) };
-			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		}
 
 		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 		{
 			ship->AddTorque(-100);
-			playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - PIXEL_TO_METERS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - PIXEL_TO_METERS(ship->GetAxis().y) };
-			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		}
 	}	
 	
