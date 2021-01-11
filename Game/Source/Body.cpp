@@ -22,22 +22,22 @@ void Body::ResetTorque()
 	torque = 0;
 }
 
-void Body::SetCollisions(int _numPoints, fPoint _bodyPointsCollision[])
+void Body::SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[])
 {
-	numPoints = _numPoints;
 	for (int i = 0; i < numPoints; i++)
 	{
-		//bodyPointsCollision[i] = _bodyPointsCollision[i];
+		*(bodyPointsCollision+i) = _bodyPointsCollision[i];
+		*(bodyPointsCollisionWorld+i) = _bodyPointsCollisionWorld[i];
 	}
 }
 
-void Body::RotateBody(fPoint pointsCollision[])
+void Body::RotateBody()
 {
 	for (int i = 0; i < numPoints; i++)
 	{
 		float posX = (bodyPointsCollision[i].x * cos(angularPosition)) - (bodyPointsCollision[i].y * sin(angularPosition));//Matrix rotation
 		float posY = (bodyPointsCollision[i].x * sin(angularPosition)) + (bodyPointsCollision[i].y * cos(angularPosition));
-		pointsCollision[i].x = posX + axisCM.x;//+axisCM change base
-		pointsCollision[i].y = posY + axisCM.y;
+		(bodyPointsCollisionWorld + i)->x = posX + METERS_TO_PIXELS(axisCM.x);//+axisCM change base
+		(bodyPointsCollisionWorld + i)->y = posY + METERS_TO_PIXELS(axisCM.y);
 	}
 }

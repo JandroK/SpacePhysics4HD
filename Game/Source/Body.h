@@ -1,6 +1,13 @@
 #pragma once
 #include "p2Point.h"
+
 #define RADTODEG 57.29577958f
+
+#define PIXELS_PER_METER 50.0f // if touched change METER_PER_PIXEL too
+#define METER_PER_PIXEL 0.02f // this is 1 / PIXELS_PER_METER !
+
+#define METERS_TO_PIXELS(m) ((int) PIXELS_PER_METER * m)
+#define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
 
 enum class BodyType
 {
@@ -19,7 +26,7 @@ public:
 	void AddTorque(float torqueCM);
 
 	// Rotations
-	void RotateBody(fPoint pointsCollision[]);
+	void RotateBody();
 
 	// Reset
 	void ResetForces();
@@ -36,6 +43,8 @@ public:
 
 	float GetMass() { return mass; };
 	fPoint GetAxis() { return axisCM; };
+	float GetWidth() { return width; };
+	float GetHight() { return hight; };
 
 	BodyType GetType() { return type; };
 	bool GetActive() { return active; };
@@ -43,6 +52,7 @@ public:
 
 	int GetNumPoints() { return numPoints; };
 	fPoint* GetPointsCollision() { return bodyPointsCollision; };
+	fPoint* GetPointsCollisionWorld() { return bodyPointsCollisionWorld; };
 	float GetRadio() { return radio; };
 	float GetSurface() { return surface; };
 	float GetCoeficientDrag() { return cd; };
@@ -55,6 +65,7 @@ public:
 
 	//Seters
 	void SetMass(float _mass) { mass = _mass; };
+	void SetDimension(float _width, float _hight) { width = _width; hight = _hight; };
 	void SetPosition(fPoint positionInitial) { position = positionInitial; };
 	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
 	void SetAcceleration(fPoint _acceleration) { acceleration = _acceleration; };
@@ -68,7 +79,7 @@ public:
 	void SetActive(bool _active) { active = _active; };
 	void SetIsFlat(bool _flat) { isFlat = _flat; };
 
-	void SetCollisions(int _numPoints, fPoint _bodyPointsCollision[]);
+	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[]);
 	void SetRadio(float _radio) { radio = _radio; };
 	void SetSurface(float _surface) { surface = _surface; };
 	void SetCoeficientDrag(float _cd) { cd = _cd; };
@@ -79,6 +90,8 @@ private:
 
 	//General properties
 	float mass = 0;
+	float width = 0;
+	float hight = 0;
 	BodyType type = BodyType::DYNAMIC_BODY;
 	bool active = true;
 	fPoint axisCM;
@@ -106,6 +119,7 @@ private:
 	float cd = 0;
 
 	// Collisions
-	int numPoints = 0;
+	int numPoints = 10;
 	fPoint* bodyPointsCollision = new fPoint[numPoints];
+	fPoint* bodyPointsCollisionWorld = new fPoint[numPoints];
 };

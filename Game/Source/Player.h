@@ -37,7 +37,8 @@ struct PlayerData
 	SDL_Texture* texTurboVelocity;
 
 	static const int numPoints = 3;
-	fPoint pointsCollision[numPoints] = { { 0, 74 },{86, 42},{ -86, 42 } };
+	fPoint pointsCollision[numPoints] = { { 0, -74 },{86, 42},{ -86, 42 } };
+	fPoint pointsCollisionWorld[numPoints] = { { 0, -74 },{86, 42},{ -86, 42 } };
 	fPoint vecDir = { 0,0 };
 };
 

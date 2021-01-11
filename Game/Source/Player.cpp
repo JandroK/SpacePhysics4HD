@@ -53,17 +53,18 @@ bool Player::Start()
 	playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
+	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
-	ship->SetCollisions(playerData.numPoints,playerData.pointsCollision);
 	ship->SetCoeficientDrag(0.82);
 	ship->SetSurface(6);
 	ship->SetRadio(PIXEL_TO_METERS(radio));
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
-		playerData.pointsCollision[i].x += posX;
-		playerData.pointsCollision[i].y += posY;
+		playerData.pointsCollisionWorld[i].x += ship->GetAxis().x;
+		playerData.pointsCollisionWorld[i].y += ship->GetAxis().y;
 	}
+	ship->SetCollisions(playerData.pointsCollision, playerData.pointsCollisionWorld);
 
 	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
 	ship->SetPosition(positionInitial);
@@ -198,12 +199,14 @@ bool Player::PostUpdate()
 
 	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetPosition().x), METERS_TO_PIXELS(ship->GetPosition().y) };
 	// Draw player 
-	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer);
+	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer, 1, ship->GetRotation());
 	SDL_Rect rectPlayer;
 
 	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
 	int centerX = positionPlayer.x + playerData.rectPlayer.w / 2 - rectPlayer.w / 2;
 	int minYPlayer = positionPlayer.y + playerData.rectPlayer.h;
+	float posX = positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w / 2;
+	float posY = positionPlayer.y - 17;
 
 	switch (playerData.state)
 	{
@@ -211,24 +214,35 @@ bool Player::PostUpdate()
 		break;
 
 	case FLY:
-		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 13, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 30, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserFly, centerX-23, minYPlayer - 21, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserFly, centerX+23, minYPlayer - 21, &rectPlayer);
+		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 13, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 30, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserFly, centerX-23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserFly, centerX+23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
 		break;
 
 	case TURBO:
-		
-		app->render->DrawTexture(playerData.texTurboVelocity, positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w/2, positionPlayer.y -17 , &turboVelocityAnim->GetCurrentFrame());
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX - 23, minYPlayer - 21, &rectPlayer);
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX + 23, minYPlayer - 21, &rectPlayer);
+		app->render->DrawTexture(playerData.texTurboVelocity, posX, posY, &turboVelocityAnim->GetCurrentFrame(), 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX - 23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserTurbo, centerX + 23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
 		break;
 
 	default:
 		break;
 	}
+	
+	int x1 = ship->GetPointsCollisionWorld()[0].x;
+	int y1 = ship->GetPointsCollisionWorld()[0].y;
+	int x2 = ship->GetPointsCollisionWorld()[1].x;
+	int y2 = ship->GetPointsCollisionWorld()[1].y;
+	int x3 = ship->GetPointsCollisionWorld()[2].x;
+	int y3 = ship->GetPointsCollisionWorld()[2].y;
+
+	app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+	app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
+	app->render->DrawLine(x3, y3, x1, y1, 255, 0, 0);
+
 	return true;
 }
 
@@ -301,19 +315,19 @@ void Player::PlayerControls(float dt)
 	{
 		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		{
-			//ship->AddTorque(100);
-			playerData.vecDir = { playerData.pointsCollision[0].x - ship->GetAxis().x, playerData.pointsCollision[0].y - ship->GetAxis().y };
+			ship->AddTorque(100);
+			playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - PIXEL_TO_METERS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - PIXEL_TO_METERS(ship->GetAxis().y) };
 			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		}
 
 		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 		{
-			//ship->AddTorque(-100);
-			playerData.vecDir = { playerData.pointsCollision[0].x - ship->GetAxis().x, playerData.pointsCollision[0].y - ship->GetAxis().y };
+			ship->AddTorque(-100);
+			playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - PIXEL_TO_METERS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - PIXEL_TO_METERS(ship->GetAxis().y) };
 			playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		}
 	}	
-
+	
 	MovePlayer(dt);
 }
 

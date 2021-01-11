@@ -74,8 +74,8 @@ void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 {
 	fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
-	fPoint axisBodyA = { PIXEL_TO_METERS(bodyA->GetAxis().x),PIXEL_TO_METERS(bodyA->GetAxis().y) };
-	fPoint axisBodyB = { PIXEL_TO_METERS(bodyB->GetAxis().x),PIXEL_TO_METERS(bodyB->GetAxis().y) };
+	fPoint axisBodyA = { bodyA->GetAxis().x,bodyA->GetAxis().y };
+	fPoint axisBodyB = { bodyB->GetAxis().x,bodyB->GetAxis().y };
 	float masBodyA = bodyA->GetMass();
 	float masBodyB = bodyB->GetMass();
 
@@ -139,6 +139,7 @@ bool PhysicsEngine::CleanUp()
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
 		delete[] item->data->GetPointsCollision();
+		delete[] item->data->GetPointsCollisionWorld();
 	}
 
 	return true;
@@ -168,6 +169,8 @@ void PhysicsEngine::Step(float dt)
 	{
 		VelocityVerletLinear(item->data, dt);
 		VelocityVerletAngular(item->data, dt);
+		item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2), item->data->GetPosition().y + (item->data->GetHight() / 2) });
+		item->data->RotateBody();
 		item->data->ResetForces();
 		item->data->ResetTorque();
 	}
@@ -176,7 +179,7 @@ void PhysicsEngine::Step(float dt)
 	{
 		for (item2 = item->next; item2 != NULL; item2 = item2->next)
 		{
-			if (IsInsidePolygons(item->data->GetPointsCollision(), item->data->GetNumPoints(), item2->data->GetPointsCollision(), item2->data->GetNumPoints()))
+			if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
 			{
 				//if(superficie plana == true) CollisionFlatSurface(item->data);
 				Collision(item->data,item2->data);
