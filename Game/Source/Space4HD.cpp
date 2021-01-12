@@ -2,24 +2,14 @@
 #define PI 3.14159265
 
 
-void PhysicsEngine::CalculateAcceleration()
+void PhysicsEngine::CalculateAcceleration(Body* body)
 {
-	ListItem<Body*>* item;
-
-	for (item = bodies.start; item != NULL; item = item->next)
-	{
-		item->data->SetAcceleration({ item->data->GetForces().x / item->data->GetMass(), item->data->GetForces().y / item->data->GetMass() });
-	}
+	body->SetAcceleration({ body->GetForces().x / body->GetMass(),body->GetForces().y / body->GetMass() });
 }
-void PhysicsEngine::CalculateAngularAcceleration()
+void PhysicsEngine::CalculateAngularAcceleration(Body* body)
 {
-	ListItem<Body*>* item;
-
-	for (item = bodies.start; item != NULL; item = item->next)
-	{
-		float inercia = item->data->GetMass() * item->data->GetRadio() * item->data->GetRadio();
-		item->data->SetAccelerationAngular(item->data->GetTorque() / inercia);
-	}
+	float inercia = body->GetMass() * body->GetRadio() * body->GetRadio();
+	body->SetAccelerationAngular(body->GetTorque() / inercia);
 	// item->data->GetRadio() es la distancia del CM al punto de aplicación de la fuerza
 }
 
@@ -64,11 +54,11 @@ void PhysicsEngine::VelocityVerletAngular(Body* body, float dt)
 	body->SetPositionAngular(body->GetPositionAngular()+body->GetVelocityAngular()*dt + 0.5* body->GetAccelerationAngular()*dt*dt);
 	body->SetVelocityAngular(body->GetVelocityAngular()+body->GetAccelerationAngular()*dt);
 }
-void PhysicsEngine::CollisionFlatSurface(Body bodyA)
+void PhysicsEngine::CollisionFlatSurface(Body* bodyA)
 {
-	fPoint bodyVelocity = bodyA.GetVelocity();
-	float lostEnergy = 0.8;
-	bodyA.SetVelocity({bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+	fPoint bodyVelocity = bodyA->GetVelocity();
+	float lostEnergy = 1;
+	bodyA->SetVelocity({bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
 }
 void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 {
@@ -82,21 +72,29 @@ void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 	float jointMass = 2 * masBodyB / (masBodyA + masBodyB);
 	fPoint subtractionVel = velBodyA - velBodyB;
 	fPoint subtractionAxis = axisBodyA - axisBodyB;
-	fPoint dotProduct = subtractionVel * subtractionAxis;
-	float k = jointMass * (CalculateModule(dotProduct)) / pow(CalculateModule(subtractionAxis),2);
+	float dotProduct = subtractionVel.x * subtractionAxis.x + subtractionVel.y * subtractionAxis.y;
+	float k = jointMass * dotProduct / pow(CalculateModule(subtractionAxis), 2);
 
 	fPoint newVelA = velBodyA - (subtractionAxis * k);
 
 	jointMass = 2 * masBodyA / (masBodyA + masBodyB);
 	subtractionVel = velBodyB - velBodyA;
 	subtractionAxis = axisBodyB - axisBodyA;
-	dotProduct = subtractionVel * subtractionAxis;
-	k = jointMass * (CalculateModule(dotProduct)) / pow(CalculateModule(subtractionAxis),2);
+	dotProduct = subtractionVel.x * subtractionAxis.x + subtractionVel.y * subtractionAxis.y;
+	k = jointMass * dotProduct / pow(CalculateModule(subtractionAxis), 2);
 
 	fPoint newVelB = velBodyB - (subtractionAxis * k);
 
-	bodyA->SetVelocity(newVelA);
-	bodyB->SetVelocity(newVelB);
+	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		bodyA->SetVelocity(newVelA);
+		if (CalculateModule(newVelA) < 0.5)bodyA->SetSleep(true);
+	}
+	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		bodyB->SetVelocity(newVelB);
+		if (CalculateModule(newVelB) < 0.5)bodyB->SetSleep(true);
+	}
 }
 float PhysicsEngine::CalculateModule(fPoint distance)
 {
@@ -151,7 +149,7 @@ void PhysicsEngine::Step(float dt)
 
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
-		if (item->data->GetType() == BodyType::DYNAMIC_BODY)
+		if (item->data->GetType() == BodyType::DYNAMIC_BODY && !item->data->GetSleep())
 		{
 			Body* p = item->data;
 			fPoint fGrav = ForceGrav(p->GetMass(), p->GetPosition().y);
@@ -160,15 +158,15 @@ void PhysicsEngine::Step(float dt)
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
 		}
+		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);
 	}
-
-	CalculateAcceleration();
-	CalculateAngularAcceleration();
 
 	for (item = bodies.start; item !=NULL; item=item->next)
 	{
-		if (item->data->GetType() == BodyType::DYNAMIC_BODY)
+		if (item->data->GetType() == BodyType::DYNAMIC_BODY && !item->data->GetSleep())
 		{
+			CalculateAcceleration(item->data);
+			CalculateAngularAcceleration(item->data);
 			VelocityVerletLinear(item->data, dt);
 			VelocityVerletAngular(item->data, dt);
 			item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2), item->data->GetPosition().y + (item->data->GetHight() / 2) });
@@ -178,15 +176,92 @@ void PhysicsEngine::Step(float dt)
 		item->data->ResetTorque();
 	}
 	ListItem<Body*>* item2;
+	bool ret = true;
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
+		while (item->data->GetSleep())
+		{
+			if (item->next != NULL)item = item->next;
+			else
+			{
+				ret = false;
+				break;
+			}
+		}
+		if (ret == false) break;
 		for (item2 = item->next; item2 != NULL; item2 = item2->next)
 		{
-			if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
+			while (item2->data->GetSleep())
 			{
-				//if(superficie plana == true) CollisionFlatSurface(item->data);
+				if (item2->next != NULL)item2 = item2->next;
+				else
+				{
+					ret = false;
+					break;
+				}
+			}
+			if (ret == false) break;
+			if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), 
+				item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
+			{
 				Collision(item->data,item2->data);
 			}
 		}
 	}
 }
+/*fPoint velBodyA = bodyA->GetVelocity();
+	fPoint velBodyB = bodyB->GetVelocity();
+	fPoint axisBodyA = { bodyA->GetAxis().x,bodyA->GetAxis().y };
+	fPoint axisBodyB = { bodyB->GetAxis().x,bodyB->GetAxis().y };
+	float masBodyA = bodyA->GetMass();
+	float masBodyB = bodyB->GetMass();
+
+	float jointMass = 2 * masBodyB / (masBodyA + masBodyB);
+	fPoint subtractionVel = velBodyA - velBodyB;
+	fPoint subtractionAxis = axisBodyA - axisBodyB;
+	fPoint dotProduct = { subtractionVel.x * subtractionAxis.x,subtractionVel.y * subtractionAxis.y };
+	float k = jointMass * (dotProduct.x + dotProduct.y) / pow(CalculateModule(subtractionAxis),2);
+	
+	fPoint newVelA = velBodyA - (subtractionAxis * k);
+
+	jointMass = 2 * masBodyA / (masBodyA + masBodyB);
+	subtractionVel = velBodyB - velBodyA;
+	subtractionAxis = axisBodyB - axisBodyA;
+	dotProduct = { subtractionVel.x * subtractionAxis.x,subtractionVel.y * subtractionAxis.y };
+	k = jointMass * (dotProduct.x + dotProduct.y) / pow(CalculateModule(subtractionAxis),2);
+
+	fPoint newVelB = velBodyB - (subtractionAxis * k);
+
+	if(bodyA->GetType() == BodyType::DYNAMIC_BODY)bodyA->SetVelocity(newVelA);
+	if(bodyB->GetType() == BodyType::DYNAMIC_BODY)bodyB->SetVelocity(newVelB);*/
+
+
+		//fPoint vecDir = bodyA->GetAxis() - bodyB->GetAxis();
+		//float rad = atan2(vecDir.y, vecDir.x) ; // 1.5708 = 90*PI/180
+		//float lostEnergy = 1;
+
+		//if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
+		//{
+		//	fPoint vBodyA = bodyA->GetVelocity();
+		//	
+		//	float vXa = vBodyA.x * cos(rad) * lostEnergy;
+		//	float vYa = vBodyA.y * sin(rad) * -lostEnergy;
+
+		//	float vXaRotate = vXa * cos(rad + PI * 2);
+		//	float vYaRotate = vYa * sin(rad + PI * 2) ;
+
+		//	bodyA->SetVelocity({ vXaRotate, vYaRotate });
+		//}
+		//
+		//if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+		//{
+		//	fPoint vBodyB = bodyB->GetVelocity();
+
+		//	float vXb = vBodyB.x * cos(rad) * lostEnergy;
+		//	float vYb = vBodyB.y * sin(rad) * -lostEnergy;
+
+		//	float vXbRotate = vXb * cos(rad + PI * 2);
+		//	float vYbRotate = vYb * sin(rad + PI * 2);
+
+		//	bodyB->SetVelocity({ vXbRotate, vYbRotate });
+		//}

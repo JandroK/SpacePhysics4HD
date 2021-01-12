@@ -47,14 +47,14 @@ bool Player::Start()
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
-	float posY = 10538;
+	float posY = 10320;
 
 	
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
 	ship->SetCoeficientDrag(0.82);
-	ship->SetSurface(6);
+	ship->SetSurface(2);
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
@@ -327,12 +327,12 @@ void Player::PlayerControls(float dt)
 	//}	
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		ship->AddTorque(100);
+		ship->AddTorque(200);
 	}
 
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		ship->AddTorque(-100);
+		ship->AddTorque(-200);
 	}
 
 	if (app->physics->CalculateModule(ship->GetVelocityFluid()) != 0 && ship->GetVelocityAngular() != 0 

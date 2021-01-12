@@ -47,7 +47,7 @@ public:
 	float GetHight() { return hight; };
 
 	BodyType GetType() { return type; };
-	bool GetActive() { return active; };
+	bool GetSleep() { return sleep; };
 	bool GetIsFlat() { return isFlat; };
 
 	int GetNumPoints() { return numPoints; };
@@ -76,7 +76,7 @@ public:
 	void SetAccelerationAngular(float _acceleration) { angularAcceleration = _acceleration; };
 
 	void SetBodyType(BodyType _type) { type = _type; };
-	void SetActive(bool _active) { active = _active; };
+	void SetSleep(bool _sleep) { sleep = _sleep; };
 	void SetIsFlat(bool _flat) { isFlat = _flat; };
 
 	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints);
@@ -89,11 +89,11 @@ public:
 private:
 
 	//General properties
-	float mass = 1;
+	float mass = 0;
 	float width = 0;
 	float hight = 0;
 	BodyType type = BodyType::DYNAMIC_BODY;
-	bool active = true;
+	bool sleep = false;
 	fPoint axisCM;
 	bool isFlat = false;
 	float radio = 0;

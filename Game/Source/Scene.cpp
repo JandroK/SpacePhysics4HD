@@ -57,7 +57,9 @@ bool Scene::Start()
 	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
 
 	platform->SetBodyType(BodyType::STATIC_BODY);
+	platform->SetMass(1000);
 	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
+	platform->SetIsFlat(true);
 	float w = 440;
 	float h = 150;
 	platform->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));

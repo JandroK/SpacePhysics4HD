@@ -22,15 +22,15 @@ public:
 	//fPoint ForceHydroDrag();
 
 	// Accelerations
-	void CalculateAcceleration();
-	void CalculateAngularAcceleration();
+	void CalculateAcceleration(Body* body);
+	void CalculateAngularAcceleration(Body* body);
 
 	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
 	//Remember to reset current forces/momentum of each body.
 
 	void VelocityVerletLinear(Body* body, float dt);
 	void VelocityVerletAngular(Body* body, float dt);
-	void CollisionFlatSurface(Body bodyA);
+	void CollisionFlatSurface(Body* bodyA);
 	void Collision(Body* bodyA, Body* bodyB);
 
 	float CalculateModule(fPoint distance);

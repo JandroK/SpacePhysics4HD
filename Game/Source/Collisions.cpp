@@ -2,7 +2,7 @@
 #include <algorithm>
 
 using namespace std;
-#define INF 1000 
+#define INF 10000 
 
 bool Collisions::OnSegment(fPoint p, fPoint q, fPoint r)
 {
