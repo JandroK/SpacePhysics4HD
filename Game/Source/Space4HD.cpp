@@ -167,10 +167,13 @@ void PhysicsEngine::Step(float dt)
 
 	for (item = bodies.start; item !=NULL; item=item->next)
 	{
-		VelocityVerletLinear(item->data, dt);
-		VelocityVerletAngular(item->data, dt);
-		item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2), item->data->GetPosition().y + (item->data->GetHight() / 2) });
-		item->data->RotateBody();
+		if (item->data->GetType() == BodyType::DYNAMIC_BODY)
+		{
+			VelocityVerletLinear(item->data, dt);
+			VelocityVerletAngular(item->data, dt);
+			item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2), item->data->GetPosition().y + (item->data->GetHight() / 2) });
+			item->data->RotateBody();
+		}
 		item->data->ResetForces();
 		item->data->ResetTorque();
 	}

@@ -22,8 +22,9 @@ void Body::ResetTorque()
 	torque = 0;
 }
 
-void Body::SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[])
+void Body::SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints)
 {
+	numPoints = _numPoints;
 	for (int i = 0; i < numPoints; i++)
 	{
 		*(bodyPointsCollision + i) = _bodyPointsCollision[i];

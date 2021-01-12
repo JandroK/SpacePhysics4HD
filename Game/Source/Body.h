@@ -79,7 +79,7 @@ public:
 	void SetActive(bool _active) { active = _active; };
 	void SetIsFlat(bool _flat) { isFlat = _flat; };
 
-	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[]);
+	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints);
 	void SetRadio(float _radio) { radio = _radio; };
 	void SetSurface(float _surface) { surface = _surface; };
 	void SetCoeficientDrag(float _cd) { cd = _cd; };
@@ -89,7 +89,7 @@ public:
 private:
 
 	//General properties
-	float mass = 0;
+	float mass = 1;
 	float width = 0;
 	float hight = 0;
 	BodyType type = BodyType::DYNAMIC_BODY;

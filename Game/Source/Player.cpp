@@ -49,6 +49,7 @@ bool Player::Start()
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
 	float posY = 10538;
 
+	
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
@@ -60,7 +61,7 @@ bool Player::Start()
 		playerData.pointsCollisionWorld[i].x += ship->GetAxis().x;
 		playerData.pointsCollisionWorld[i].y += ship->GetAxis().y;
 	}
-	ship->SetCollisions(playerData.pointsCollision, playerData.pointsCollisionWorld);
+	ship->SetCollisions(playerData.pointsCollision, playerData.pointsCollisionWorld, playerData.numPoints);
 
 	playerData.vecDir = { playerData.pointsCollisionWorld[0].x - ship->GetAxis().x , playerData.pointsCollisionWorld[0].y - ship->GetAxis().y };
 	float radio = app->physics->CalculateModule(playerData.vecDir); 
@@ -320,21 +321,27 @@ void Player::PlayerControls(float dt)
 
 	
 		// Comprobamos si las tecas est�n pulsadas al mismo tiempo
-	if (!(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	/*if (!(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 		&& (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT || app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT))
+	{*/
+	//}	
+	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
-		{
-			ship->AddTorque(100);
-		}
+		ship->AddTorque(100);
+	}
 
-		if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
-		{
-			ship->AddTorque(-100);
-		}
-	}	
-	
-	MovePlayer(dt);
+	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	{
+		ship->AddTorque(-100);
+	}
+
+	if (app->physics->CalculateModule(ship->GetVelocityFluid()) != 0 && ship->GetVelocityAngular() != 0 
+		&& !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
+	{
+		if(ship->GetVelocityAngular() < 0)ship->AddTorque(100);
+		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-100);
+	}
+	//MovePlayer(dt);
 }
 
 void Player::GodModeControls(float dt)

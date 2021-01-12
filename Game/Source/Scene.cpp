@@ -31,6 +31,8 @@ bool Scene::Awake()
 // Called before the first frame
 bool Scene::Start()
 {
+	platform = app->physics->CreateBody();
+
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
 	imgClouds = app->tex->Load("Assets/Textures/clouds.png");
@@ -53,6 +55,29 @@ bool Scene::Start()
 	propulsionPlatform.laserBack->loop = true;
 	propulsionPlatform.laserBack->speed = 0.2;
 	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
+
+	platform->SetBodyType(BodyType::STATIC_BODY);
+	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
+	float w = 440;
+	float h = 150;
+	platform->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
+	fPoint axis = { WINDOW_W / 2, METERS_TO_PIXELS(platform->GetPosition().y) + h / 2 };
+
+	float width = w / 2;
+	float hight = h / 2;
+
+	for (int i = 0; i < numPoints; i++)
+	{
+		if (i == 0 || i == 3)width = -abs(width);
+		else width = abs(width);
+		if (i == 0 || i == 1) hight = -abs(hight);
+		else hight = abs(hight);
+		pointsCollision[i].x = axis.x + width;
+		pointsCollision[i].y = axis.y + hight;
+	}
+	
+	platform->SetCollisions(pointsCollision, pointsCollision, numPoints);
+	platform->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS (axis.y)});
 
 	return true;
 }
@@ -87,6 +112,8 @@ bool Scene::PostUpdate()
 
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
+	/*SDL_Rect rectPlatform = {METERS_TO_PIXELS(platform->GetPosition().x),METERS_TO_PIXELS(platform->GetPosition().y),
+		METERS_TO_PIXELS(platform->GetWidth()),METERS_TO_PIXELS(platform->GetHight())};*/
 
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
@@ -99,6 +126,22 @@ bool Scene::PostUpdate()
 	app->render->DrawTexture(propulsionPlatform.textureLaser, 505, 10800, &rect2,1,22);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
+
+	int x1 = platform->GetPointsCollisionWorld()[0].x;
+	int y1 = platform->GetPointsCollisionWorld()[0].y;
+	int x2 = platform->GetPointsCollisionWorld()[1].x;
+	int y2 = platform->GetPointsCollisionWorld()[1].y;
+	int x3 = platform->GetPointsCollisionWorld()[2].x;
+	int y3 = platform->GetPointsCollisionWorld()[2].y;
+	int x4 = platform->GetPointsCollisionWorld()[3].x;
+	int y4 = platform->GetPointsCollisionWorld()[3].y;
+
+	app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+	app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
+	app->render->DrawLine(x3, y3, x4, y4, 255, 0, 0);
+	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+
+	//app->render->DrawRectangle(rectPlatform,255,0,0);
 
 	return ret;
 }

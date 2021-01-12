@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include "Animation.h"
+#include "Physics.h"
 
 struct SDL_Texture;
 
@@ -43,6 +44,10 @@ public:
 	bool CleanUp();
 
 private:
+	Body* platform;
+	static const int numPoints = 4;
+	fPoint pointsCollision[numPoints];
+
 	SDL_Texture* imgBgSpace;
 	SDL_Texture* imgBgEarth;
 	
