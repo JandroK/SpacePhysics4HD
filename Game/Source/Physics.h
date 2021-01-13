@@ -24,6 +24,7 @@ public:
 
 	float CalculateModule(fPoint distance);
 	fPoint NormalizeVector(fPoint distance);
+	fPoint RotateVector(fPoint vector, fPoint axis, float angle);
 
 private:
 

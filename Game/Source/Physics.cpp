@@ -85,3 +85,11 @@ fPoint Physics::NormalizeVector(fPoint distance)
 	normalize.y = distance.y / module;
 	return normalize;
 }
+
+fPoint Physics::RotateVector(fPoint vector, fPoint axis, float angle)
+{
+	vector = { vector.x - METERS_TO_PIXELS(axis.x), vector.y - METERS_TO_PIXELS(axis.y) };
+	float posX = (vector.x * cos(angle)) - (vector.y * sin(angle)) + METERS_TO_PIXELS(axis.x);//Matrix rotation
+	float posY = (vector.x * sin(angle)) + (vector.y * cos(angle)) + METERS_TO_PIXELS(axis.y);//Change basis
+	return fPoint({ posX, posY });
+}

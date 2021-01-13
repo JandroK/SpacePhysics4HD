@@ -205,10 +205,13 @@ bool Player::PostUpdate()
 	SDL_Rect rectPlayer;
 
 	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
-	int centerX = positionPlayer.x + playerData.rectPlayer.w / 2 - rectPlayer.w / 2;
-	int minYPlayer = positionPlayer.y + playerData.rectPlayer.h;
+	fPoint posPropulsor;
+	posPropulsor.x = METERS_TO_PIXELS(ship->GetAxis().x) - rectPlayer.w/2;
+	posPropulsor.y = METERS_TO_PIXELS(ship->GetAxis().y) + playerData.rectPlayer.h / 2;
+
 	float posX = positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w / 2;
 	float posY = positionPlayer.y - 17;
+	float angle = ship->GetRotation();
 
 	switch (playerData.state)
 	{
@@ -216,18 +219,18 @@ bool Player::PostUpdate()
 		break;
 
 	case FLY:
-		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 13, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserFly, centerX, minYPlayer - 30, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserFly, centerX-23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserFly, centerX+23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x, posPropulsor.y - 13, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h - 8);
+		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9);
+		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h);
+		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h);
 		break;
 
 	case TURBO:
-		app->render->DrawTexture(playerData.texTurboVelocity, posX, posY, &turboVelocityAnim->GetCurrentFrame(), 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 13, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX, minYPlayer - 30, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX - 23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
-		app->render->DrawTexture(playerData.texLaserTurbo, centerX + 23, minYPlayer - 21, &rectPlayer, 1, ship->GetRotation());
+		app->render->DrawTexture(playerData.texTurboVelocity, posX, posY, &turboVelocityAnim->GetCurrentFrame(), 1, angle);
+		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x, posPropulsor.y - 13, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h - 8 +34);
+		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9 + 34);
+		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h + 34);
+		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h + 34);
 		break;
 
 	default:
