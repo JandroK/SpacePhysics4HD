@@ -48,7 +48,7 @@ public:
 
 	BodyType GetType() { return type; };
 	bool GetSleep() { return sleep; };
-	bool GetIsFlat() { return isFlat; };
+	bool GetIsShpere() { return isShpere; };
 
 	int GetNumPoints() { return numPoints; };
 	fPoint* GetPointsCollision() { return bodyPointsCollision; };
@@ -77,7 +77,7 @@ public:
 
 	void SetBodyType(BodyType _type) { type = _type; };
 	void SetSleep(bool _sleep) { sleep = _sleep; };
-	void SetIsFlat(bool _flat) { isFlat = _flat; };
+	void SetIsShpere(bool _flat) { isShpere = _flat; };
 
 	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints);
 	void SetRadio(float _radio) { radio = _radio; };
@@ -95,7 +95,7 @@ private:
 	BodyType type = BodyType::DYNAMIC_BODY;
 	bool sleep = false;
 	fPoint axisCM;
-	bool isFlat = false;
+	bool isShpere = false;
 	float radio = 0;
 	float densityFluid = 1.225f;
 	fPoint velocityFluid = { 0,8 };

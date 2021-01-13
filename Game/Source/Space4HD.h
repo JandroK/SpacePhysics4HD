@@ -32,6 +32,7 @@ public:
 	void VelocityVerletAngular(Body* body, float dt);
 	void CollisionFlatSurface(Body* bodyA);
 	void Collision(Body* bodyA, Body* bodyB);
+	void CollisionShpere(Body* bodyA, Body* bodyB);
 
 	float CalculateModule(fPoint distance);
 	fPoint NormalizeVector(fPoint distance);

@@ -62,6 +62,7 @@ void PhysicsEngine::CollisionFlatSurface(Body* bodyA)
 }
 void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 {
+		
 	fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
 	fPoint axisBodyA = { bodyA->GetAxis().x,bodyA->GetAxis().y };
@@ -88,59 +89,72 @@ void PhysicsEngine::Collision(Body *bodyA, Body *bodyB)
 	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
 	{
 		bodyA->SetVelocity(newVelA);
-		if (CalculateModule(newVelA) < 0.5)bodyA->SetSleep(true);
+		float velCriticA = CalculateModule(newVelA);
+		if (velCriticA < 0.3 || velCriticA > 30)
+		{
+			bodyA->SetSleep(true);
+			bodyA->SetVelocity({ 0,0 });
+			bodyA->SetAcceleration({ 0,0 });
+		}	
 	}
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
 	{
 		bodyB->SetVelocity(newVelB);
-		if (CalculateModule(newVelB) < 0.5)bodyB->SetSleep(true);
-	}
-}
-float PhysicsEngine::CalculateModule(fPoint distance)
-{
-	return sqrt((distance.x * distance.x) + (distance.y * distance.y));
-}
-fPoint PhysicsEngine::NormalizeVector(fPoint distance)
-{
-	float module = CalculateModule(distance);
-	if (module == 1 || module == 0) return distance;
-
-	fPoint normalize;
-	normalize.x = distance.x / module;
-	normalize.y = distance.y / module;
-	return normalize;
-}
-
-void PhysicsEngine::AddBody(Body* body)
-{
-	bodies.Add(body);
-}
-
-void PhysicsEngine::deleteBody(Body* body)
-{
-	ListItem<Body*>* item;
-
-	for (item = bodies.start; item != NULL; item = item->next)
-	{
-		if (item->data == body)
+		float velCriticB = CalculateModule(newVelB);
+		if (velCriticB < 0.3 || velCriticB > 30)
 		{
-			bodies.Del(item);
+			bodyB->SetSleep(true);
+			bodyB->SetVelocity({ 0,0 });
+			bodyB->SetAcceleration({ 0,0 });
 		}
 	}
 }
 
-bool PhysicsEngine::CleanUp()
+void PhysicsEngine::CollisionShpere(Body* bodyA, Body* bodyB)
 {
-	bodies.Clear();
-	ListItem<Body*>* item;
+	fPoint vecDir = bodyA->GetAxis() - bodyB->GetAxis();
+	float rad = atan2(vecDir.y, vecDir.x); // 1.5708 = 90*PI/180
+	float lostEnergy = 0.9;
 
-	for (item = bodies.start; item != NULL; item = item->next)
+	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
 	{
-		delete[] item->data->GetPointsCollision();
-		delete[] item->data->GetPointsCollisionWorld();
+		fPoint vBodyA = bodyA->GetVelocity();
+
+		float vXa = vBodyA.x * cos(rad) * lostEnergy;
+		float vYa = vBodyA.y * sin(rad) * -lostEnergy;
+
+		float vXaRotate = vXa * cos(rad + PI * 2);
+		float vYaRotate = vYa * sin(rad + PI * 2);
+
+		bodyA->SetVelocity({ vXaRotate, vYaRotate });
+		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
+		if (velCriticA < 0.3 || velCriticA > 30)
+		{
+			bodyA->SetSleep(true);
+			bodyA->SetVelocity({ 0,0 });
+			bodyA->SetAcceleration({ 0,0 });
+		}
 	}
 
-	return true;
+	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		fPoint vBodyB = bodyB->GetVelocity();
+
+		float vXb = vBodyB.x * cos(rad) * lostEnergy;
+		float vYb = vBodyB.y * sin(rad) * -lostEnergy;
+
+		float vXbRotate = vXb * cos(rad + PI * 2);
+		float vYbRotate = vYb * sin(rad + PI * 2);
+
+		bodyB->SetVelocity({ vXbRotate, vYbRotate });
+		float velCriticB = CalculateModule({ vXbRotate, vYbRotate });
+		if (velCriticB < 0.3 || velCriticB > 30)
+		{
+			bodyB->SetSleep(true);
+			bodyB->SetVelocity({ 0,0 });
+			bodyB->SetAcceleration({ 0,0 });
+		}
+	}
 }
 
 void PhysicsEngine::Step(float dt)
@@ -201,13 +215,67 @@ void PhysicsEngine::Step(float dt)
 				}
 			}
 			if (ret == false) break;
-			if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), 
-				item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
+			float distanceBetweenAxis = CalculateModule(item->data->GetAxis() - item2->data->GetAxis());
+			bool shpere = false;
+			if (item->data->GetIsShpere() || item2->data->GetIsShpere()) shpere = true;
+			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && shpere)
+			{
+				CollisionShpere(item->data, item2->data);
+			}
+			else if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), 
+				item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()) && !shpere)
 			{
 				Collision(item->data,item2->data);
 			}
 		}
 	}
+}
+
+float PhysicsEngine::CalculateModule(fPoint distance)
+{
+	return sqrt((distance.x * distance.x) + (distance.y * distance.y));
+}
+fPoint PhysicsEngine::NormalizeVector(fPoint distance)
+{
+	float module = CalculateModule(distance);
+	if (module == 1 || module == 0) return distance;
+
+	fPoint normalize;
+	normalize.x = distance.x / module;
+	normalize.y = distance.y / module;
+	return normalize;
+}
+
+void PhysicsEngine::AddBody(Body* body)
+{
+	bodies.Add(body);
+}
+
+void PhysicsEngine::deleteBody(Body* body)
+{
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		if (item->data == body)
+		{
+			bodies.Del(item);
+		}
+	}
+}
+
+bool PhysicsEngine::CleanUp()
+{
+	bodies.Clear();
+	ListItem<Body*>* item;
+
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		delete[] item->data->GetPointsCollision();
+		delete[] item->data->GetPointsCollisionWorld();
+	}
+
+	return true;
 }
 /*fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
@@ -236,32 +304,34 @@ void PhysicsEngine::Step(float dt)
 	if(bodyB->GetType() == BodyType::DYNAMIC_BODY)bodyB->SetVelocity(newVelB);*/
 
 
-		//fPoint vecDir = bodyA->GetAxis() - bodyB->GetAxis();
-		//float rad = atan2(vecDir.y, vecDir.x) ; // 1.5708 = 90*PI/180
-		//float lostEnergy = 1;
-
-		//if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
-		//{
-		//	fPoint vBodyA = bodyA->GetVelocity();
-		//	
-		//	float vXa = vBodyA.x * cos(rad) * lostEnergy;
-		//	float vYa = vBodyA.y * sin(rad) * -lostEnergy;
-
-		//	float vXaRotate = vXa * cos(rad + PI * 2);
-		//	float vYaRotate = vYa * sin(rad + PI * 2) ;
-
-		//	bodyA->SetVelocity({ vXaRotate, vYaRotate });
-		//}
-		//
-		//if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
-		//{
-		//	fPoint vBodyB = bodyB->GetVelocity();
-
-		//	float vXb = vBodyB.x * cos(rad) * lostEnergy;
-		//	float vYb = vBodyB.y * sin(rad) * -lostEnergy;
-
-		//	float vXbRotate = vXb * cos(rad + PI * 2);
-		//	float vYbRotate = vYb * sin(rad + PI * 2);
-
-		//	bodyB->SetVelocity({ vXbRotate, vYbRotate });
-		//}
+//fPoint vecDir = bodyA->GetAxis() - bodyB->GetAxis();
+//float rad = atan2(vecDir.y, vecDir.x); // 1.5708 = 90*PI/180
+//float lostEnergy = 1;
+//
+//if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
+//{
+//	fPoint vBodyA = bodyA->GetVelocity();
+//
+//	float vXa = vBodyA.x * cos(rad) * lostEnergy;
+//	float vYa = vBodyA.y * sin(rad) * -lostEnergy;
+//
+//	float vXaRotate = vXa * cos(rad + PI * 2);
+//	float vYaRotate = vYa * sin(rad + PI * 2);
+//
+//	bodyA->SetVelocity({ vXaRotate, vYaRotate });
+//	if (CalculateModule({ vXaRotate, vYaRotate }) < 0.5)bodyA->SetSleep(true);
+//}
+//
+//if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+//{
+//	fPoint vBodyB = bodyB->GetVelocity();
+//
+//	float vXb = vBodyB.x * cos(rad) * lostEnergy;
+//	float vYb = vBodyB.y * sin(rad) * -lostEnergy;
+//
+//	float vXbRotate = vXb * cos(rad + PI * 2);
+//	float vYbRotate = vYb * sin(rad + PI * 2);
+//
+//	bodyB->SetVelocity({ vXbRotate, vYbRotate });
+//	if (CalculateModule({ vXbRotate, vYbRotate }) < 0.5)bodyB->SetSleep(true);
+//}

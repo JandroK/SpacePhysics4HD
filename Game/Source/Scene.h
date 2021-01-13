@@ -45,6 +45,7 @@ public:
 
 private:
 	Body* platform;
+	Body* moon;
 	static const int numPoints = 4;
 	fPoint pointsCollision[numPoints];
 

@@ -32,6 +32,7 @@ bool Scene::Awake()
 bool Scene::Start()
 {
 	platform = app->physics->CreateBody();
+	moon = app->physics->CreateBody();
 
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
@@ -59,7 +60,6 @@ bool Scene::Start()
 	platform->SetBodyType(BodyType::STATIC_BODY);
 	platform->SetMass(1000);
 	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
-	platform->SetIsFlat(true);
 	float w = 440;
 	float h = 150;
 	platform->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
@@ -80,6 +80,13 @@ bool Scene::Start()
 	
 	platform->SetCollisions(pointsCollision, pointsCollision, numPoints);
 	platform->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS (axis.y)});
+
+	moon->SetBodyType(BodyType::STATIC_BODY);
+	moon->SetMass(1000);
+	moon->SetIsShpere(true);
+	moon->SetRadio(PIXEL_TO_METERS(1000));
+	moon->SetPosition({ 0, PIXEL_TO_METERS (-450) });
+	moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-450) });
 
 	return true;
 }
@@ -143,7 +150,8 @@ bool Scene::PostUpdate()
 	app->render->DrawLine(x3, y3, x4, y4, 255, 0, 0);
 	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
 
-	//app->render->DrawRectangle(rectPlatform,255,0,0);
+	app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
+	//app->render->DrawCircle2(WINDOW_W/2, -450, 1000);
 
 	return ret;
 }

@@ -47,14 +47,14 @@ bool Player::Start()
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
-	float posY = 10320;
+	float posY = 10538;
 
 	
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
 	ship->SetCoeficientDrag(0.82);
-	ship->SetSurface(2);
+	ship->SetSurface(8);
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
@@ -70,6 +70,8 @@ bool Player::Start()
 
 	positionInitial = { PIXEL_TO_METERS(posX), PIXEL_TO_METERS(posY) };
 	ship->SetPosition(positionInitial);
+	ship->SetAxisCM({ PIXEL_TO_METERS(ship->GetAxis().x), PIXEL_TO_METERS(ship->GetAxis().y) });
+	ship->SetSleep(true);
 	
 	playerData.state = IDLE;
 
@@ -249,6 +251,8 @@ bool Player::PostUpdate()
 	int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
 
 	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+
+	
 
 	return true;
 }
