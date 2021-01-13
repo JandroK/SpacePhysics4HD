@@ -71,6 +71,8 @@ void PhysicsEngine::Step(float dt)
 			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({0,0});
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
+			if (item->data->GetVelocity().x < 0 && item->data->GetIsShpere()) item->data->AddTorque(-10);
+			if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
 		}
 		// If body receives an external force thge body is awake
 		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);

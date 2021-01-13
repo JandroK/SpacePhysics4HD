@@ -172,7 +172,7 @@ bool Scene::PostUpdate()
 			METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
 
 		app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->GetAxis().x) - METERS_TO_PIXELS(item->data->GetRadio()),
-			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()));
+			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()), NULL, 1, item->data->GetRotation() );
 	}
 	return ret;
 }
@@ -222,6 +222,8 @@ void Scene::CreateEntity()
 		float velX = rand() % 2;
 		float velY = rand() % 2;
 		item->data->SetVelocity({ velX,velY });
+		if (velX < 0) item->data->AddTorque(-60);
+		if (velX > 0) item->data->AddTorque(60);
 
 		app->physics->CreateBody(item->data);
 		Body* b = new Body;
