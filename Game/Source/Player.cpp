@@ -25,7 +25,7 @@ Player::~Player()
 
 bool Player::Start() 
 {
-	ship = app->physics->CreateBody();
+	ship = new Body;
 
 	idleAnim = new Animation();
 	flyAnim = new Animation();
@@ -72,6 +72,8 @@ bool Player::Start()
 	ship->SetPosition(positionInitial);
 	ship->SetAxisCM({ PIXEL_TO_METERS(ship->GetAxis().x), PIXEL_TO_METERS(ship->GetAxis().y) });
 	ship->SetSleep(true);
+
+	app->physics->CreateBody(ship);
 	
 	playerData.state = IDLE;
 
@@ -438,6 +440,8 @@ bool Player::CleanUp()
 	delete turboVelocityAnim;
 	delete atakAnim;
 	delete damageAnim;
+
+	delete ship;
 
 	return true;
 }

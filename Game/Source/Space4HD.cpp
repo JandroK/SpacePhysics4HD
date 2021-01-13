@@ -183,7 +183,12 @@ void PhysicsEngine::Step(float dt)
 			CalculateAngularAcceleration(item->data);
 			VelocityVerletLinear(item->data, dt);
 			VelocityVerletAngular(item->data, dt);
-			item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2), item->data->GetPosition().y + (item->data->GetHight() / 2) });
+			if (!item->data->GetIsShpere())
+			{
+				item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2),
+				item->data->GetPosition().y + (item->data->GetHight() / 2) });
+			}
+			else item->data->SetAxisCM(item->data->GetPosition());
 			item->data->RotateBody();
 		}
 		item->data->ResetForces();
@@ -220,12 +225,12 @@ void PhysicsEngine::Step(float dt)
 			if (item->data->GetIsShpere() || item2->data->GetIsShpere()) shpere = true;
 			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && shpere)
 			{
-				CollisionShpere(item->data, item2->data);
+				Collision(item->data, item2->data);
 			}
-			else if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(), 
+			else if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(),
 				item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()) && !shpere)
 			{
-				Collision(item->data,item2->data);
+				Collision(item->data, item2->data);
 			}
 		}
 	}

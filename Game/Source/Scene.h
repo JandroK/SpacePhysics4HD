@@ -40,12 +40,18 @@ public:
 	// Called before all Updates
 	bool PostUpdate();
 
+	// Create Entities
+	void CreateEntity();
+
 	// Called before quitting
 	bool CleanUp();
 
 private:
 	Body* platform;
 	Body* moon;
+	List<Body*> asteroids;
+	int numAsteroids = 30;
+
 	static const int numPoints = 4;
 	fPoint pointsCollision[numPoints];
 
@@ -53,6 +59,7 @@ private:
 	SDL_Texture* imgBgEarth;
 	
 	SDL_Texture* imgClouds;
+	SDL_Texture* imgAsteroids;
 	SDL_Rect rectPlatform;
 
 	AnimationPlatform propulsionPlatform;

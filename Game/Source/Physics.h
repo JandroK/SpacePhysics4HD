@@ -19,7 +19,7 @@ public:
 
 	bool CleanUp() override;
 
-	Body* CreateBody();
+	Body* CreateBody(Body* b);
 	void DestroyBody(Body* b);
 
 	float CalculateModule(fPoint distance);

@@ -31,12 +31,13 @@ bool Scene::Awake()
 // Called before the first frame
 bool Scene::Start()
 {
-	platform = app->physics->CreateBody();
-	moon = app->physics->CreateBody();
+	platform = new Body;
+	moon = new Body;
 
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
 	imgClouds = app->tex->Load("Assets/Textures/clouds.png");
+	imgAsteroids = app->tex->Load("Assets/Textures/asteroid.png");
 
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
@@ -87,6 +88,11 @@ bool Scene::Start()
 	moon->SetRadio(PIXEL_TO_METERS(1000));
 	moon->SetPosition({ 0, PIXEL_TO_METERS (-450) });
 	moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-450) });
+
+	
+	app->physics->CreateBody(platform);
+	app->physics->CreateBody(moon);
+	CreateEntity();
 
 	return true;
 }
@@ -150,10 +156,67 @@ bool Scene::PostUpdate()
 	app->render->DrawLine(x3, y3, x4, y4, 255, 0, 0);
 	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
 
-	app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
-	//app->render->DrawCircle2(WINDOW_W/2, -450, 1000);
+	app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), 
+		METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
+	
+	ListItem<Body*>* item;
 
+	for (item = asteroids.start; item != NULL; item = item->next)
+	{
+		app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x), 
+			METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
+
+		app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->GetAxis().x) - METERS_TO_PIXELS(item->data->GetRadio()),
+			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()));
+	}
 	return ret;
+}
+
+void Scene::CreateEntity()
+{
+	Body* b = new Body;
+	asteroids.Add(b);
+
+	ListItem<Body*>* item = asteroids.start;
+	ListItem<Body*>* itemPrev;
+
+	fPoint pos;
+	fPoint posM;
+	float distanceBetweenAxis;
+
+	for (int i = 0; i < numAsteroids; item = item->next, i++)
+	{
+		int m = rand() % 50 + 50;
+		item->data->SetMass(m);
+		item->data->SetIsShpere(true);
+		item->data->SetRadio(PIXEL_TO_METERS(50));
+
+		pos.x = rand() % WINDOW_W - 100 + 100;
+		pos.y = rand() % 2600 + 2200;
+		
+		for (itemPrev = item; itemPrev != NULL; itemPrev = itemPrev->prev)
+		{
+			posM = { itemPrev->data->GetAxis().x - PIXEL_TO_METERS(pos.x), itemPrev->data->GetAxis().y - PIXEL_TO_METERS(pos.y) };
+			distanceBetweenAxis = app->physics->CalculateModule(posM);
+			if (itemPrev->data->GetRadio() + item->data->GetRadio() > distanceBetweenAxis)
+			{
+				pos.x = rand() % WINDOW_W - 100 + 100;
+				pos.y = rand() % 2400 + 2200;
+				itemPrev = item;
+			}
+		}
+		
+		item->data->SetPosition({ PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y) });
+		item->data->SetAxisCM(item->data->GetPosition());
+
+		float velX = rand() % 2;
+		float velY = rand() % 2;
+		item->data->SetVelocity({ velX,velY });
+
+		app->physics->CreateBody(item->data);
+		Body* b = new Body;
+		asteroids.Add(b);
+	}
 }
 
 // Called before quitting
@@ -163,12 +226,17 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(imgBgSpace);
 	app->tex->UnLoad(imgBgEarth);
 	app->tex->UnLoad(imgClouds);
+	app->tex->UnLoad(imgAsteroids);
 	app->tex->UnLoad(propulsionPlatform.texture);
 	app->tex->UnLoad(propulsionPlatform.textureLaser);
 
 	delete idleAnim;
 	delete propulsionPlatform.laserBack;
 	delete propulsionPlatform.laserFront;
+
+	delete platform;
+	delete moon;
+	asteroids.Clear();
 
 	return true;
 }

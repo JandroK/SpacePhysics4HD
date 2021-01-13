@@ -45,9 +45,9 @@ bool Physics::CleanUp()
 	return true;
 }
 
-Body* Physics::CreateBody()
+Body* Physics::CreateBody(Body* b)
 {
-	Body* b = new Body;
+	//Body* b = new Body;
 
 	// Add the body to the list in module physics
 	bodies.Add(b);
