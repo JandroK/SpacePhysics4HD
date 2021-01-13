@@ -24,6 +24,7 @@ void Body::ResetTorque()
 
 void Body::SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints)
 {
+	// Guardamos el array de puntos de collision de los objetos dentro del motor para que se encarge de resolver colisiones
 	numPoints = _numPoints;
 	for (int i = 0; i < numPoints; i++)
 	{
@@ -34,6 +35,7 @@ void Body::SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollis
 
 void Body::RotateBody()
 {
+	// Rotamos la matriz de puntos de collision para que se adapten a la orientación del cuerpo
 	for (int i = 0; i < numPoints; i++)
 	{
 		float posX = (bodyPointsCollision[i].x * cos(angularPosition)) - (bodyPointsCollision[i].y * sin(angularPosition));//Matrix rotation

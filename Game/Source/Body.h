@@ -63,7 +63,7 @@ public:
 	fPoint GetForces() { return forces; };
 	float GetTorque() { return torque; };
 
-	//Seters
+	// Seters
 	void SetMass(float _mass) { mass = _mass; };
 	void SetDimension(float _width, float _hight) { width = _width; hight = _hight; };
 	void SetPosition(fPoint positionInitial) { position = positionInitial; };
@@ -88,7 +88,7 @@ public:
 
 private:
 
-	//General properties
+	// General properties
 	float mass = 0;
 	float width = 0;
 	float hight = 0;

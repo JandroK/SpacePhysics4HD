@@ -31,19 +31,23 @@ bool Scene::Awake()
 // Called before the first frame
 bool Scene::Start()
 {
+	// Create new Bodies
 	platform = new Body;
 	moon = new Body;
 
+	// Load textures and music
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
 	imgClouds = app->tex->Load("Assets/Textures/clouds.png");
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroid.png");
-
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
+	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
+
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10572 };
 
+	// Animations of the propulsion of the air platform
 	for (int i = 0; i < 8; i++)
 	{
 		propulsionPlatform.laserFront->PushBack({118*i,0,118,208});
@@ -56,8 +60,8 @@ bool Scene::Start()
 	}
 	propulsionPlatform.laserBack->loop = true;
 	propulsionPlatform.laserBack->speed = 0.2;
-	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
 
+	// Set values of the bodies
 	platform->SetBodyType(BodyType::STATIC_BODY);
 	platform->SetMass(1000);
 	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
@@ -68,7 +72,8 @@ bool Scene::Start()
 
 	float width = w / 2;
 	float hight = h / 2;
-
+	
+	// Fill the matrix of points in clockwise
 	for (int i = 0; i < numPoints; i++)
 	{
 		if (i == 0 || i == 3)width = -abs(width);
@@ -89,7 +94,7 @@ bool Scene::Start()
 	moon->SetPosition({ 0, PIXEL_TO_METERS (-450) });
 	moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-450) });
 
-	
+	// Add bodies of the world
 	app->physics->CreateBody(platform);
 	app->physics->CreateBody(moon);
 	CreateEntity();
@@ -160,7 +165,7 @@ bool Scene::PostUpdate()
 		METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
 	
 	ListItem<Body*>* item;
-
+	// Draw all asteroids
 	for (item = asteroids.start; item != NULL; item = item->next)
 	{
 		app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x), 
@@ -183,32 +188,37 @@ void Scene::CreateEntity()
 	fPoint pos;
 	fPoint posM;
 	float distanceBetweenAxis;
-
+	// Create as many bodies as	numAsteroids 
 	for (int i = 0; i < numAsteroids; item = item->next, i++)
 	{
+		// Randomize the massa of bodies for everyone is different
 		int m = rand() % 50 + 50;
 		item->data->SetMass(m);
 		item->data->SetIsShpere(true);
 		item->data->SetRadio(PIXEL_TO_METERS(50));
 
+		// Randomize position of spawn
 		pos.x = rand() % WINDOW_W - 100 + 100;
 		pos.y = rand() % 2600 + 2200;
-		
+		// But this position must be different to the rest asteroids
 		for (itemPrev = item; itemPrev != NULL; itemPrev = itemPrev->prev)
 		{
 			posM = { itemPrev->data->GetAxis().x - PIXEL_TO_METERS(pos.x), itemPrev->data->GetAxis().y - PIXEL_TO_METERS(pos.y) };
 			distanceBetweenAxis = app->physics->CalculateModule(posM);
+			// If this asteroid is collision with other calculate again the position of the new asteroid
 			if (itemPrev->data->GetRadio() + item->data->GetRadio() > distanceBetweenAxis)
 			{
 				pos.x = rand() % WINDOW_W - 100 + 100;
 				pos.y = rand() % 2400 + 2200;
 				itemPrev = item;
 			}
+			// In this way, never there will be asteroids in the same position and can buid a procedural level 
 		}
 		
 		item->data->SetPosition({ PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y) });
 		item->data->SetAxisCM(item->data->GetPosition());
 
+		// The asteroids also move and collide with each other
 		float velX = rand() % 2;
 		float velY = rand() % 2;
 		item->data->SetVelocity({ velX,velY });

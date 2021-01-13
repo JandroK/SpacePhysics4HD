@@ -49,8 +49,9 @@ public:
 private:
 	Body* platform;
 	Body* moon;
-	List<Body*> asteroids;
+
 	int numAsteroids = 30;
+	List<Body*> asteroids;
 
 	static const int numPoints = 4;
 	fPoint pointsCollision[numPoints];

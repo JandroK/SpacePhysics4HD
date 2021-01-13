@@ -133,3 +133,133 @@ bool Collisions::IsInsidePolygons(fPoint polygon[],int n, fPoint polygon2[], int
 	// Return true if count is odd, false otherwise 
 	return false;  // Same as (count%2 == 1) 
 }
+
+void Collisions::Collision(Body* bodyA, Body* bodyB)
+{
+	// Get velocities and axis of bodies
+	fPoint velBodyA = bodyA->GetVelocity();
+	fPoint velBodyB = bodyB->GetVelocity();
+	fPoint axisBodyA = { bodyA->GetAxis().x,bodyA->GetAxis().y };
+	fPoint axisBodyB = { bodyB->GetAxis().x,bodyB->GetAxis().y };
+	float masBodyA = bodyA->GetMass();
+	float masBodyB = bodyB->GetMass();
+
+	float jointMass = 2 * masBodyB / (masBodyA + masBodyB);
+	fPoint subtractionVel = velBodyA - velBodyB;
+	fPoint subtractionAxis = axisBodyA - axisBodyB;
+	float dotProduct = subtractionVel.x * subtractionAxis.x + subtractionVel.y * subtractionAxis.y;
+	float k = jointMass * dotProduct / pow(CalculateModule(subtractionAxis), 2);
+
+	// Calculate the new velocity of Body A
+	fPoint newVelA = velBodyA - (subtractionAxis * k);
+
+	jointMass = 2 * masBodyA / (masBodyA + masBodyB);
+	subtractionVel = velBodyB - velBodyA;
+	subtractionAxis = axisBodyB - axisBodyA;
+	dotProduct = subtractionVel.x * subtractionAxis.x + subtractionVel.y * subtractionAxis.y;
+	k = jointMass * dotProduct / pow(CalculateModule(subtractionAxis), 2);
+
+	// Calculate the new velocity of Body B
+	fPoint newVelB = velBodyB - (subtractionAxis * k);
+
+	// Only if body is DYNAMIC_BODY the object will be move
+	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		bodyA->SetVelocity(newVelA);
+		// If newVelocity is smaller than 0.2 or it's bigger than 30m/s the body sleep=true
+		// Because the body is still or it has stamped  
+		float velCriticA = CalculateModule(newVelA);
+		if (velCriticA < 0.2 || velCriticA > 30)
+		{
+			bodyA->SetSleep(true);
+			bodyA->SetVelocity({ 0,0 });
+			bodyA->SetAcceleration({ 0,0 });
+		}
+	}
+	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		bodyB->SetVelocity(newVelB);
+		float velCriticB = CalculateModule(newVelB);
+		if (velCriticB < 0.2 || velCriticB > 30)
+		{
+			bodyB->SetSleep(true);
+			bodyB->SetVelocity({ 0,0 });
+			bodyB->SetAcceleration({ 0,0 });
+		}
+	}
+}
+
+void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
+{
+	// Calculate the direction of the collision between axis
+	fPoint vecDir = bodyA->GetAxis() - bodyB->GetAxis();
+	// Calculate the angle in radians about the axes of the world of the collision
+	float rad = atan2(vecDir.y, vecDir.x); 
+	float lostEnergy = 0.9;
+
+	// Only if body is DYNAMIC_BODY the object will be move
+	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		fPoint vBodyA = bodyA->GetVelocity();
+
+		// Rotate vector velocity for simulate the collision against a flat surface
+		float vXa = vBodyA.x * cos(rad) * lostEnergy;
+		float vYa = vBodyA.y * sin(rad) * -lostEnergy;
+
+		// And roatet again but in the opposite direction 
+		float vXaRotate = vXa * cos(rad + PI * 2); // PI * 2 = 180º
+		float vYaRotate = vYa * sin(rad + PI * 2);
+
+		bodyA->SetVelocity({ vXaRotate, vYaRotate });
+		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
+		if (velCriticA < 0.2 || velCriticA > 30)
+		{
+			bodyA->SetSleep(true);
+			bodyA->SetVelocity({ 0,0 });
+			bodyA->SetAcceleration({ 0,0 });
+		}
+	}
+
+	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
+	{
+		fPoint vBodyB = bodyB->GetVelocity();
+
+		float vXb = vBodyB.x * cos(rad) * lostEnergy;
+		float vYb = vBodyB.y * sin(rad) * -lostEnergy;
+
+		float vXbRotate = vXb * cos(rad + PI * 2);
+		float vYbRotate = vYb * sin(rad + PI * 2);
+
+		bodyB->SetVelocity({ vXbRotate, vYbRotate });
+		float velCriticB = CalculateModule({ vXbRotate, vYbRotate });
+		if (velCriticB < 0.2 || velCriticB > 30)
+		{
+			bodyB->SetSleep(true);
+			bodyB->SetVelocity({ 0,0 });
+			bodyB->SetAcceleration({ 0,0 });
+		}
+	}
+}
+
+void Collisions::CollisionFlatSurface(Body* bodyA)
+{
+	// Flip the direction of axis Y and reduce vector lenght 
+	fPoint bodyVelocity = bodyA->GetVelocity();
+	float lostEnergy = 0.8;
+	bodyA->SetVelocity({ bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+}
+
+float Collisions::CalculateModule(fPoint distance)
+{
+	return sqrt((distance.x * distance.x) + (distance.y * distance.y));
+}
+fPoint Collisions::NormalizeVector(fPoint distance)
+{
+	float module = CalculateModule(distance);
+	if (module == 1 || module == 0) return distance;
+
+	fPoint normalize;
+	normalize.x = distance.x / module;
+	normalize.y = distance.y / module;
+	return normalize;
+}

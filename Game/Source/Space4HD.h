@@ -1,6 +1,5 @@
 #include "List.h"
 #include "Collisions.h"
-#include "Body.h"
 
 class PhysicsEngine : public Collisions
 {
@@ -8,8 +7,6 @@ public:
 	PhysicsEngine() {};
 	~PhysicsEngine() {};
 
-	//List<Body*> asteroids;
-	//List<Body*> missiles;
 	List<Body*> bodies;
 
 	void AddBody(Body* body);
@@ -28,14 +25,9 @@ public:
 	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
 	//Remember to reset current forces/momentum of each body.
 
+	// Integrator
 	void VelocityVerletLinear(Body* body, float dt);
 	void VelocityVerletAngular(Body* body, float dt);
-	void CollisionFlatSurface(Body* bodyA);
-	void Collision(Body* bodyA, Body* bodyB);
-	void CollisionShpere(Body* bodyA, Body* bodyB);
-
-	float CalculateModule(fPoint distance);
-	fPoint NormalizeVector(fPoint distance);
 
 	// Geters
 	float GetCurrentGravity() { return gravity; };

@@ -11,6 +11,7 @@ Physics::~Physics()
 
 bool Physics::Start()
 {
+	// Definimos un nuevo mundo
 	world = new PhysicsEngine();
 	world->SetPositionAndRangePlanetA(PIXEL_TO_METERS(11081), PIXEL_TO_METERS(5650));
 	world->SetPositionAndRangePlanetB(PIXEL_TO_METERS(0), PIXEL_TO_METERS(2300));
@@ -47,8 +48,6 @@ bool Physics::CleanUp()
 
 Body* Physics::CreateBody(Body* b)
 {
-	//Body* b = new Body;
-
 	// Add the body to the list in module physics
 	bodies.Add(b);
 

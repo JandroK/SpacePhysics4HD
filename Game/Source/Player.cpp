@@ -25,6 +25,7 @@ Player::~Player()
 
 bool Player::Start() 
 {
+	// Create new ship
 	ship = new Body;
 
 	idleAnim = new Animation();
@@ -34,22 +35,20 @@ bool Player::Start()
 	turboAnim = new Animation();
 	turboAnim = new Animation();
 
-	//godMode = true;
-	//ship->SetBodyType(BodyType::STATIC_BODY);
-
+	// Ñpad textures and FX
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
-	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
-	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 	playerData.texLaserFly = app->tex->Load("Assets/Textures/laser_fly.png");
 	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
 	playerData.texTurboVelocity = app->tex->Load("Assets/Textures/particle_velocity.png");
+	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
 	float posY = 10538;
 
-	
+	// Set properties of the ship
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetMass(100);
@@ -171,7 +170,7 @@ bool Player::PreUpdate()
 
 bool Player::Update(float dt) 
 {
-
+	// Active GodMode, this mode allows to move without physics
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
 		godMode = !godMode;
@@ -181,15 +180,12 @@ bool Player::Update(float dt)
 		ship->SetVelocity({ 0,0 });
 	}
 
-
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);
-
 
 	if (!godMode)PlayerControls(dt);
 	else GodModeControls(dt);
 	CameraPlayer();
-
 
 	if (playerData.state == ATTACK && playerData.currentAnimation->HasFinished())
 	{
@@ -311,10 +307,11 @@ void Player::PlayerControls(float dt)
 	if ((app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 		&& (playerData.state == State::FLY || playerData.state == State::TURBO))
 	{
+		// The direction of the force is equal to normalized director vector
 		playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - METERS_TO_PIXELS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - METERS_TO_PIXELS(ship->GetAxis().y) };
 		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::TURBO;
-		ship->AddForces({ playerData.vecDir.x * 3000, playerData.vecDir.y * 3000 });
+		ship->AddForces({ playerData.vecDir.x * 4000, playerData.vecDir.y * 4000 });
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
@@ -325,12 +322,6 @@ void Player::PlayerControls(float dt)
 	}
 	else playerData.state = State::IDLE;
 
-	
-		// Comprobamos si las tecas est�n pulsadas al mismo tiempo
-	/*if (!(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
-		&& (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT || app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT))
-	{*/
-	//}	
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
 		ship->AddTorque(200);
@@ -340,14 +331,13 @@ void Player::PlayerControls(float dt)
 	{
 		ship->AddTorque(-200);
 	}
-
+	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (app->physics->CalculateModule(ship->GetVelocityFluid()) != 0 && ship->GetVelocityAngular() != 0 
 		&& !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
 	{
 		if(ship->GetVelocityAngular() < 0)ship->AddTorque(100);
 		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-100);
 	}
-	//MovePlayer(dt);
 }
 
 void Player::GodModeControls(float dt)
@@ -363,8 +353,6 @@ void Player::GodModeControls(float dt)
 		ship->SetPosition({ ship->GetPosition().x - velGodMode, ship->GetPosition().y });
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		ship->SetPosition({ ship->GetPosition().x + velGodMode, ship->GetPosition().y });
-
-
 }
 
 void Player::MovePlayer(float dt)
@@ -417,7 +405,6 @@ void Player::SetHit()
 		playerData.state = HIT;
 		//app->audio->PlayFx(damageFx);
 	}
-	
 }
 
 bool Player::CleanUp()
