@@ -148,16 +148,7 @@ void PhysicsEngine::Step(float dt)
 			}
 			else if (!shpere && !staticBody)
 			{
-				/*if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(),
-					item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
-				{
-					Collision(item->data, item2->data);
-				}*/
-				if (CollisionSquare(item->data,item2->data))
-				{
-					//Collision(item->data, item2->data);
-
-				}
+				CollisionSquare(item->data, item2->data);
 			}
 		}
 	}

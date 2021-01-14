@@ -34,7 +34,8 @@ public:
 
 	// Functions for resolve collisions
 	void Collision(Body* bodyA, Body* bodyB);
-	void CollisionFlatSurface(Body* bodyA);
+	void CollisionFlatSurfaceX(Body* bodyA);
+	void CollisionFlatSurfaceY(Body* bodyA);
 	void CollisionShpere(Body* bodyA, Body* bodyB);
 
 	// Functions extra

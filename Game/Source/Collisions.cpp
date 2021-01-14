@@ -145,7 +145,6 @@ bool Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 			&& point.y > bodyA->GetPointsCollisionWorld()[0].y && point.y < bodyA->GetPointsCollisionWorld()[3].y)
 		{ 
 			Descliping(bodyB, point, bodyA->GetPointsCollisionWorld());
-			CollisionFlatSurface(bodyB);
 			return true;
 		}
 	}
@@ -189,7 +188,7 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		float velCriticA = CalculateModule(newVelA);
 		if (velCriticA < 0.2 || velCriticA > 30)
 		{
-			if (!bodyB->GetIsShpere())
+			if (!bodyA->GetIsShpere())
 				bodyA->SetSleep(true);
 			bodyA->SetVelocity({ 0,0 });
 			bodyA->SetAcceleration({ 0,0 });
@@ -232,11 +231,13 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 
 		bodyA->SetVelocity({ vXaRotate, vYaRotate });
 		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
-		if (velCriticA < 0.2 || velCriticA > 30)
+		if (velCriticA < 0.2 )//|| velCriticA > 30)
 		{
-			if (!bodyB->GetIsShpere())bodyA->SetSleep(true);
-			bodyA->SetVelocity({ 0,0 });
+			if (!bodyA->GetIsShpere())bodyA->SetSleep(true);
 			bodyA->SetAcceleration({ 0,0 });
+			bodyA->SetAccelerationAngular(0);
+			//bodyA->SetVelocity({ 0,0 });
+			//bodyA->SetAcceleration({ 0,0 });
 		}
 	}
 
@@ -252,26 +253,34 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 
 		bodyB->SetVelocity({ vXbRotate, vYbRotate });
 		float velCriticB = CalculateModule({ vXbRotate, vYbRotate });
-		if (velCriticB < 0.2 || velCriticB > 30)
+		if (velCriticB < 0.2)// || velCriticB > 30)
 		{
 			if(!bodyB->GetIsShpere())bodyB->SetSleep(true);
-			bodyB->SetVelocity({ 0,0 });
 			bodyB->SetAcceleration({ 0,0 });
+			bodyB->SetAccelerationAngular(0);
+			//bodyB->SetVelocity({ 0,0 });
+			//bodyB->SetAcceleration({ 0,0 });
 		}
 	}
 }
 
-void Collisions::CollisionFlatSurface(Body* body)
+void Collisions::CollisionFlatSurfaceX(Body* body)
+{
+	// Flip the direction of axis X and reduce vector lenght 
+	fPoint bodyVelocity = body->GetVelocity();
+	float lostEnergy = 1;
+	body->SetVelocity({ bodyVelocity.x * -lostEnergy, bodyVelocity.y * lostEnergy });
+}
+
+void Collisions::CollisionFlatSurfaceY(Body* body)
 {
 	// Flip the direction of axis Y and reduce vector lenght 
 	fPoint bodyVelocity = body->GetVelocity();
 	float lostEnergy = 0.6;
-	body->SetVelocity({ bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+	body->SetVelocity({ bodyVelocity.x * lostEnergy, bodyVelocity.y * -lostEnergy });
 	float velCritic = CalculateModule(body->GetVelocity());
 	if (velCritic < 0.2 )//|| velCriticB > 30)
 	{
-		//body->SetVelocity({ 0,0 });
-		//body->SetVelocityAngular(0);
 		body->SetAcceleration({ 0,0 });
 		body->SetAccelerationAngular(0);
 		if (!body->GetIsShpere())body->SetSleep(true);
@@ -295,14 +304,38 @@ fPoint Collisions::NormalizeVector(fPoint distance)
 
 void Collisions::Descliping(Body* body, fPoint vertex, fPoint* colliders)
 {
-	if (abs(vertex.y - colliders[0].y) < abs(vertex.y - colliders[3].y))
+	float xRight = abs(vertex.x - colliders[0].x);	// Surface wall right
+	float xLeft = abs(vertex.x - colliders[1].x);	// Surface wall left
+	float yUp = abs(vertex.y - colliders[0].y);		// Surface floor
+	float yDown = abs(vertex.y - colliders[3].y);	// Surface ceiling
+
+	float distance = xRight;
+	if (distance > xLeft)distance = xLeft;
+	if (distance > yUp)distance = yUp;
+	if (distance > yDown)distance = yDown;
+
+	if (distance == yUp)
 	{
-		body->SetAxisCM({ body->GetAxis().x,body->GetAxis().y - PIXEL_TO_METERS(abs(vertex.y - colliders[0].y)) - 1 / 25 });
+		body->SetAxisCM({ body->GetAxis().x, body->GetAxis().y - PIXEL_TO_METERS(yUp) - 1 / 25 });
 		body->RotateBody();
+		CollisionFlatSurfaceY(body);
 	}
-	else if (abs(vertex.y - colliders[0].y) > abs(vertex.y - colliders[3].y))
+	else if (distance == yDown)
 	{
-		body->SetAxisCM({ body->GetAxis().x,body->GetAxis().y + PIXEL_TO_METERS(abs(vertex.y - colliders[3].y)) + 1 / 25 });
+		body->SetAxisCM({ body->GetAxis().x, body->GetAxis().y + PIXEL_TO_METERS(yDown) + 1 / 25 });
 		body->RotateBody();
+		CollisionFlatSurfaceY(body);
+	}
+	else if (distance == xLeft)
+	{
+		body->SetAxisCM({ body->GetAxis().x + PIXEL_TO_METERS(xLeft) + 1 / 25, body->GetAxis().y });
+		body->RotateBody();
+		CollisionFlatSurfaceX(body);
+	}
+	else if (distance == xRight)
+	{
+		body->SetAxisCM({ body->GetAxis().x - PIXEL_TO_METERS(xRight) - 1 / 25, body->GetAxis().y });
+		body->RotateBody();
+		CollisionFlatSurfaceX(body);
 	}
 }

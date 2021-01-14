@@ -31,6 +31,7 @@ public:
 	// Called before the first frame
 	bool Start();
 
+
 	// Called before all Updates
 	bool PreUpdate();
 
@@ -40,8 +41,11 @@ public:
 	// Called before all Updates
 	bool PostUpdate();
 
+
 	// Create Entities
+	void CreateWalls(Body* body, fPoint position, float w, float h);
 	void CreateEntity();
+	void DrawStaticBodies(Body* wallDown);
 
 	// Get and Set Win
 	int GetWin() { return win; };
@@ -53,8 +57,11 @@ public:
 private:
 	Body* platform;
 	Body* moon;
+	Body* wallLeft;
+	Body* wallRight;
+	Body* wallDown;
 
-	int numAsteroids = 30;
+	int numAsteroids = 40;
 	List<Body*> asteroids;
 
 	static const int numPoints = 4;

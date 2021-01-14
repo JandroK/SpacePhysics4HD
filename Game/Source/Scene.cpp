@@ -34,6 +34,9 @@ bool Scene::Start()
 	// Create new Bodies
 	platform = new Body;
 	moon = new Body;
+	wallLeft = new Body;
+	wallRight = new Body;
+	wallDown = new Body;
 
 	// Load textures and music
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
@@ -62,63 +65,11 @@ bool Scene::Start()
 	propulsionPlatform.laserBack->speed = 0.2;
 
 	// Set values of the bodies
-	platform->SetBodyType(BodyType::STATIC_BODY);
-	platform->SetMass(100000);
-	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
-	float w = 440;
-	float h = 150;
-	platform->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
-	fPoint axis = { WINDOW_W / 2, METERS_TO_PIXELS(platform->GetPosition().y) + h / 2 };
-
-	float width = w / 2;
-	float hight = h / 2;
-	
-	// Fill the matrix of points in clockwise
-	for (int i = 0; i < numPoints; i++)
-	{
-		if (i == 0 || i == 3)width = -abs(width);
-		else width = abs(width);
-		if (i == 0 || i == 1) hight = -abs(hight);
-		else hight = abs(hight);
-		pointsCollision[i].x = axis.x + width;
-		pointsCollision[i].y = axis.y + hight;
-	}
-	
-	platform->SetCollisions(pointsCollision, pointsCollision, numPoints);
-	platform->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS (axis.y)});
-
-	moon->SetBodyType(BodyType::STATIC_BODY);
-	moon->SetMass(100000);
-	//moon->SetIsShpere(true);
-	//moon->SetRadio(PIXEL_TO_METERS(1000));
-	//moon->SetPosition({ 0, PIXEL_TO_METERS (-400) });
-	//moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-400) });
-	moon->SetPosition({ PIXEL_TO_METERS(0), PIXEL_TO_METERS(0) });
-	w = WINDOW_W;
-	h = 414;
-	moon->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
-	axis = { WINDOW_W / 2, METERS_TO_PIXELS(moon->GetPosition().y) + h / 2 };
-
-	width = w / 2;
-	hight = h / 2;
-
-	// Fill the matrix of points in clockwise
-	for (int i = 0; i < numPoints; i++)
-	{
-		if (i == 0 || i == 3)width = -abs(width);
-		else width = abs(width);
-		if (i == 0 || i == 1) hight = -abs(hight);
-		else hight = abs(hight);
-		pointsCollision[i].x = axis.x + width;
-		pointsCollision[i].y = axis.y + hight;
-	}
-
-	moon->SetCollisions(pointsCollision, pointsCollision, numPoints);
-	moon->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS(axis.y) });
-
-	// Add bodies of the world
-	app->physics->CreateBody(platform);
-	app->physics->CreateBody(moon);
+	CreateWalls(platform, { 742, 10656 }, 440, 150);
+	CreateWalls(moon, { 0, 0 }, WINDOW_W, 414);
+	CreateWalls(wallLeft, { -150, 0 }, 150, 11081);
+	CreateWalls(wallRight, { WINDOW_W, 0 }, 150, 11081);
+	CreateWalls(wallDown, { 0, 11081 }, WINDOW_W, 150);
 	CreateEntity();
 
 	return true;
@@ -169,29 +120,11 @@ bool Scene::PostUpdate()
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
-	int x1, y1, x2, y2;
-	for (int i = 0; i < numPoints; i++)
-	{
-		x1 = platform->GetPointsCollisionWorld()[i].x;
-		y1 = platform->GetPointsCollisionWorld()[i].y;
-		if (i == 3)i = -1;
-		x2 = platform->GetPointsCollisionWorld()[i+1].x;
-		y2 = platform->GetPointsCollisionWorld()[i+1].y;
-
-		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
-		if (i == -1)break;
-	}
-	for (int i = 0; i < numPoints; i++)
-	{
-		x1 = moon->GetPointsCollisionWorld()[i].x;
-		y1 = moon->GetPointsCollisionWorld()[i].y;
-		if (i == 3)i = -1;
-		x2 = moon->GetPointsCollisionWorld()[i + 1].x;
-		y2 = moon->GetPointsCollisionWorld()[i + 1].y;
-
-		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
-		if (i == -1)break;
-	}
+	DrawStaticBodies(platform);
+	DrawStaticBodies(moon);
+	DrawStaticBodies(wallLeft);
+	DrawStaticBodies(wallDown);
+	DrawStaticBodies(wallDown);
 
 	//app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), 
 		//METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
@@ -207,6 +140,51 @@ bool Scene::PostUpdate()
 			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()), NULL, 1, item->data->GetRotation() );
 	}
 	return ret;
+}
+
+void Scene::DrawStaticBodies(Body* body)
+{
+	int x1, y1, x2, y2;
+	for (int i = 0; i < numPoints; i++)
+	{
+		x1 = body->GetPointsCollisionWorld()[i].x;
+		y1 = body->GetPointsCollisionWorld()[i].y;
+		if (i == 3)i = -1;
+		x2 = body->GetPointsCollisionWorld()[i + 1].x;
+		y2 = body->GetPointsCollisionWorld()[i + 1].y;
+
+		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+		if (i == -1)break;
+	}
+}
+
+void Scene::CreateWalls(Body* body, fPoint position, float w, float h)
+{
+	body->SetBodyType(BodyType::STATIC_BODY);
+	body->SetMass(100000);
+	body->SetPosition({ PIXEL_TO_METERS(position.x), PIXEL_TO_METERS(position.y) });
+	body->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
+	fPoint axis = { METERS_TO_PIXELS(body->GetPosition().x) + w / 2, METERS_TO_PIXELS(body->GetPosition().y) + h / 2 };
+
+	float width = w / 2;
+	float hight = h / 2;
+
+	// Fill the matrix of points in clockwise
+	for (int i = 0; i < numPoints; i++)
+	{
+		if (i == 0 || i == 3)width = -abs(width);
+		else width = abs(width);
+		if (i == 0 || i == 1) hight = -abs(hight);
+		else hight = abs(hight);
+		pointsCollision[i].x = axis.x + width;
+		pointsCollision[i].y = axis.y + hight;
+	}
+
+	body->SetCollisions(pointsCollision, pointsCollision, numPoints);
+	body->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS(axis.y) });
+
+	// Add body of the world
+	app->physics->CreateBody(body);
 }
 
 void Scene::CreateEntity()
@@ -231,17 +209,17 @@ void Scene::CreateEntity()
 
 		// Randomize position of spawn
 		pos.x = rand() % WINDOW_W - 100 + 100;
-		pos.y = rand() % 2400 + 2300;
+		pos.y = rand() % 3500 + 2000;
 		// But this position must be different to the rest asteroids
 		for (itemPrev = item; itemPrev != NULL; itemPrev = itemPrev->prev)
 		{
 			posM = { itemPrev->data->GetAxis().x - PIXEL_TO_METERS(pos.x), itemPrev->data->GetAxis().y - PIXEL_TO_METERS(pos.y) };
 			distanceBetweenAxis = app->physics->CalculateModule(posM);
 			// If this asteroid is collision with other calculate again the position of the new asteroid
-			if (itemPrev->data->GetRadio() + item->data->GetRadio() > distanceBetweenAxis)
+			if (itemPrev->data->GetRadio() + item->data->GetRadio() > distanceBetweenAxis - 1)
 			{
 				pos.x = rand() % WINDOW_W - 100 + 100;
-				pos.y = rand() % 2400 + 2200;
+				pos.y = rand() % 3500 + 2000;
 				itemPrev = item;
 			}
 			// In this way, never there will be asteroids in the same position and can buid a procedural level 
@@ -251,9 +229,9 @@ void Scene::CreateEntity()
 		item->data->SetAxisCM(item->data->GetPosition());
 
 		// The asteroids also move and collide with each other
-		float velX = rand() % 2;
-		float velY = rand() % 2;
-		item->data->SetVelocity({ velX,velY });
+		float velX = rand() % 4 - 2;
+		//float velY = rand() % 2;
+		//item->data->SetVelocity({ velX,velY });
 		if (velX < 0) item->data->AddTorque(-60);
 		if (velX > 0) item->data->AddTorque(60);
 		item->data->SetCoeficientDrag(0.47);
@@ -282,6 +260,9 @@ bool Scene::CleanUp()
 
 	delete platform;
 	delete moon;
+	delete wallLeft;
+	delete wallRight;
+	delete wallDown;
 	asteroids.Clear();
 
 	return true;
