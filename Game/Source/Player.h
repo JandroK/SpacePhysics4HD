@@ -59,6 +59,8 @@ public:
 
 	bool Update(float dt);
 
+	void CheckWin();
+
 	bool PostUpdate();
 
 	bool CheckGameOver(int level);

@@ -195,14 +195,7 @@ bool Player::Update(float dt)
 	}*/
 
 	// Condition Win
-	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
-		&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
-	{
-		if (METERS_TO_PIXELS(ship->GetPosition().y) > 350 && METERS_TO_PIXELS(ship->GetPosition().y) < 400 && app->scene->GetWin() !=1)
-			app->scene->SetWin(1);
-		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400 && app->scene->GetWin() !=0 && app->scene->GetWin() != 2)
-			app->scene->SetWin(2);
-	}
+	CheckWin();
 	return true;
 }
 
@@ -417,6 +410,17 @@ bool Player::CheckGameOver(int level)
 	}
 		
 	return false;
+}
+void Player::CheckWin()
+{
+	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
+		&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
+	{
+		if (METERS_TO_PIXELS(ship->GetPosition().y) > 350 && METERS_TO_PIXELS(ship->GetPosition().y) < 400 && app->scene->GetWin() != 1)
+			app->scene->SetWin(1);
+		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400 && app->scene->GetWin() != 0 && app->scene->GetWin() != 2)
+			app->scene->SetWin(2);
+	}
 }
 
 void Player::SetHit()
