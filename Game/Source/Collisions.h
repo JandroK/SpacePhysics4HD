@@ -40,6 +40,7 @@ public:
 	// Functions extra
 	float CalculateModule(fPoint distance);
 	fPoint NormalizeVector(fPoint distance);
+	void Descliping(Body* body, fPoint vertex, fPoint* colliders);
 };
 
 #endif // __COLLISIONS_H__

@@ -199,7 +199,7 @@ bool Player::PostUpdate()
 {
 	PlayerMoveAnimation();
 
-	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetPosition().x), METERS_TO_PIXELS(ship->GetPosition().y) };
+	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetAxis().x) - playerData.rectPlayer.w/2, METERS_TO_PIXELS(ship->GetAxis().y) - playerData.rectPlayer.h / 2 };
 	// Draw player 
 	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer, 1, ship->GetRotation());
 	SDL_Rect rectPlayer;
@@ -327,19 +327,25 @@ void Player::PlayerControls(float dt)
 
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		ship->AddTorque(200);
+		ship->AddTorque(350);
 	}
 
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		ship->AddTorque(-200);
+		ship->AddTorque(-350);
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
-	if (app->physics->CalculateModule(ship->GetVelocityFluid()) != 0 && ship->GetVelocityAngular() != 0 
-		&& !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
+	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
 	{
-		if(ship->GetVelocityAngular() < 0)ship->AddTorque(100);
-		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-100);
+		// Add Torque in wrong way 
+		if(ship->GetVelocityAngular() < 0)ship->AddTorque(200);
+		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-200);
+
+		// Add Torque for stabilize the ship, this system help player to land 
+		if(ship->GetPointsCollisionWorld()[2].y > ship->GetPointsCollisionWorld()[1].y)
+			ship->AddTorque(300*ship->GetOrientationGravity());
+		if (ship->GetPointsCollisionWorld()[2].y < ship->GetPointsCollisionWorld()[1].y)
+			ship->AddTorque(-300 * ship->GetOrientationGravity());
 	}
 }
 

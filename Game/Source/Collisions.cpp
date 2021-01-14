@@ -143,20 +143,12 @@ bool Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 		point = bodyB->GetPointsCollisionWorld()[i];
 		if (point.x > bodyA->GetPointsCollisionWorld()[0].x && point.x < bodyA->GetPointsCollisionWorld()[1].x
 			&& point.y > bodyA->GetPointsCollisionWorld()[0].y && point.y < bodyA->GetPointsCollisionWorld()[3].y)
-		{
+		{ 
+			Descliping(bodyB, point, bodyA->GetPointsCollisionWorld());
+			CollisionFlatSurface(bodyB);
 			return true;
 		}
 	}
-	for (int i = 0; i < bodyA->GetNumPoints(); i++)
-	{
-		point = bodyA->GetPointsCollisionWorld()[i];
-		if (point.x > bodyB->GetPointsCollisionWorld()[0].x&& point.x < bodyB->GetPointsCollisionWorld()[1].x
-			&& point.y > bodyB->GetPointsCollisionWorld()[0].y&& point.y < bodyB->GetPointsCollisionWorld()[3].y)
-		{
-			return true;
-		}
-	}
-
 	return ret;
 }
 
@@ -199,8 +191,8 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		{
 			if (!bodyB->GetIsShpere())
 				bodyA->SetSleep(true);
-			//bodyA->SetVelocity({ 0,0 });
-			//bodyA->SetAcceleration({ 0,0 });
+			bodyA->SetVelocity({ 0,0 });
+			bodyA->SetAcceleration({ 0,0 });
 		}
 	}
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
@@ -211,8 +203,8 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		{
 			if (!bodyB->GetIsShpere())
 				bodyB->SetSleep(true);
-			//bodyB->SetVelocity({ 0,0 });
-			//bodyB->SetAcceleration({ 0,0 });
+			bodyB->SetVelocity({ 0,0 });
+			bodyB->SetAcceleration({ 0,0 });
 		}
 	}
 }
@@ -269,12 +261,21 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 	}
 }
 
-void Collisions::CollisionFlatSurface(Body* bodyA)
+void Collisions::CollisionFlatSurface(Body* body)
 {
 	// Flip the direction of axis Y and reduce vector lenght 
-	fPoint bodyVelocity = bodyA->GetVelocity();
-	float lostEnergy = 0.8;
-	bodyA->SetVelocity({ bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+	fPoint bodyVelocity = body->GetVelocity();
+	float lostEnergy = 0.6;
+	body->SetVelocity({ bodyVelocity.x * lostEnergy, -bodyVelocity.y * lostEnergy });
+	float velCritic = CalculateModule(body->GetVelocity());
+	if (velCritic < 0.2 )//|| velCriticB > 30)
+	{
+		//body->SetVelocity({ 0,0 });
+		//body->SetVelocityAngular(0);
+		body->SetAcceleration({ 0,0 });
+		body->SetAccelerationAngular(0);
+		if (!body->GetIsShpere())body->SetSleep(true);
+	}
 }
 
 float Collisions::CalculateModule(fPoint distance)
@@ -290,4 +291,18 @@ fPoint Collisions::NormalizeVector(fPoint distance)
 	normalize.x = distance.x / module;
 	normalize.y = distance.y / module;
 	return normalize;
+}
+
+void Collisions::Descliping(Body* body, fPoint vertex, fPoint* colliders)
+{
+	if (abs(vertex.y - colliders[0].y) < abs(vertex.y - colliders[3].y))
+	{
+		body->SetAxisCM({ body->GetAxis().x,body->GetAxis().y - PIXEL_TO_METERS(abs(vertex.y - colliders[0].y)) - 1 / 25 });
+		body->RotateBody();
+	}
+	else if (abs(vertex.y - colliders[0].y) > abs(vertex.y - colliders[3].y))
+	{
+		body->SetAxisCM({ body->GetAxis().x,body->GetAxis().y + PIXEL_TO_METERS(abs(vertex.y - colliders[3].y)) + 1 / 25 });
+		body->RotateBody();
+	}
 }

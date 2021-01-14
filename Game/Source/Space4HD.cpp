@@ -66,16 +66,23 @@ void PhysicsEngine::Step(float dt)
 			Body* p = item->data;
 			fPoint fGrav = ForceGrav(p->GetMass(), p->GetPosition().y);
 			item->data->AddForces(fGrav);
+			if (fGrav.y > 0) item->data->SetOrientationGravity(1);
+			else if (fGrav.y < 0) item->data->SetOrientationGravity(-1);
+			else item->data->SetOrientationGravity(0);
+			// If there isn't gravity neither there is wind, but if body get in the surface of the earth the wind is restored
+			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({ 0,0 });
+			else if (fGrav.y > 0) p->SetVelocityFluid({ 0,8 });
 
-			// If there isn't gravity neither there is wind
-			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({0,0});
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
+			
+			// Add ineria to asteroids
 			if (item->data->GetVelocity().x < 0 && item->data->GetIsShpere()) item->data->AddTorque(-10);
 			if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
 		}
 		// If body receives an external force thge body is awake
 		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);
+		if (item->data->GetTorque() != 0)item->data->SetSleep(false);
 	}
 
 	for (item = bodies.start; item !=NULL; item=item->next)
@@ -148,7 +155,8 @@ void PhysicsEngine::Step(float dt)
 				}*/
 				if (CollisionSquare(item->data,item2->data))
 				{
-					Collision(item->data, item2->data);
+					//Collision(item->data, item2->data);
+
 				}
 			}
 		}
