@@ -43,6 +43,10 @@ public:
 	// Create Entities
 	void CreateEntity();
 
+	// Get and Set Win
+	int GetWin() { return win; };
+	void SetWin(int _win) { win = _win; };
+
 	// Called before quitting
 	bool CleanUp();
 
@@ -65,6 +69,8 @@ private:
 
 	AnimationPlatform propulsionPlatform;
 	Animation* idleAnim = new Animation();
+
+	int win = 0;
 };
 
 #endif // __SCENE_H__

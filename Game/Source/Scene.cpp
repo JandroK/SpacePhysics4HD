@@ -231,7 +231,7 @@ void Scene::CreateEntity()
 
 		// Randomize position of spawn
 		pos.x = rand() % WINDOW_W - 100 + 100;
-		pos.y = rand() % 2600 + 2200;
+		pos.y = rand() % 2400 + 2300;
 		// But this position must be different to the rest asteroids
 		for (itemPrev = item; itemPrev != NULL; itemPrev = itemPrev->prev)
 		{

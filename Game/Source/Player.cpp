@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "App.h"
 #include "Physics.h"
+#include "Scene.h"
 
 #include "Log.h"
 #include "Defs.h"
@@ -187,10 +188,20 @@ bool Player::Update(float dt)
 	else GodModeControls(dt);
 	CameraPlayer();
 
-	if (playerData.state == ATTACK && playerData.currentAnimation->HasFinished())
+	/*if (playerData.state == ATTACK && playerData.currentAnimation->HasFinished())
 	{
 		playerData.state = IDLE;
 		atakAnim->Reset();
+	}*/
+
+	// Condition Win
+	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
+		&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
+	{
+		if (METERS_TO_PIXELS(ship->GetPosition().y) > 350 && METERS_TO_PIXELS(ship->GetPosition().y) < 400 && app->scene->GetWin() !=1)
+			app->scene->SetWin(1);
+		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400 && app->scene->GetWin() !=0 && app->scene->GetWin() != 2)
+			app->scene->SetWin(2);
 	}
 	return true;
 }
@@ -335,17 +346,19 @@ void Player::PlayerControls(float dt)
 		ship->AddTorque(-350);
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
-	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
+	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
+		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN )
 	{
 		// Add Torque in wrong way 
 		if(ship->GetVelocityAngular() < 0)ship->AddTorque(200);
 		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-200);
 
-		// Add Torque for stabilize the ship, this system help player to land 
-		if(ship->GetPointsCollisionWorld()[2].y > ship->GetPointsCollisionWorld()[1].y)
-			ship->AddTorque(300*ship->GetOrientationGravity());
-		if (ship->GetPointsCollisionWorld()[2].y < ship->GetPointsCollisionWorld()[1].y)
+		// Add Torque for stabilize the ship, this system help player to land
+		if (ship->GetPointsCollisionWorld()[2].y > ship->GetPointsCollisionWorld()[1].y)
+			ship->AddTorque(300 * ship->GetOrientationGravity());
+		else if (ship->GetPointsCollisionWorld()[2].y < ship->GetPointsCollisionWorld()[1].y)
 			ship->AddTorque(-300 * ship->GetOrientationGravity());
+		
 	}
 }
 
