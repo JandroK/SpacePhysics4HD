@@ -30,6 +30,7 @@ public:
 	// Devuelve true si el punto p está dentro del polygono
 	bool IsInside(fPoint polygon[], int n, fPoint p);
 	bool IsInsidePolygons(fPoint polygon[], int n, fPoint polygon2[], int n2);
+	bool CollisionSquare(Body* bodyA, Body* bodyB);
 
 	// Functions for resolve collisions
 	void Collision(Body* bodyA, Body* bodyB);

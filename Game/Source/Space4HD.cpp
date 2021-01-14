@@ -129,18 +129,27 @@ void PhysicsEngine::Step(float dt)
 			if (ret == false) break;
 			float distanceBetweenAxis = CalculateModule(item->data->GetAxis() - item2->data->GetAxis());
 			bool shpere = false;
-
+			bool staticBody = false;
 			// If one of thw two is circular the collisions are checked using their radius
 			// Else the collisions are checked using their matrix of points
 			if (item->data->GetIsShpere() || item2->data->GetIsShpere()) shpere = true;
+			// No ckeck collison if two bodies are static Body
+			if (item->data->GetType()==BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
 			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && shpere)
 			{
 				Collision(item->data, item2->data);
 			}
-			else if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(),
-				item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()) && !shpere)
+			else if (!shpere && !staticBody)
 			{
-				Collision(item->data, item2->data);
+				/*if (IsInsidePolygons(item->data->GetPointsCollisionWorld(), item->data->GetNumPoints(),
+					item2->data->GetPointsCollisionWorld(), item2->data->GetNumPoints()))
+				{
+					Collision(item->data, item2->data);
+				}*/
+				if (CollisionSquare(item->data,item2->data))
+				{
+					Collision(item->data, item2->data);
+				}
 			}
 		}
 	}

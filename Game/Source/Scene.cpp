@@ -63,7 +63,7 @@ bool Scene::Start()
 
 	// Set values of the bodies
 	platform->SetBodyType(BodyType::STATIC_BODY);
-	platform->SetMass(1000);
+	platform->SetMass(100000);
 	platform->SetPosition({ PIXEL_TO_METERS(742), PIXEL_TO_METERS(10656) });
 	float w = 440;
 	float h = 150;
@@ -88,11 +88,33 @@ bool Scene::Start()
 	platform->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS (axis.y)});
 
 	moon->SetBodyType(BodyType::STATIC_BODY);
-	moon->SetMass(1000);
-	moon->SetIsShpere(true);
-	moon->SetRadio(PIXEL_TO_METERS(1000));
-	moon->SetPosition({ 0, PIXEL_TO_METERS (-450) });
-	moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-450) });
+	moon->SetMass(100000);
+	//moon->SetIsShpere(true);
+	//moon->SetRadio(PIXEL_TO_METERS(1000));
+	//moon->SetPosition({ 0, PIXEL_TO_METERS (-400) });
+	//moon->SetAxisCM({ PIXEL_TO_METERS(WINDOW_W/2) , PIXEL_TO_METERS(-400) });
+	moon->SetPosition({ PIXEL_TO_METERS(0), PIXEL_TO_METERS(0) });
+	w = WINDOW_W;
+	h = 414;
+	moon->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
+	axis = { WINDOW_W / 2, METERS_TO_PIXELS(moon->GetPosition().y) + h / 2 };
+
+	width = w / 2;
+	hight = h / 2;
+
+	// Fill the matrix of points in clockwise
+	for (int i = 0; i < numPoints; i++)
+	{
+		if (i == 0 || i == 3)width = -abs(width);
+		else width = abs(width);
+		if (i == 0 || i == 1) hight = -abs(hight);
+		else hight = abs(hight);
+		pointsCollision[i].x = axis.x + width;
+		pointsCollision[i].y = axis.y + hight;
+	}
+
+	moon->SetCollisions(pointsCollision, pointsCollision, numPoints);
+	moon->SetAxisCM({ PIXEL_TO_METERS(axis.x) , PIXEL_TO_METERS(axis.y) });
 
 	// Add bodies of the world
 	app->physics->CreateBody(platform);
@@ -147,22 +169,32 @@ bool Scene::PostUpdate()
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
-	int x1 = platform->GetPointsCollisionWorld()[0].x;
-	int y1 = platform->GetPointsCollisionWorld()[0].y;
-	int x2 = platform->GetPointsCollisionWorld()[1].x;
-	int y2 = platform->GetPointsCollisionWorld()[1].y;
-	int x3 = platform->GetPointsCollisionWorld()[2].x;
-	int y3 = platform->GetPointsCollisionWorld()[2].y;
-	int x4 = platform->GetPointsCollisionWorld()[3].x;
-	int y4 = platform->GetPointsCollisionWorld()[3].y;
+	int x1, y1, x2, y2;
+	for (int i = 0; i < numPoints; i++)
+	{
+		x1 = platform->GetPointsCollisionWorld()[i].x;
+		y1 = platform->GetPointsCollisionWorld()[i].y;
+		if (i == 3)i = -1;
+		x2 = platform->GetPointsCollisionWorld()[i+1].x;
+		y2 = platform->GetPointsCollisionWorld()[i+1].y;
 
-	app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
-	app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
-	app->render->DrawLine(x3, y3, x4, y4, 255, 0, 0);
-	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+		if (i == -1)break;
+	}
+	for (int i = 0; i < numPoints; i++)
+	{
+		x1 = moon->GetPointsCollisionWorld()[i].x;
+		y1 = moon->GetPointsCollisionWorld()[i].y;
+		if (i == 3)i = -1;
+		x2 = moon->GetPointsCollisionWorld()[i + 1].x;
+		y2 = moon->GetPointsCollisionWorld()[i + 1].y;
 
-	app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), 
-		METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
+		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+		if (i == -1)break;
+	}
+
+	//app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), 
+		//METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
 	
 	ListItem<Body*>* item;
 	// Draw all asteroids
@@ -192,7 +224,7 @@ void Scene::CreateEntity()
 	for (int i = 0; i < numAsteroids; item = item->next, i++)
 	{
 		// Randomize the massa of bodies for everyone is different
-		int m = rand() % 50 + 50;
+		int m = rand() % 100 + 200;
 		item->data->SetMass(m);
 		item->data->SetIsShpere(true);
 		item->data->SetRadio(PIXEL_TO_METERS(50));
@@ -224,6 +256,8 @@ void Scene::CreateEntity()
 		item->data->SetVelocity({ velX,velY });
 		if (velX < 0) item->data->AddTorque(-60);
 		if (velX > 0) item->data->AddTorque(60);
+		item->data->SetCoeficientDrag(0.47);
+		item->data->SetSurface(2);
 
 		app->physics->CreateBody(item->data);
 		Body* b = new Body;

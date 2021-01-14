@@ -23,7 +23,7 @@ struct PlayerData
 	State state;
 
 	Animation* currentAnimation;
-	uint lives = 0;
+	uint lives = 5;
 	uint respawns = 0;
 	uint fuel = 0;
 	uint *stateShoot = 0;
