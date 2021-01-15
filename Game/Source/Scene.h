@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "Animation.h"
 #include "Physics.h"
+#include "SceneControl.h"
 
 struct SDL_Texture;
 
@@ -16,7 +17,7 @@ struct AnimationPlatform
 	SDL_Texture* textureLaser;
 };
 
-class Scene : public Module
+class Scene : public SceneControl
 {
 public:
 
@@ -56,6 +57,7 @@ public:
 
 private:
 	Body* platform;
+	Body* platformMoon;
 	Body* moon;
 	Body* wallLeft;
 	Body* wallRight;
@@ -71,6 +73,7 @@ private:
 	SDL_Texture* imgBgEarth;
 	
 	SDL_Texture* imgClouds;
+	SDL_Texture* imgPlatformMoon;
 	SDL_Texture* imgAsteroids;
 	SDL_Rect rectPlatform;
 

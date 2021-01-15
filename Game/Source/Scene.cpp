@@ -10,7 +10,7 @@
 #include "Defs.h"
 #include "Log.h"
 
-Scene::Scene() : Module()
+Scene::Scene() : SceneControl()
 {
 	name.Create("scene");
 }
@@ -33,6 +33,7 @@ bool Scene::Start()
 {
 	// Create new Bodies
 	platform = new Body;
+	platformMoon = new Body;
 	moon = new Body;
 	wallLeft = new Body;
 	wallRight = new Body;
@@ -41,11 +42,12 @@ bool Scene::Start()
 	// Load textures and music
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
+	imgPlatformMoon = app->tex->Load("Assets/Textures/platformMoon.png");
 	imgClouds = app->tex->Load("Assets/Textures/clouds.png");
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroid.png");
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
-	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
+	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
 
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10572 };
@@ -66,11 +68,15 @@ bool Scene::Start()
 
 	// Set values of the bodies
 	CreateWalls(platform, { 742, 10656 }, 440, 150);
+	CreateWalls(platformMoon, { WINDOW_W/2-(390/2), 415 }, 390, 190);
 	CreateWalls(moon, { 0, 0 }, WINDOW_W, 414);
 	CreateWalls(wallLeft, { -150, 0 }, 150, 11081);
 	CreateWalls(wallRight, { WINDOW_W, 0 }, 150, 11081);
 	CreateWalls(wallDown, { 0, 11081 }, WINDOW_W, 150);
 	CreateEntity();
+
+	app->player->Init();
+	app->player->Start();
 
 	return true;
 }
@@ -100,9 +106,6 @@ bool Scene::PostUpdate()
 {
 	bool ret = true;
 
-	if(app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN)
-		ret = false;
-
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
 	/*SDL_Rect rectPlatform = {METERS_TO_PIXELS(platform->GetPosition().x),METERS_TO_PIXELS(platform->GetPosition().y),
@@ -110,7 +113,7 @@ bool Scene::PostUpdate()
 
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
-
+	app->render->DrawTexture(imgPlatformMoon, 647, 390);
 
 	app->player->PostUpdate();
 	app->render->DrawTexture(imgClouds, 0,6620);
@@ -121,6 +124,7 @@ bool Scene::PostUpdate()
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
 	DrawStaticBodies(platform);
+	DrawStaticBodies(platformMoon);
 	DrawStaticBodies(moon);
 	DrawStaticBodies(wallLeft);
 	DrawStaticBodies(wallDown);
@@ -249,6 +253,7 @@ bool Scene::CleanUp()
 	LOG("Freeing scene");
 	app->tex->UnLoad(imgBgSpace);
 	app->tex->UnLoad(imgBgEarth);
+	app->tex->UnLoad(imgPlatformMoon);
 	app->tex->UnLoad(imgClouds);
 	app->tex->UnLoad(imgAsteroids);
 	app->tex->UnLoad(propulsionPlatform.texture);
@@ -259,6 +264,7 @@ bool Scene::CleanUp()
 	delete propulsionPlatform.laserFront;
 
 	delete platform;
+	delete platformMoon;
 	delete moon;
 	delete wallLeft;
 	delete wallRight;

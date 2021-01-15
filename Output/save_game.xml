@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <save_state>
-  <input />
-  <window />
-  <textures />
-  <audio />
-  <scene />
-  <renderer>
-    <camera x="0" y="-675" />
-  </renderer>
-  <player>
-    <position x="432" y="1170" />
-    <fuel count="0" />
-    <lives num_respawns="3" />
-  </player>
+	<input />
+	<window />
+	<textures />
+	<audio />
+	<scene />
+	<renderer>
+		<camera x="0" y="0" />
+	</renderer>
+	<player>
+		<position x="0" y="0" />
+		<fuel count="0" />
+		<lives num_respawns="3" />
+	</player>
 </save_state>

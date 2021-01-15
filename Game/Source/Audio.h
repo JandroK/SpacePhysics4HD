@@ -4,6 +4,7 @@
 #include "Module.h"
 
 #define DEFAULT_MUSIC_FADE_TIME 2.0f
+#define MAX_FX 200
 
 struct _Mix_Music;
 struct Mix_Chunk;
@@ -29,14 +30,18 @@ public:
 	// Load a WAV in memory
 	unsigned int LoadFx(const char* path);
 	bool Unload1Fx(int index);
+	bool UnloadFxs();
 
 	// Play a previously loaded WAV
-	bool PlayFx(unsigned int fx, int repeat = 0);
+	bool PlayFx(unsigned int fx, int volume = 0);
 
 private:
 
 	_Mix_Music* music;
-	List<Mix_Chunk *>	fx;
+	Mix_Chunk* fx[MAX_FX] = { nullptr };
+
+	uint volumeMusic = 0;
+	uint volumeFx = 0;
 };
 
 #endif // __AUDIO_H__

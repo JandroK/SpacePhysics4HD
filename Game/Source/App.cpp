@@ -5,7 +5,7 @@
 #include "Textures.h"
 #include "Physics.h"
 #include "Audio.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "Player.h"
 
 #include "Defs.h"
@@ -25,7 +25,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	tex = new Textures();
 	physics = new Physics();
 	audio = new Audio();
-	scene = new Scene();
+	sceneManager = new SceneManager(input, render, tex);
 	player = new Player();
 
 	// Ordered for awake / Start / Update
@@ -35,11 +35,13 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(tex);
 	AddModule(physics);
 	AddModule(audio);
-	AddModule(scene);
+	AddModule(sceneManager);
 	AddModule(player);
 
 	// Render last to swap buffer
 	AddModule(render);
+
+	player->active = false;
 }
 
 // Destructor

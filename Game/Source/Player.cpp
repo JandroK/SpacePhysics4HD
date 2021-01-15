@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "App.h"
 #include "Physics.h"
+#include "SceneManager.h"
 #include "Scene.h"
 
 #include "Log.h"
@@ -26,6 +27,7 @@ Player::~Player()
 
 bool Player::Start() 
 {
+	active = true;
 	// Create new ship
 	ship = new Body;
 
@@ -257,8 +259,6 @@ bool Player::PostUpdate()
 
 	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
 
-	
-
 	return true;
 }
 
@@ -275,6 +275,8 @@ void Player::SpeedAnimationCheck(float dt)
 void Player::CameraPlayer()
 {
 	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
+	if (app->render->camera.y > 0) app->render->camera.y = 0;
+	if (app->render->camera.y < -11081+ WINDOW_H) app->render->camera.y = -11081 + WINDOW_H;
 }
 
 void Player::PlayerMoveAnimation()
@@ -331,25 +333,27 @@ void Player::PlayerControls(float dt)
 
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		ship->AddTorque(350);
+		ship->AddTorque(400);
 	}
 
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		ship->AddTorque(-350);
+		ship->AddTorque(-400);
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
 		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN )
 	{
 		// Add Torque in wrong way 
-		if(ship->GetVelocityAngular() < 0)ship->AddTorque(200);
-		if(ship->GetVelocityAngular() > 0)ship->AddTorque(-200);
+		if(ship->GetVelocityAngular() < 0)
+			ship->AddTorque(200);
+		if(ship->GetVelocityAngular() > 0)
+			ship->AddTorque(-200);
 
 		// Add Torque for stabilize the ship, this system help player to land
-		if (ship->GetPointsCollisionWorld()[2].y > ship->GetPointsCollisionWorld()[1].y)
+		if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y > 0.1f)
 			ship->AddTorque(300 * ship->GetOrientationGravity());
-		else if (ship->GetPointsCollisionWorld()[2].y < ship->GetPointsCollisionWorld()[1].y)
+		else if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y < -0.1f)
 			ship->AddTorque(-300 * ship->GetOrientationGravity());
 		
 	}
@@ -416,10 +420,17 @@ void Player::CheckWin()
 	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
 		&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
 	{
-		if (METERS_TO_PIXELS(ship->GetPosition().y) > 350 && METERS_TO_PIXELS(ship->GetPosition().y) < 400 && app->scene->GetWin() != 1)
-			app->scene->SetWin(1);
-		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400 && app->scene->GetWin() != 0 && app->scene->GetWin() != 2)
-			app->scene->SetWin(2);
+		if (METERS_TO_PIXELS(ship->GetPosition().y) > 560 && METERS_TO_PIXELS(ship->GetPosition().y) < 580
+			&& app->sceneManager->scene->GetWin() != 1)
+		{
+			app->sceneManager->scene->SetWin(1);
+		}
+			
+		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400
+			&& app->sceneManager->scene->GetWin() != 0 && app->sceneManager->scene->GetWin() != 2)
+		{
+			app->sceneManager->scene->SetWin(2);
+		}	
 	}
 }
 

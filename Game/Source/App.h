@@ -18,7 +18,7 @@ class Render;
 class Textures;
 class Physics;
 class Audio;
-class Scene;
+class SceneManager;
 class Player;
 
 class App
@@ -101,7 +101,7 @@ public:
 	Textures* tex;
 	Physics* physics;
 	Audio* audio;
-	Scene* scene;
+	SceneManager* sceneManager;
 	Player* player;
 	//ModuleFonts* fonts;
 
