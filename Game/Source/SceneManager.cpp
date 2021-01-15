@@ -3,8 +3,8 @@
 #include "SceneLogo.h"
 #include "SceneIntro.h"
 #include "Scene.h"
+#include "SceneWin.h"
 //#include "SceneLose.h"
-//#include "SceneWin.h"
 
 #include "Input.h"
 #include "Render.h"
@@ -26,13 +26,13 @@ SceneManager::SceneManager(Input* input, Render* render, Textures* tex) : Module
 	sceneLogo = new SceneLogo();
 	sceneIntro = new SceneIntro();
 	scene = new Scene();
-	//sceneWin = new SceneWin();
+	sceneWin = new SceneWin();
 	//sceneLose = new SceneLose();
 
 	AddScene(sceneLogo, false);
 	AddScene(sceneIntro, false);
 	AddScene(scene, false);
-	//AddScene(sceneWin, false);
+	AddScene(sceneWin, false);
 	//AddScene(sceneLose, false);
 
 	onTransition = false;
@@ -139,7 +139,7 @@ bool SceneManager::Update(float dt)
 		case SceneType::LOGO: next = new SceneLogo(); break;
 		case SceneType::INTRO: next = new SceneIntro(); break;
 		case SceneType::LEVEL1: next = new Scene(); break;
-		//case SceneType::WIN: next = new SceneWin(); break;
+		case SceneType::WIN: next = new SceneWin(); break;
 		//case SceneType::LOSE: next = new SceneLose(); break;
 		default: break;
 		}

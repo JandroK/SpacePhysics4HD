@@ -12,6 +12,7 @@
 
 Scene::Scene() : SceneControl()
 {
+	active = true;
 	name.Create("scene");
 }
 
@@ -31,6 +32,10 @@ bool Scene::Awake()
 // Called before the first frame
 bool Scene::Start()
 {
+	// Active Motor Engine
+	app->physics->Init();
+	app->physics->Start();
+
 	// Create new Bodies
 	platform = new Body;
 	platformMoon = new Body;
@@ -38,6 +43,10 @@ bool Scene::Start()
 	wallLeft = new Body;
 	wallRight = new Body;
 	wallDown = new Body;
+
+	idleAnim = new Animation();
+	propulsionPlatform.laserFront = new Animation();
+	propulsionPlatform.laserBack = new Animation();
 
 	// Load textures and music
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
@@ -98,6 +107,11 @@ bool Scene::Update(float dt)
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
 
+	if (app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN )
+	{
+		TransitionToScene(SceneType::WIN);
+	}
+
 	return true;
 }
 
@@ -123,22 +137,19 @@ bool Scene::PostUpdate()
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10760, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10798, &rect2,1,-22);
 
-	DrawStaticBodies(platform);
+	/*DrawStaticBodies(platform);
 	DrawStaticBodies(platformMoon);
 	DrawStaticBodies(moon);
 	DrawStaticBodies(wallLeft);
 	DrawStaticBodies(wallDown);
-	DrawStaticBodies(wallDown);
-
-	//app->render->DrawCircle2(METERS_TO_PIXELS(moon->GetAxis().x), 
-		//METERS_TO_PIXELS(moon->GetAxis().y), METERS_TO_PIXELS(moon->GetRadio()));
+	DrawStaticBodies(wallDown);*/
 	
 	ListItem<Body*>* item;
 	// Draw all asteroids
 	for (item = asteroids.start; item != NULL; item = item->next)
 	{
-		app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x), 
-			METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
+		//app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x), 
+			//METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
 
 		app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->GetAxis().x) - METERS_TO_PIXELS(item->data->GetRadio()),
 			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()), NULL, 1, item->data->GetRotation() );
@@ -250,6 +261,9 @@ void Scene::CreateEntity()
 // Called before quitting
 bool Scene::CleanUp()
 {
+	if (!active)
+		return true;
+
 	LOG("Freeing scene");
 	app->tex->UnLoad(imgBgSpace);
 	app->tex->UnLoad(imgBgEarth);
@@ -263,13 +277,18 @@ bool Scene::CleanUp()
 	delete propulsionPlatform.laserBack;
 	delete propulsionPlatform.laserFront;
 
-	delete platform;
+	/*delete platform;
 	delete platformMoon;
 	delete moon;
 	delete wallLeft;
 	delete wallRight;
-	delete wallDown;
+	delete wallDown;*/
 	asteroids.Clear();
+
+	app->player->CleanUp();
+	app->physics->CleanUp();
+
+	active = false;
 
 	return true;
 }

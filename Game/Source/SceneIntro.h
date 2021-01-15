@@ -48,7 +48,7 @@ private:
 
 	SDL_Texture* bgIntro;
 	SDL_Texture* bgText;
-	float speed = 66;
+	int speed = 66;
 	float imgX = 0, imgY = 0;
 	int imgW = 0, imgH = 0;
 	bool transition;

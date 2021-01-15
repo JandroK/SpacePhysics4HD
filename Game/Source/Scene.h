@@ -11,8 +11,8 @@ struct SDL_Texture;
 struct AnimationPlatform
 {
 	iPoint position;
-	Animation* laserFront = new Animation();
-	Animation* laserBack = new Animation();
+	Animation* laserFront;
+	Animation* laserBack;
 	SDL_Texture* texture;
 	SDL_Texture* textureLaser;
 };
@@ -78,7 +78,7 @@ private:
 	SDL_Rect rectPlatform;
 
 	AnimationPlatform propulsionPlatform;
-	Animation* idleAnim = new Animation();
+	Animation* idleAnim;
 
 	int win = 0;
 };

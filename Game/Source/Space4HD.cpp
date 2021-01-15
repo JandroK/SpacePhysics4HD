@@ -78,7 +78,7 @@ void PhysicsEngine::Step(float dt)
 			
 			// Add ineria to asteroids
 			if (item->data->GetVelocity().x < 0 && item->data->GetIsShpere()) item->data->AddTorque(-10);
-			if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
+			else if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
 		}
 		// If body receives an external force thge body is awake
 		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);
@@ -174,14 +174,14 @@ void PhysicsEngine::deleteBody(Body* body)
 
 bool PhysicsEngine::CleanUp()
 {
-	bodies.Clear();
-	ListItem<Body*>* item;
+	/*ListItem<Body*>* item;
 
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
 		delete[] item->data->GetPointsCollision();
 		delete[] item->data->GetPointsCollisionWorld();
-	}
+	}*/
 
+	bodies.Clear();
 	return true;
 }

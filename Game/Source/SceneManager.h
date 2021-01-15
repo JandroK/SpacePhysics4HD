@@ -12,7 +12,7 @@ class Textures;
 class SceneLogo;
 class SceneIntro;
 class Scene;
-//class SceneWin;
+class SceneWin;
 //class SceneLose;
 
 class SceneManager : public Module
@@ -80,7 +80,7 @@ public:
 	SceneLogo* sceneLogo;
 	SceneIntro* sceneIntro;
 	Scene* scene;
-	//SceneWin* sceneWin;
+	SceneWin* sceneWin;
 	//SceneLose* sceneLose;
 
 	SceneControl* sceneControl;

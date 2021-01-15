@@ -19,6 +19,8 @@
 #define METERS_TO_PIXELS(m) ((int) PIXELS_PER_METER * m)
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
 
+#define CCOOLDOWNSCENE 3.5f
+
 // Deletes a buffer
 #define RELEASE( x ) \
 	{						\

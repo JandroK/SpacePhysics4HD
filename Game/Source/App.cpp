@@ -33,14 +33,15 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(win);
 	AddModule(input);
 	AddModule(tex);
-	AddModule(physics);
 	AddModule(audio);
+	AddModule(physics);
 	AddModule(sceneManager);
 	AddModule(player);
 
 	// Render last to swap buffer
 	AddModule(render);
 
+	physics->active = false;
 	player->active = false;
 }
 

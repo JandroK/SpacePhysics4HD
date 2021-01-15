@@ -11,6 +11,7 @@ Physics::~Physics()
 
 bool Physics::Start()
 {
+	active = true;
 	// Definimos un nuevo mundo
 	world = new PhysicsEngine();
 	world->SetPositionAndRangePlanetA(PIXEL_TO_METERS(11081), PIXEL_TO_METERS(5500));
@@ -40,9 +41,14 @@ bool Physics::PostUpdate()
 
 bool Physics::CleanUp()
 {
-	bodies.Clear();
-	world->CleanUp();
-
+	if (active)
+	{
+		bodies.Clear();
+		world->CleanUp();
+		delete world;
+	}
+	
+	active = false;
 	return true;
 }
 
@@ -92,4 +98,4 @@ fPoint Physics::RotateVector(fPoint vector, fPoint axis, float angle)
 	float posX = (vector.x * cos(angle)) - (vector.y * sin(angle)) + METERS_TO_PIXELS(axis.x);//Matrix rotation
 	float posY = (vector.x * sin(angle)) + (vector.y * cos(angle)) + METERS_TO_PIXELS(axis.y);//Change basis
 	return fPoint({ posX, posY });
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           

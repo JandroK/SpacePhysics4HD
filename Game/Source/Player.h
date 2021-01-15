@@ -26,9 +26,9 @@ struct PlayerData
 	uint lives = 5;
 	uint respawns = 0;
 	uint fuel = 0;
-	uint *stateShoot = 0;
-	iPoint* shootPosition;
-	iPoint* shootPointsCollision;
+	//uint *stateShoot = 0;
+	//iPoint* shootPosition;
+	//iPoint* shootPointsCollision;
 	SDL_Rect rectPlayer = {0,0,0,0};
 
 	SDL_Texture* texture;
@@ -37,8 +37,8 @@ struct PlayerData
 	SDL_Texture* texTurboVelocity;
 
 	static const int numPoints = 3;
-	fPoint pointsCollision[numPoints] = { { 0, -74 },{86, 42},{ -86, 42 } };
-	fPoint pointsCollisionWorld[numPoints] = { { 0, -74 },{86, 42},{ -86, 42 } };
+	fPoint* pointsCollision;// [numPoints] ;// = { { 0, -74 },{86, 42},{ -86, 42 } };
+	fPoint* pointsCollisionWorld;// [numPoints] ;// = { { 0, -74 },{86, 42},{ -86, 42 } };
 	fPoint vecDir = { 0,0 };
 };
 
@@ -60,15 +60,13 @@ public:
 	bool Update(float dt);
 
 	void CheckWin();
+	//bool CheckGameOver(int level);
 
 	bool PostUpdate();
 
-	bool CheckGameOver(int level);
-
-
-	void SetHit();
-	void CoinPlus() { playerData.fuel++; };
-	void LivePlus() { playerData.respawns++; };
+	//void SetHit();
+	//void CoinPlus() { playerData.fuel++; };
+	//void LivePlus() { playerData.respawns++; };
 
 	bool CleanUp();
 
@@ -80,15 +78,15 @@ private:
 
 	void PlayerMoveAnimation();
 
-	void MovePlayer( float dt);
+	//void MovePlayer( float dt);
 
 	void PlayerControls(float dt);
 	void GodModeControls(float dt);
 
 	// Load state game
-	bool LoadState(pugi::xml_node& data);
+	//bool LoadState(pugi::xml_node& data);
 	// Save state game
-	bool SaveState(pugi::xml_node& data)const;
+	//bool SaveState(pugi::xml_node& data)const;
 
 public:
 
@@ -102,16 +100,15 @@ private:
 	Body *ship;
 	int levelScene;
 
-	float gravity = 0.3f;
 	float velGodMode = 0;
 
-	Animation* idleAnim= new Animation();
-	Animation* flyAnim = new Animation();
-	Animation* turboAnim = new Animation();
-	Animation* turboVelocityAnim = new Animation();
-	Animation* atakAnim = new Animation();
-	Animation* damageAnim = new Animation();
-	Animation* deadAnim = new Animation();
+	Animation* idleAnim;
+	Animation* flyAnim;
+	Animation* turboAnim;
+	Animation* turboVelocityAnim;
+	Animation* atakAnim;
+	Animation* damageAnim;
+	Animation* deadAnim;
 
 	pugi::xml_document playerFile;
 	SString folder;

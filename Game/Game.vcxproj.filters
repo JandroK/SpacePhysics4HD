@@ -57,6 +57,9 @@
     <ClCompile Include="Source\SceneIntro.cpp">
       <Filter>Gameplay\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Source\SceneWin.cpp">
+      <Filter>Gameplay\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\App.h" />
@@ -142,6 +145,9 @@
       <Filter>Gameplay\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Source\SceneIntro.h">
+      <Filter>Gameplay\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SceneWin.h">
       <Filter>Gameplay\Scenes</Filter>
     </ClInclude>
   </ItemGroup>

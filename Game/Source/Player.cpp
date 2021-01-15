@@ -33,12 +33,13 @@ bool Player::Start()
 
 	idleAnim = new Animation();
 	flyAnim = new Animation();
+	turboAnim = new Animation();
+	turboVelocityAnim = new Animation();
 	atakAnim = new Animation();
 	damageAnim = new Animation();
-	turboAnim = new Animation();
-	turboAnim = new Animation();
+	deadAnim = new Animation();
 
-	// Ñpad textures and FX
+	// Load textures and FX
 	playerData.texture = app->tex->Load("Assets/Textures/space_ship.png");
 	playerData.texLaserFly = app->tex->Load("Assets/Textures/laser_fly.png");
 	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
@@ -57,6 +58,18 @@ bool Player::Start()
 	ship->SetMass(100);
 	ship->SetCoeficientDrag(0.82);
 	ship->SetSurface(8);
+
+	playerData.pointsCollision = new fPoint[playerData.numPoints];
+	playerData.pointsCollisionWorld = new fPoint[playerData.numPoints];
+
+	playerData.pointsCollision[0] =  { 0, -74 };
+	playerData.pointsCollision[1] =  { 86, 42 };
+	playerData.pointsCollision[2] =  { -86, 42 };
+	
+	for (int i = 0; i < playerData.numPoints; i++)
+	{
+		playerData.pointsCollisionWorld[i] = playerData.pointsCollision[i];
+	}
 
 	for (int i = 0; i < playerData.numPoints; i++)
 	{
@@ -135,34 +148,34 @@ bool Player::Awake(pugi::xml_node& config)
 	return true;
 }
 
-bool Player::LoadState(pugi::xml_node& player) 
-{
-	bool ret=true;
-	float posX = player.child("position").attribute("x").as_int(ship->GetPosition().x);
-	float posY = player.child("position").attribute("y").as_int(ship->GetPosition().y);
-	playerData.respawns = player.child("lives").attribute("num_respawns").as_int(playerData.respawns);
-	playerData.fuel = player.child("fuel").attribute("count").as_int(playerData.fuel);
-
-	ship->SetPosition({ posX,posY });
-	return ret;
-}
-
-bool Player::SaveState(pugi::xml_node& player) const
-{
-	pugi::xml_node positionPlayer = player.child("position");
-	pugi::xml_node coinsPlayer = player.child("coins");
-	pugi::xml_node respawnsPlayer = player.child("lives");
-	
-	fPoint pos;
-	positionPlayer.attribute("x").set_value(pos.x);
-	positionPlayer.attribute("y").set_value(pos.y);
-	coinsPlayer.attribute("count").set_value(playerData.fuel);
-	respawnsPlayer.attribute("num_respawns").set_value(playerData.respawns);
-
-	ship->SetPosition(pos);
-	
-	return true;
-}
+//bool Player::LoadState(pugi::xml_node& player) 
+//{
+//	bool ret=true;
+//	float posX = player.child("position").attribute("x").as_int(ship->GetPosition().x);
+//	float posY = player.child("position").attribute("y").as_int(ship->GetPosition().y);
+//	playerData.respawns = player.child("lives").attribute("num_respawns").as_int(playerData.respawns);
+//	playerData.fuel = player.child("fuel").attribute("count").as_int(playerData.fuel);
+//
+//	ship->SetPosition({ posX,posY });
+//	return ret;
+//}
+//
+//bool Player::SaveState(pugi::xml_node& player) const
+//{
+//	pugi::xml_node positionPlayer = player.child("position");
+//	pugi::xml_node coinsPlayer = player.child("coins");
+//	pugi::xml_node respawnsPlayer = player.child("lives");
+//	
+//	fPoint pos;
+//	positionPlayer.attribute("x").set_value(pos.x);
+//	positionPlayer.attribute("y").set_value(pos.y);
+//	coinsPlayer.attribute("count").set_value(playerData.fuel);
+//	respawnsPlayer.attribute("num_respawns").set_value(playerData.respawns);
+//
+//	ship->SetPosition(pos);
+//	
+//	return true;
+//}
 
 bool Player::PreUpdate() 
 {
@@ -374,47 +387,47 @@ void Player::GodModeControls(float dt)
 		ship->SetPosition({ ship->GetPosition().x + velGodMode, ship->GetPosition().y });
 }
 
-void Player::MovePlayer(float dt)
-{
-	switch (playerData.state)
-	{
-	case IDLE:
-		// Future conditions in state IDLE...
-		break;	
+//void Player::MovePlayer(float dt)
+//{
+//	switch (playerData.state)
+//	{
+//	case IDLE:
+//		// Future conditions in state IDLE...
+//		break;	
+//
+//	case FLY:
+//		// Move in state WALK 
+//		
+//		// Future conditions in state FLY...
+//		break;
+//
+//	case TURBO:
+//		// Move in state TURBO 
+//		
+//		// Future conditions in state TURBO...
+//		break;
+//
+//	default:
+//		break;
+//	}
+//}
 
-	case FLY:
-		// Move in state WALK 
-		
-		// Future conditions in state FLY...
-		break;
-
-	case TURBO:
-		// Move in state TURBO 
-		
-		// Future conditions in state TURBO...
-		break;
-
-	default:
-		break;
-	}
-}
-
-bool Player::CheckGameOver(int level)
-{
-	if (playerData.state==DEADING)
-	{
-		playerData.currentAnimation = deadAnim;
-		return true;
-	}
-	if (playerData.currentAnimation == deadAnim && playerData.currentAnimation->HasFinished())
-	{
-		playerData.state = DEAD;
-		ship->SetPosition(positionInitial);
-		ship->SetVelocity({ 0,0 });
-	}
-		
-	return false;
-}
+//bool Player::CheckGameOver(int level)
+//{
+//	if (playerData.state==DEADING)
+//	{
+//		playerData.currentAnimation = deadAnim;
+//		return true;
+//	}
+//	if (playerData.currentAnimation == deadAnim && playerData.currentAnimation->HasFinished())
+//	{
+//		playerData.state = DEAD;
+//		ship->SetPosition(positionInitial);
+//		ship->SetVelocity({ 0,0 });
+//	}
+//		
+//	return false;
+//}
 void Player::CheckWin()
 {
 	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
@@ -434,15 +447,15 @@ void Player::CheckWin()
 	}
 }
 
-void Player::SetHit()
-{
-	if (playerData.respawns > 0 && playerData.state != HIT && !godMode) 
-	{
-		playerData.respawns--;
-		playerData.state = HIT;
-		//app->audio->PlayFx(damageFx);
-	}
-}
+//void Player::SetHit()
+//{
+//	if (playerData.respawns > 0 && playerData.state != HIT && !godMode) 
+//	{
+//		playerData.respawns--;
+//		playerData.state = HIT;
+//		//app->audio->PlayFx(damageFx);
+//	}
+//}
 
 bool Player::CleanUp()
 {
@@ -465,7 +478,10 @@ bool Player::CleanUp()
 	delete atakAnim;
 	delete damageAnim;
 
-	delete ship;
+	delete playerData.pointsCollision;
+	delete playerData.pointsCollisionWorld;
+
+	//delete ship;
 
 	return true;
 }
