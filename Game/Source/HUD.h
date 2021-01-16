@@ -27,7 +27,7 @@ public:
 
 private:
 
-	char hudText[64];
+	char hudText[64]={0};
 	Font* font;
 
 };

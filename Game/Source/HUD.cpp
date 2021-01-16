@@ -30,8 +30,7 @@ bool HUD::Awake(pugi::xml_node&)
 bool HUD::Start()
 {
 	font = new Font("Assets/Fonts/londrina.xml");
-	hudText[64] = { 0 };
-
+	
 	return true;
 }
 
@@ -50,13 +49,14 @@ bool HUD::PostUpdate()
 	int drawPosX = 10;
 	int drawPosY = 20;
 
+	//Funcion para devolver la fuerza G que le afecta a la nave 
+	/*
 	sprintf_s(hudText, 64, "G-Force: %.2f", 34.93113f);
     app->render->DrawText(font, hudText, drawPosX, drawPosY, 32, 0, { 255, 0, 255, 255 });
-	
+	*/
 	drawPosY += 32;
 	sprintf_s(hudText, 64, "Vertical Velocity: %.2f", abs(app->player->GetBody()->GetVelocity().y));
-    app->render->DrawText(font, hudText, drawPosX, drawPosY, 32, 0, { 255, 0, 255, 255 });
-
+    app->render->DrawText(font, hudText, drawPosX, drawPosY, 32, 0, { 0, 0, 0, 255 });
 	return true;
 }
 
