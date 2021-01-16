@@ -1,11 +1,13 @@
 #include "App.h"
 #include "Input.h"
 #include "Textures.h"
+#include "Font.h"
 #include "Audio.h"
 #include "Render.h"
 #include "Window.h"
 #include "Scene.h"
 #include "Player.h"
+#include "HUD.h"
 #include "SceneManager.h"
 
 #include "Defs.h"
@@ -57,7 +59,7 @@ bool Scene::Start()
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroid.png");
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
-	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
+	//app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
 
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10572 };
@@ -87,6 +89,9 @@ bool Scene::Start()
 
 	app->player->Init();
 	app->player->Start();
+
+	app->hud->Init();
+	app->hud->Start();
 
 	app->sceneManager->scene->win = 0;
 
@@ -289,7 +294,7 @@ bool Scene::CleanUp()
 
 	app->player->CleanUp();
 	app->physics->CleanUp();
-
+	app->hud->CleanUp();
 	active = false;
 
 	return true;

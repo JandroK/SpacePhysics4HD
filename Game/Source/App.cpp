@@ -7,6 +7,7 @@
 #include "Audio.h"
 #include "SceneManager.h"
 #include "Player.h"
+#include "HUD.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -27,6 +28,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	audio = new Audio();
 	sceneManager = new SceneManager(input, render, tex);
 	player = new Player();
+	hud = new HUD();
 
 	// Ordered for awake / Start / Update
 	// Reverse order of CleanUp
@@ -37,12 +39,13 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(physics);
 	AddModule(sceneManager);
 	AddModule(player);
-
+	AddModule(hud);
 	// Render last to swap buffer
 	AddModule(render);
 
 	physics->active = false;
 	player->active = false;
+	hud->active = false;
 }
 
 // Destructor

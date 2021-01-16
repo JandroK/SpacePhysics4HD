@@ -70,6 +70,8 @@ public:
 
 	bool CleanUp();
 
+	Body* GetBody() { return ship; };
+
 private:
 
 	void SpeedAnimationCheck(float dt);
@@ -82,6 +84,7 @@ private:
 
 	void PlayerControls(float dt);
 	void GodModeControls(float dt);
+
 
 	// Load state game
 	//bool LoadState(pugi::xml_node& data);

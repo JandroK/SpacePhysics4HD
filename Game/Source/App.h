@@ -20,7 +20,7 @@ class Physics;
 class Audio;
 class SceneManager;
 class Player;
-
+class HUD;
 class App
 {
 public:
@@ -103,6 +103,7 @@ public:
 	Audio* audio;
 	SceneManager* sceneManager;
 	Player* player;
+	HUD* hud;
 	//ModuleFonts* fonts;
 
 private:
