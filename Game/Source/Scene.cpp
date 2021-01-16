@@ -61,7 +61,7 @@ bool Scene::Start()
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroids_explosion.png");
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
-	//app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
+	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
 
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10572 };

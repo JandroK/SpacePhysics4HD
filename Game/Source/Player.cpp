@@ -391,20 +391,21 @@ void Player::PlayerControls(float dt)
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
-		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN )
 	{
 		// Add Torque in wrong way 
 		if(ship->GetVelocityAngular() < 0)
 			ship->AddTorque(200);
 		if(ship->GetVelocityAngular() > 0)
-			ship->AddTorque(-200);
-
+			ship->AddTorque(-200);		
+	}
+	if (app->input->GetKey(SDL_SCANCODE_S) != KEY_DOWN )
+	{
 		// Add Torque for stabilize the ship, this system help player to land
 		if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y > 0.1f)
 			ship->AddTorque(300 * ship->GetOrientationGravity());
 		else if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y < -0.1f)
 			ship->AddTorque(-300 * ship->GetOrientationGravity());
-		
 	}
 }
 
