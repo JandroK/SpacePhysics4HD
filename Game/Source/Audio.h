@@ -33,15 +33,15 @@ public:
 	bool UnloadFxs();
 
 	// Play a previously loaded WAV
-	bool PlayFx(unsigned int fx, int volume = 0);
+	bool PlayFx(unsigned int fx, int volume = 100);
 
 private:
 
 	_Mix_Music* music;
 	Mix_Chunk* fx[MAX_FX] = { nullptr };
 
-	uint volumeMusic = 0;
-	uint volumeFx = 0;
+	uint volumeMusic = 100;
+	uint volumeFx = 100;
 };
 
 #endif // __AUDIO_H__

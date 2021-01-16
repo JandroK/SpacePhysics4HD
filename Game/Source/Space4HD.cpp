@@ -87,8 +87,8 @@ void PhysicsEngine::ApplyForcesWorld(ListItem<Body*>*& item)
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
 
 			// Add ineria to asteroids
-			if (item->data->GetVelocity().x < 0 && item->data->GetIsShpere()) item->data->AddTorque(-10);
-			else if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
+			if (item->data->GetVelocity().x < 0 && item->data->GetClassType() == BodyClass::ASTEROIDS) item->data->AddTorque(-10);
+			else if (item->data->GetVelocity().x > 0 && item->data->GetClassType() == BodyClass::ASTEROIDS) item->data->AddTorque(10);
 		}
 		// If body receives an external force thge body is awake
 		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);
@@ -108,7 +108,7 @@ void PhysicsEngine::Integrator(ListItem<Body*>*& item, float dt)
 			VelocityVerletAngular(item->data, dt);
 
 			// If body isn't circular, update his axis 
-			if (!item->data->GetIsShpere())
+			if (item->data->GetClassType() != BodyClass::ASTEROIDS)
 			{
 				item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2),
 					item->data->GetPosition().y + (item->data->GetHight() / 2) });
@@ -152,18 +152,18 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 			}
 			if (ret == false) break;
 			float distanceBetweenAxis = CalculateModule(item->data->GetAxis() - item2->data->GetAxis());
-			bool shpere = false;
+			bool sphere = false;
 			bool staticBody = false;
 			// If one of thw two is circular the collisions are checked using their radius
 			// Else the collisions are checked using their matrix of points
-			if (item->data->GetIsShpere() || item2->data->GetIsShpere()) shpere = true;
+			if (item->data->GetClassType()==BodyClass::ASTEROIDS || item2->data->GetClassType() == BodyClass::ASTEROIDS) sphere = true;
 			// No ckeck collison if two bodies are static Body
 			if (item->data->GetType() == BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
-			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis&& shpere)
+			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis&& sphere)
 			{
 				Collision(item->data, item2->data);
 			}
-			else if (!shpere && !staticBody)
+			else if (!sphere && !staticBody)
 			{
 				CollisionSquare(item->data, item2->data);
 			}
@@ -180,6 +180,7 @@ void PhysicsEngine::ComprobeState(ListItem<Body*>*& item)
 		case BodyState::HIT:
 			item->data->SetLives(item->data->GetLives() - 1);
 			if (item->data->GetLives() <= 0) item->data->SetBodyState(BodyState::DEADING);
+
 			break;
 		case BodyState::DEAD:
 			item->data->SetPendingToDelete(true);
