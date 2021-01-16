@@ -89,6 +89,7 @@ bool Scene::Start()
 	app->player->Start();
 
 	app->sceneManager->scene->win = 0;
+	app->sceneManager->scene->lose = false;
 
 	return true;
 }
@@ -111,6 +112,7 @@ bool Scene::Update(float dt)
 	propulsionPlatform.laserBack->Update();
 
 	if(app->sceneManager->scene->win == 2)TransitionToScene(SceneType::WIN);
+	if(app->sceneManager->scene->lose == true)TransitionToScene(SceneType::INTRO);
 
 	return true;
 }
@@ -177,8 +179,9 @@ void Scene::DrawStaticBodies(Body* body)
 
 void Scene::CreateWalls(Body* body, fPoint position, float w, float h)
 {
-	body->SetBodyType(BodyType::STATIC_BODY);
 	body->SetMass(100000);
+	body->SetBodyType(BodyType::STATIC_BODY);
+	body->SetClassType(BodyClass::PLATFORMS);
 	body->SetPosition({ PIXEL_TO_METERS(position.x), PIXEL_TO_METERS(position.y) });
 	body->SetDimension(PIXEL_TO_METERS(w), PIXEL_TO_METERS(h));
 	fPoint axis = { METERS_TO_PIXELS(body->GetPosition().x) + w / 2, METERS_TO_PIXELS(body->GetPosition().y) + h / 2 };
@@ -221,7 +224,7 @@ void Scene::CreateEntity()
 		// Randomize the massa of bodies for everyone is different
 		int m = rand() % 100 + 200;
 		item->data->SetMass(m);
-		item->data->SetIsShpere(true);
+		item->data->SetClassType(BodyClass::ASTEROIDS);
 		item->data->SetRadio(PIXEL_TO_METERS(50));
 
 		// Randomize position of spawn

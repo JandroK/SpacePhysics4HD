@@ -153,6 +153,8 @@ bool Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 
 void Collisions::Collision(Body* bodyA, Body* bodyB)
 {
+	bool sphere = false;
+	if (bodyA->GetClassType()==BodyClass::ASTEROIDS && bodyB->GetClassType() == BodyClass::ASTEROIDS) sphere = true;
 	// Get velocities and axis of bodies
 	fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
@@ -188,12 +190,12 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		float velCriticA = CalculateModule(newVelA);
 		if (velCriticA < 0.2)// || velCriticA > 30)
 		{
-			if (!bodyA->GetIsShpere())
-				bodyA->SetSleep(true);
+			if (bodyA->GetClassType() != BodyClass::ASTEROIDS)bodyA->SetSleep(true);
 			bodyA->SetVelocity({ 0,0 });
 			bodyA->SetAcceleration({ 0,0 });
 		}
-		bodyA->SetBodyState(BodyState::HIT);
+		if(sphere)bodyA->SetBodyState(BodyState::HIT);
+		if (bodyA->GetClassType() == BodyClass::PLAYER) bodyA->SetBodyState(BodyState::HIT);
 	}
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
 	{
@@ -201,12 +203,12 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		float velCriticB = CalculateModule(newVelB);
 		if (velCriticB < 0.2)// || velCriticB > 30)
 		{
-			if (!bodyB->GetIsShpere())
-				bodyB->SetSleep(true);
+			if (bodyB->GetClassType() != BodyClass::ASTEROIDS)bodyB->SetSleep(true);
 			bodyB->SetVelocity({ 0,0 });
 			bodyB->SetAcceleration({ 0,0 });
 		}
-		bodyB->SetBodyState(BodyState::HIT);
+		if (sphere) bodyB->SetBodyState(BodyState::HIT);
+		if(bodyB->GetClassType()==BodyClass::PLAYER) bodyB->SetBodyState(BodyState::HIT);
 	}
 }
 
@@ -235,7 +237,7 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
 		if (velCriticA < 0.2 )//|| velCriticA > 30)
 		{
-			if (!bodyA->GetIsShpere())bodyA->SetSleep(true);
+			if (bodyA->GetClassType() != BodyClass::ASTEROIDS)bodyA->SetSleep(true);
 			bodyA->SetAcceleration({ 0,0 });
 			bodyA->SetAccelerationAngular(0);
 			//bodyA->SetVelocity({ 0,0 });
@@ -257,7 +259,7 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 		float velCriticB = CalculateModule({ vXbRotate, vYbRotate });
 		if (velCriticB < 0.2)// || velCriticB > 30)
 		{
-			if(!bodyB->GetIsShpere())bodyB->SetSleep(true);
+			if(bodyB->GetClassType() != BodyClass::ASTEROIDS)bodyB->SetSleep(true);
 			bodyB->SetAcceleration({ 0,0 });
 			bodyB->SetAccelerationAngular(0);
 			//bodyB->SetVelocity({ 0,0 });
@@ -285,7 +287,7 @@ void Collisions::CollisionFlatSurfaceY(Body* body)
 	{
 		body->SetAcceleration({ 0,0 });
 		body->SetAccelerationAngular(0);
-		if (!body->GetIsShpere())body->SetSleep(true);
+		if (body->GetClassType() != BodyClass::ASTEROIDS)body->SetSleep(true);
 	}
 	if (velCritic > 30) body->SetBodyState(BodyState::DEADING);
 }

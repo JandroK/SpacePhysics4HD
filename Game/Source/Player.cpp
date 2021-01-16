@@ -35,7 +35,6 @@ bool Player::Start()
 	flyAnim = new Animation();
 	turboAnim = new Animation();
 	turboVelocityAnim = new Animation();
-	atakAnim = new Animation();
 	damageAnim = new Animation();
 	deadAnim = new Animation();
 
@@ -44,6 +43,7 @@ bool Player::Start()
 	playerData.texLaserFly = app->tex->Load("Assets/Textures/laser_fly.png");
 	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
 	playerData.texTurboVelocity = app->tex->Load("Assets/Textures/particle_velocity.png");
+	playerData.texHitDead = app->tex->Load("Assets/Textures/space_ship_asset.png");
 	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
 
@@ -55,6 +55,7 @@ bool Player::Start()
 	// Set properties of the ship
 	ship->SetMass(100);
 	ship->SetLives(10);
+	ship->SetClassType(BodyClass::PLAYER);
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
 	ship->SetCoeficientDrag(0.82);
@@ -97,26 +98,12 @@ bool Player::Start()
 	playerData.fuel = 0;
 	playerData.lives = 3;
 
-	win = false;
-
 	idleAnim->loop = true;
-	idleAnim->speed = 0.05f;
-
 	flyAnim->loop = true;
-	flyAnim->speed = 0.08f;
-
-	damageAnim->loop = false;
-	damageAnim->speed = 0.005f;
-
 	turboAnim->loop = true;
-	turboAnim->speed = 0.10f;
-	
-	atakAnim->loop = false;
-	atakAnim->speed = 0.10f;
-
 	turboVelocityAnim->loop = true;
-	turboVelocityAnim->speed = 0.10f;
-
+	damageAnim->loop = false;
+	deadAnim->loop = false;
 
 	idleAnim->PushBack({ 0 ,0, playerData.rectPlayer.w, playerData.rectPlayer.h });
 	
@@ -127,15 +114,18 @@ bool Player::Start()
 		turboAnim->PushBack({ 0 + (26 * i),0, 26, 86 });
 
 	for (int i = 0; i < 2; i++)
-		turboVelocityAnim->PushBack({ 0 ,0+ (237 * i), 207, 237 });
-
-	//for (int i = 0; i < 4; i++)
-	//	damageAnim->PushBack({ 1008 + (78 * i),0, 78, 78 });
-
-
-
-	deadAnim->PushBack({ 1008 + (78 * 1),0, 78, 78 });
-
+		turboVelocityAnim->PushBack({ 0 ,0 + (237 * i), 207, 237 });
+	for (int j = 0; j < 2; j++)
+	{
+		for (int i = 0; i < 2; i++)
+			damageAnim->PushBack({ 0, 0 + (168 * i) , 195, 168 });
+	}
+	
+	for (int i = 0; i < 7; i++)
+	{
+		deadAnim->PushBack({ 0, 1344 + (-168 * i), 195, 168 });
+	}
+	
 	playerData.currentAnimation = idleAnim;
 
 	return true;
@@ -180,8 +170,6 @@ bool Player::Awake(pugi::xml_node& config)
 
 bool Player::PreUpdate() 
 {
-	playerData.currentAnimation->Update();
-
 	return true;
 }
 
@@ -196,12 +184,15 @@ bool Player::Update(float dt)
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
 		ship->SetVelocity({ 0,0 });
 	}
+	playerData.currentAnimation->Update();
 
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);
-
-	if (!godMode)PlayerControls(dt);
-	else GodModeControls(dt);
+	if (playerData.state != State::DEADING && playerData.state != State::DEAD && playerData.state != State::HIT)
+	{
+		if (!godMode)PlayerControls(dt);
+		else GodModeControls(dt);
+	}
 	CameraPlayer();
 
 	/*if (playerData.state == ATTACK && playerData.currentAnimation->HasFinished())
@@ -210,8 +201,10 @@ bool Player::Update(float dt)
 		atakAnim->Reset();
 	}*/
 
-	// Condition Win
+	// Comprobe Win/Lose
 	CheckWin();
+	CheckGameOver();
+
 	return true;
 }
 
@@ -219,12 +212,11 @@ bool Player::PostUpdate()
 {
 	PlayerMoveAnimation();
 
-	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetAxis().x) - playerData.rectPlayer.w/2, METERS_TO_PIXELS(ship->GetAxis().y) - playerData.rectPlayer.h / 2 };
-	// Draw player 
-	app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y, &playerData.rectPlayer, 1, ship->GetRotation());
+	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetAxis().x) - playerData.rectPlayer.w/2, 
+							  METERS_TO_PIXELS(ship->GetAxis().y) - playerData.rectPlayer.h / 2 };
 	SDL_Rect rectPlayer;
-
 	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
+
 	fPoint posPropulsor;
 	posPropulsor.x = METERS_TO_PIXELS(ship->GetAxis().x) - rectPlayer.w/2;
 	posPropulsor.y = METERS_TO_PIXELS(ship->GetAxis().y) + playerData.rectPlayer.h / 2;
@@ -232,6 +224,13 @@ bool Player::PostUpdate()
 	float posX = positionPlayer.x + playerData.rectPlayer.w / 2 - turboVelocityAnim->GetCurrentFrame().w / 2;
 	float posY = positionPlayer.y - 17;
 	float angle = ship->GetRotation();
+
+	// Draw player 
+	if (playerData.state != HIT && playerData.state != DEADING && playerData.state != DEAD)
+	{
+		app->render->DrawTexture(playerData.texture, positionPlayer.x, positionPlayer.y,
+			&playerData.rectPlayer, 1, ship->GetRotation());
+	}
 
 	switch (playerData.state)
 	{
@@ -253,6 +252,22 @@ bool Player::PostUpdate()
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h + 34);
 		break;
 
+	case HIT:
+		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x - 12, positionPlayer.y - 10, &rectPlayer, 1, ship->GetRotation());
+		if (playerData.currentAnimation->HasFinished()) playerData.state = State::IDLE;
+		break;
+
+	case DEADING:
+		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x, positionPlayer.y, &rectPlayer, 1, ship->GetRotation());
+		if (playerData.currentAnimation->HasFinished())
+		{
+			playerData.state = DEAD;
+			ship->SetAcceleration({ 0, 0 });
+			ship->SetAccelerationAngular(0);
+			ship->SetBodyState(BodyState::DEAD);
+			ship->SetBodyType(BodyType::STATIC_BODY);
+		}
+		break;
 	default:
 		break;
 	}
@@ -280,10 +295,10 @@ void Player::SpeedAnimationCheck(float dt)
 {
 	idleAnim->speed = (dt * 5) ;
 	flyAnim->speed = (dt * 9) ;
-	atakAnim->speed = (dt * 5) ;
-	damageAnim->speed = (dt * 10) ;
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
+	damageAnim->speed = (dt * 5) ;
+	deadAnim->speed = (dt * 5) ;
 }
 
 void Player::CameraPlayer()
@@ -312,13 +327,27 @@ void Player::PlayerMoveAnimation()
 	
 	case HIT:
 		playerData.currentAnimation = damageAnim;
-		//if (playerData.currentAnimation->HasFinished())playerData.state = IDLE;
 		break;	
 	
-	case ATTACK:
-		playerData.currentAnimation = atakAnim;
+	case DEADING:
+		playerData.currentAnimation = deadAnim;
 		break;
 
+	default:
+		break;
+	}
+
+	switch (ship->GetBodyState())
+	{
+	case BodyState::IDLE:
+		break;
+	case BodyState::HIT:
+		playerData.state = State::HIT;
+		ship->SetBodyState(BodyState::IDLE);
+		break;
+	case BodyState::DEADING:
+		playerData.state = State::DEADING;
+		break;
 	default:
 		break;
 	}
@@ -356,7 +385,7 @@ void Player::PlayerControls(float dt)
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
-		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN && app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN && !app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
 		// Add Torque in wrong way 
 		if(ship->GetVelocityAngular() < 0)
@@ -413,22 +442,13 @@ void Player::GodModeControls(float dt)
 //	}
 //}
 
-//bool Player::CheckGameOver(int level)
-//{
-//	if (playerData.state==DEADING)
-//	{
-//		playerData.currentAnimation = deadAnim;
-//		return true;
-//	}
-//	if (playerData.currentAnimation == deadAnim && playerData.currentAnimation->HasFinished())
-//	{
-//		playerData.state = DEAD;
-//		ship->SetPosition(positionInitial);
-//		ship->SetVelocity({ 0,0 });
-//	}
-//		
-//	return false;
-//}
+void Player::CheckGameOver()
+{
+	if (playerData.state==DEAD)
+	{
+		app->sceneManager->scene->SetLose(true);
+	}
+}
 void Player::CheckWin()
 {
 	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
@@ -476,7 +496,6 @@ bool Player::CleanUp()
 	delete flyAnim;
 	delete turboAnim;
 	delete turboVelocityAnim;
-	delete atakAnim;
 	delete damageAnim;
 
 	delete playerData.pointsCollision;

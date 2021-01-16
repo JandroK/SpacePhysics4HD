@@ -50,7 +50,9 @@ public:
 
 	// Get and Set Win
 	int GetWin() { return win; };
+	int GetLose() { return lose; };
 	void SetWin(int _win) { win = _win; };
+	void SetLose(int _lose) { lose = _lose; };
 
 	// Called before quitting
 	bool CleanUp();
@@ -81,6 +83,7 @@ private:
 	Animation* idleAnim;
 
 	int win = 0;
+	bool lose = false;
 };
 
 #endif // __SCENE_H__

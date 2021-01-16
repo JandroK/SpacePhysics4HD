@@ -13,9 +13,9 @@ enum State {
 	FLY,
 	TURBO,
 	ATTACK,
-	DEADING,
-	DEAD,
 	HIT,
+	DEADING,
+	DEAD
 };
 
 struct PlayerData
@@ -35,6 +35,7 @@ struct PlayerData
 	SDL_Texture* texLaserFly;
 	SDL_Texture* texLaserTurbo;
 	SDL_Texture* texTurboVelocity;
+	SDL_Texture* texHitDead;
 
 	static const int numPoints = 3;
 	fPoint* pointsCollision;// [numPoints] ;// = { { 0, -74 },{86, 42},{ -86, 42 } };
@@ -60,7 +61,7 @@ public:
 	bool Update(float dt);
 
 	void CheckWin();
-	//bool CheckGameOver(int level);
+	void CheckGameOver();
 
 	bool PostUpdate();
 
@@ -93,7 +94,6 @@ public:
 	PlayerData playerData;
 	bool godMode = false;
 	fPoint positionInitial;
-	bool win= false;
 
 private:
 	
@@ -106,7 +106,6 @@ private:
 	Animation* flyAnim;
 	Animation* turboAnim;
 	Animation* turboVelocityAnim;
-	Animation* atakAnim;
 	Animation* damageAnim;
 	Animation* deadAnim;
 

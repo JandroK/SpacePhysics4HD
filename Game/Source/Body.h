@@ -16,6 +16,14 @@ enum class BodyType
 	DYNAMIC_BODY
 };
 
+enum class BodyClass
+{
+	NOTHING = 0,
+	PLAYER,
+	ASTEROIDS,
+	PLATFORMS
+};
+
 enum class BodyState
 {
 	IDLE = 0,
@@ -57,8 +65,8 @@ public:
 
 	BodyType GetType() { return type; };
 	BodyState GetBodyState() { return state; };
+	BodyClass GetClassType() { return classType; };
 	bool GetSleep() { return sleep; };
-	bool GetIsShpere() { return isShpere; };
 	bool GetPendingToDelete() { return pendingToDelete; };
 
 	int GetNumPoints() { return numPoints; };
@@ -93,7 +101,7 @@ public:
 	void SetBodyType(BodyType _type) { type = _type; };
 	void SetBodyState(BodyState _state) { state = _state; };
 	void SetSleep(bool _sleep) { sleep = _sleep; };
-	void SetIsShpere(bool _flat) { isShpere = _flat; };
+	void SetClassType(BodyClass _class) { classType = _class; };
 
 	void SetCollisions(fPoint _bodyPointsCollision[], fPoint _bodyPointsCollisionWorld[], float _numPoints);
 	void SetRadio(float _radio) { radio = _radio; };
@@ -111,9 +119,9 @@ private:
 	float hight = 0;
 	BodyType type = BodyType::DYNAMIC_BODY;
 	BodyState state = BodyState::IDLE;
+	BodyClass classType = BodyClass::NOTHING;
 	bool sleep = false;
 	fPoint axisCM;
-	bool isShpere = false;
 	float radio = 0;
 	float densityFluid = 1.225f;
 	fPoint velocityFluid = { 0,8 };
