@@ -88,6 +88,8 @@ bool Scene::Start()
 	app->player->Init();
 	app->player->Start();
 
+	app->sceneManager->scene->win = 0;
+
 	return true;
 }
 

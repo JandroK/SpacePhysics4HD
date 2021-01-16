@@ -58,6 +58,15 @@ void PhysicsEngine::VelocityVerletAngular(Body* body, float dt)
 void PhysicsEngine::Step(float dt)
 {
 	ListItem<Body*>* item;
+	
+	ApplyForcesWorld(item);
+	Integrator(item, dt);
+	ComprobeCollisions(item);
+	ComprobeState(item);
+}
+
+void PhysicsEngine::ApplyForcesWorld(ListItem<Body*>*& item)
+{
 	// Only apply forces to dynamic objects and if they are awake
 	for (item = bodies.start; item != NULL; item = item->next)
 	{
@@ -69,13 +78,14 @@ void PhysicsEngine::Step(float dt)
 			if (fGrav.y > 0) item->data->SetOrientationGravity(1);
 			else if (fGrav.y < 0) item->data->SetOrientationGravity(-1);
 			else item->data->SetOrientationGravity(0);
+
 			// If there isn't gravity neither there is wind, but if body get in the surface of the earth the wind is restored
 			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({ 0,0 });
 			else if (fGrav.y > 0) p->SetVelocityFluid({ 0,8 });
 
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
-			
+
 			// Add ineria to asteroids
 			if (item->data->GetVelocity().x < 0 && item->data->GetIsShpere()) item->data->AddTorque(-10);
 			else if (item->data->GetVelocity().x > 0 && item->data->GetIsShpere()) item->data->AddTorque(10);
@@ -84,8 +94,11 @@ void PhysicsEngine::Step(float dt)
 		if (CalculateModule(item->data->GetForces()) != 0)item->data->SetSleep(false);
 		if (item->data->GetTorque() != 0)item->data->SetSleep(false);
 	}
+}
 
-	for (item = bodies.start; item !=NULL; item=item->next)
+void PhysicsEngine::Integrator(ListItem<Body*>*& item, float dt)
+{
+	for (item = bodies.start; item != NULL; item = item->next)
 	{
 		if (item->data->GetType() == BodyType::DYNAMIC_BODY && !item->data->GetSleep())
 		{
@@ -98,7 +111,7 @@ void PhysicsEngine::Step(float dt)
 			if (!item->data->GetIsShpere())
 			{
 				item->data->SetAxisCM({ item->data->GetPosition().x + (item->data->GetWidth() / 2),
-						item->data->GetPosition().y + (item->data->GetHight() / 2) });
+					item->data->GetPosition().y + (item->data->GetHight() / 2) });
 			}
 			else item->data->SetAxisCM(item->data->GetPosition()); // Else the axis follow de position
 			item->data->RotateBody();
@@ -106,6 +119,10 @@ void PhysicsEngine::Step(float dt)
 		item->data->ResetForces();
 		item->data->ResetTorque();
 	}
+}
+
+void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
+{
 	ListItem<Body*>* item2;
 	bool ret = true;
 	for (item = bodies.start; item != NULL; item = item->next)
@@ -116,7 +133,7 @@ void PhysicsEngine::Step(float dt)
 			if (item->next != NULL)item = item->next;
 			else
 			{
-				ret = false; 
+				ret = false;
 				break;
 			}
 		}
@@ -141,8 +158,8 @@ void PhysicsEngine::Step(float dt)
 			// Else the collisions are checked using their matrix of points
 			if (item->data->GetIsShpere() || item2->data->GetIsShpere()) shpere = true;
 			// No ckeck collison if two bodies are static Body
-			if (item->data->GetType()==BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
-			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && shpere)
+			if (item->data->GetType() == BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
+			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis&& shpere)
 			{
 				Collision(item->data, item2->data);
 			}
@@ -154,12 +171,31 @@ void PhysicsEngine::Step(float dt)
 	}
 }
 
+void PhysicsEngine::ComprobeState(ListItem<Body*>*& item)
+{
+	for (item = bodies.start; item != NULL; item = item->next)
+	{
+		switch (item->data->GetBodyState())
+		{
+		case BodyState::HIT:
+			item->data->SetLives(item->data->GetLives() - 1);
+			if (item->data->GetLives() <= 0) item->data->SetBodyState(BodyState::DEADING);
+			break;
+		case BodyState::DEAD:
+			item->data->SetPendingToDelete(true);
+		default:
+			break;
+		}
+		if (item->data->GetPendingToDelete()) DeleteBody(item->data);
+	}
+}
+
 void PhysicsEngine::AddBody(Body* body)
 {
 	bodies.Add(body);
 }
 
-void PhysicsEngine::deleteBody(Body* body)
+void PhysicsEngine::DeleteBody(Body* body)
 {
 	ListItem<Body*>* item;
 

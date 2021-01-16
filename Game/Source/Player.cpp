@@ -53,9 +53,10 @@ bool Player::Start()
 	float posY = 10538;
 
 	// Set properties of the ship
+	ship->SetMass(100);
+	ship->SetLives(10);
 	ship->SetAxisCM({ posX + (playerData.rectPlayer.w >> 1), posY + (playerData.rectPlayer.h >> 1) });
 	ship->SetDimension(PIXEL_TO_METERS(172), PIXEL_TO_METERS(148));
-	ship->SetMass(100);
 	ship->SetCoeficientDrag(0.82);
 	ship->SetSurface(8);
 
@@ -355,7 +356,7 @@ void Player::PlayerControls(float dt)
 	}
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (ship->GetOrientationGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
-		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN )
+		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN && app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
 		// Add Torque in wrong way 
 		if(ship->GetVelocityAngular() < 0)

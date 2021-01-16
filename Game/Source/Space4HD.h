@@ -10,7 +10,7 @@ public:
 	List<Body*> bodies;
 
 	void AddBody(Body* body);
-	void deleteBody(Body* body);
+	void DeleteBody(Body* body);
 
 	fPoint ForceGrav(float mass, float hight); // masa del objeto y distancia a la superfície del planeta
 	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd);
@@ -23,6 +23,10 @@ public:
 	void CalculateAngularAcceleration(Body* body);
 
 	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
+	void ApplyForcesWorld(ListItem<Body*>*& item);
+	void Integrator(ListItem<Body*>*& item, float dt);
+	void ComprobeCollisions(ListItem<Body*>*& item);
+	void ComprobeState(ListItem<Body*>*& item);
 	//Remember to reset current forces/momentum of each body.
 
 	// Integrator

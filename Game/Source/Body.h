@@ -16,6 +16,14 @@ enum class BodyType
 	DYNAMIC_BODY
 };
 
+enum class BodyState
+{
+	IDLE = 0,
+	HIT,
+	DEADING,
+	DEAD
+};
+
 class Body
 {
 public:
@@ -42,13 +50,16 @@ public:
 	float& GetAccelerationAngular() { return angularAcceleration; };
 
 	float GetMass() { return mass; };
+	int GetLives() { return lives; };
 	fPoint GetAxis() { return axisCM; };
 	float GetWidth() { return width; };
 	float GetHight() { return hight; };
 
 	BodyType GetType() { return type; };
+	BodyState GetBodyState() { return state; };
 	bool GetSleep() { return sleep; };
 	bool GetIsShpere() { return isShpere; };
+	bool GetPendingToDelete() { return pendingToDelete; };
 
 	int GetNumPoints() { return numPoints; };
 	fPoint* GetPointsCollision() { return bodyPointsCollision; };
@@ -66,18 +77,21 @@ public:
 
 	// Seters
 	void SetMass(float _mass) { mass = _mass; };
+	void SetLives(float _lives) { lives = _lives; };
 	void SetDimension(float _width, float _hight) { width = _width; hight = _hight; };
 	void SetPosition(fPoint positionInitial) { position = positionInitial; };
 	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
 	void SetAcceleration(fPoint _acceleration) { acceleration = _acceleration; };
 	void SetAxisCM(fPoint axis) { axisCM = axis; };
 	void SetOrientationGravity(int orientation) { gravityDirection = orientation; };
+	void SetPendingToDelete(bool _delete) { pendingToDelete = _delete; };
 
 	void SetPositionAngular(float angle) { angularPosition = angle; };
 	void SetVelocityAngular(float velocity) { angularVelocity = velocity; };
 	void SetAccelerationAngular(float _acceleration) { angularAcceleration = _acceleration; };
 
 	void SetBodyType(BodyType _type) { type = _type; };
+	void SetBodyState(BodyState _state) { state = _state; };
 	void SetSleep(bool _sleep) { sleep = _sleep; };
 	void SetIsShpere(bool _flat) { isShpere = _flat; };
 
@@ -92,9 +106,11 @@ private:
 
 	// General properties
 	float mass = 0;
+	int lives = 1;
 	float width = 0;
 	float hight = 0;
 	BodyType type = BodyType::DYNAMIC_BODY;
+	BodyState state = BodyState::IDLE;
 	bool sleep = false;
 	fPoint axisCM;
 	bool isShpere = false;
@@ -102,6 +118,7 @@ private:
 	float densityFluid = 1.225f;
 	fPoint velocityFluid = { 0,8 };
 	int gravityDirection = 1;
+	bool pendingToDelete = false;
 
 	// Properties linal
 	fPoint position = { 0,0 };

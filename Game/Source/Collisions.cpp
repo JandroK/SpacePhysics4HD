@@ -186,25 +186,27 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		// If newVelocity is smaller than 0.2 or it's bigger than 30m/s the body sleep=true
 		// Because the body is still or it has stamped  
 		float velCriticA = CalculateModule(newVelA);
-		if (velCriticA < 0.2 || velCriticA > 30)
+		if (velCriticA < 0.2)// || velCriticA > 30)
 		{
 			if (!bodyA->GetIsShpere())
 				bodyA->SetSleep(true);
 			bodyA->SetVelocity({ 0,0 });
 			bodyA->SetAcceleration({ 0,0 });
 		}
+		bodyA->SetBodyState(BodyState::HIT);
 	}
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
 	{
 		bodyB->SetVelocity(newVelB);
 		float velCriticB = CalculateModule(newVelB);
-		if (velCriticB < 0.2 || velCriticB > 30)
+		if (velCriticB < 0.2)// || velCriticB > 30)
 		{
 			if (!bodyB->GetIsShpere())
 				bodyB->SetSleep(true);
 			bodyB->SetVelocity({ 0,0 });
 			bodyB->SetAcceleration({ 0,0 });
 		}
+		bodyB->SetBodyState(BodyState::HIT);
 	}
 }
 
@@ -226,8 +228,8 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 		float vYa = vBodyA.y * sin(rad) * -lostEnergy;
 
 		// And roatet again but in the opposite direction 
-		float vXaRotate = vXa * cos(rad + PI * 2); // PI * 2 = 180º
-		float vYaRotate = vYa * sin(rad + PI * 2);
+		float vXaRotate = vXa * cos(rad + PI); // PI = 180º
+		float vYaRotate = vYa * sin(rad + PI);
 
 		bodyA->SetVelocity({ vXaRotate, vYaRotate });
 		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
@@ -285,6 +287,7 @@ void Collisions::CollisionFlatSurfaceY(Body* body)
 		body->SetAccelerationAngular(0);
 		if (!body->GetIsShpere())body->SetSleep(true);
 	}
+	if (velCritic > 30) body->SetBodyState(BodyState::DEADING);
 }
 
 float Collisions::CalculateModule(fPoint distance)
