@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "Scene.h"
 #include "Player.h"
+#include "SceneManager.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -107,10 +108,7 @@ bool Scene::Update(float dt)
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
 
-	if (app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN )
-	{
-		TransitionToScene(SceneType::WIN);
-	}
+	if(app->sceneManager->scene->win == 2)TransitionToScene(SceneType::WIN);
 
 	return true;
 }
@@ -154,6 +152,8 @@ bool Scene::PostUpdate()
 		app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->GetAxis().x) - METERS_TO_PIXELS(item->data->GetRadio()),
 			METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()), NULL, 1, item->data->GetRotation() );
 	}
+	SDL_Rect rectMoon = { 0,0, 100, 100 };
+	app->render->DrawTexture(imgBgSpace, 0, 0, &rectMoon);
 	return ret;
 }
 
