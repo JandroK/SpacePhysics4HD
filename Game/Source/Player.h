@@ -113,7 +113,9 @@ private:
 	SString folder;
 	iPoint tmp;
 
-	uint fireFx;
+	uint turboBigFx;
+	uint turboSmallFx;
+	uint deadFx;
 	uint damageFx;
 
 	State lastState;

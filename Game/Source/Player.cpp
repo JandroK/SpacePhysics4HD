@@ -44,8 +44,10 @@ bool Player::Start()
 	playerData.texLaserTurbo = app->tex->Load("Assets/Textures/laser_turbo.png");
 	playerData.texTurboVelocity = app->tex->Load("Assets/Textures/particle_velocity.png");
 	playerData.texHitDead = app->tex->Load("Assets/Textures/space_ship_asset.png");
-	//fireFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
-	//damageFx = app->audio->LoadFx("Assets/Audio/Fx/hello_man.wav");
+	turboBigFx = app->audio->LoadFx("Assets/Audio/Fx/turbo_big.wav");
+	turboSmallFx = app->audio->LoadFx("Assets/Audio/Fx/turbo_small.wav");
+	damageFx = app->audio->LoadFx("Assets/Audio/Fx/hit_metal_rock.wav");
+	deadFx = app->audio->LoadFx("Assets/Audio/Fx/player_dead.wav");
 
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
@@ -242,6 +244,7 @@ bool Player::PostUpdate()
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9);
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h);
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h);
+		app->audio->PlayFx(turboSmallFx, 100);
 		break;
 
 	case TURBO:
@@ -250,15 +253,18 @@ bool Player::PostUpdate()
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9 + 34);
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h + 34);
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h + 34);
+		app->audio->PlayFx(turboBigFx, 60);
 		break;
 
 	case HIT:
 		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x - 12, positionPlayer.y - 10, &rectPlayer, 1, ship->GetRotation());
 		if (playerData.currentAnimation->HasFinished()) playerData.state = State::IDLE;
+		app->audio->PlayFx(damageFx);
 		break;
 
 	case DEADING:
 		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x, positionPlayer.y, &rectPlayer, 1, ship->GetRotation());
+		app->audio->PlayFx(deadFx);
 		if (playerData.currentAnimation->HasFinished())
 		{
 			playerData.state = DEAD;
@@ -271,7 +277,7 @@ bool Player::PostUpdate()
 	default:
 		break;
 	}
-	
+
 	int x1 = ship->GetPointsCollisionWorld()[0].x;
 	int y1 = ship->GetPointsCollisionWorld()[0].y;
 	int x2 = ship->GetPointsCollisionWorld()[1].x;
@@ -298,7 +304,7 @@ void Player::SpeedAnimationCheck(float dt)
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
 	damageAnim->speed = (dt * 5) ;
-	deadAnim->speed = (dt * 5) ;
+	deadAnim->speed = (dt * 6) ;
 }
 
 void Player::CameraPlayer()
@@ -490,6 +496,10 @@ bool Player::CleanUp()
 	app->tex->UnLoad(playerData.texLaserFly);
 	app->tex->UnLoad(playerData.texLaserTurbo);
 	app->tex->UnLoad(playerData.texTurboVelocity);
+	app->audio->Unload1Fx(turboBigFx);
+	app->audio->Unload1Fx(turboSmallFx);
+	app->audio->Unload1Fx(damageFx);
+	app->audio->Unload1Fx(deadFx);
 	active = false;
 
 	delete idleAnim;
