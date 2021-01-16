@@ -60,6 +60,12 @@
     <ClCompile Include="Source\SceneWin.cpp">
       <Filter>Gameplay\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Font.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HUD.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\App.h" />
@@ -149,6 +155,12 @@
     </ClInclude>
     <ClInclude Include="Source\SceneWin.h">
       <Filter>Gameplay\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Font.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\HUD.h">
+      <Filter>Gameplay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
