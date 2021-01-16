@@ -33,7 +33,7 @@ bool SceneLogo::Start()
 
 	img = app->tex->Load("Assets/Textures/scene_logo.png");
 	introFx = app->audio->LoadFx("Assets/Audio/Fx/intro.wav");
-	app->audio->PlayFx(introFx, 100);
+	app->audio->PlayFx(-1,introFx, 100);
 
 	SDL_QueryTexture(img, NULL, NULL, &imgW, &imgH);
 	app->render->camera.x = app->render->camera.y = 0;

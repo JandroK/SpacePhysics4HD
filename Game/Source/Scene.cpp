@@ -61,7 +61,9 @@ bool Scene::Start()
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroids_explosion.png");
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
+
 	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
+	explosionFx = app->audio->LoadFx("Assets/Audio/Fx/explosion_asteroid.wav");
 
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10572 };
@@ -79,9 +81,6 @@ bool Scene::Start()
 		}
 	}
 	explosionAsteroidAnim->loop = false;
-	explosionAsteroidAnim->speed = 0.05;
-
-	currentAnimAsteroid = idleAsteroidAnim;
 
 	// Animations of the propulsion of the air platform
 	for (int i = 0; i < 8; i++)
@@ -128,10 +127,15 @@ bool Scene::PreUpdate()
 bool Scene::Update(float dt)
 {
 	ComprobeStateAsteroids();
-
+	explosionAsteroidAnim->speed = dt * 3;
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
-	currentAnimAsteroid->Update();
+	ListItem<Asteroids*>* item;
+	// Update all animations asteroids
+	for (item = asteroids.start; item != NULL; item = item->next)
+	{
+		item->data->currentAnimAsteroid->Update();
+	}
 
 	if(app->sceneManager->scene->win == 2)TransitionToScene(SceneType::WIN);
 	if(app->sceneManager->scene->lose == true)TransitionToScene(SceneType::INTRO); //Change to Lose
@@ -169,28 +173,27 @@ bool Scene::PostUpdate()
 	DrawStaticBodies(wallDown);
 	DrawStaticBodies(wallDown);*/
 	
-	ListItem<Body*>* item;
+	ListItem<Asteroids*>* item;
 	// Draw all asteroids
 	for (item = asteroids.start; item != NULL; item = item->next)
 	{
-		if (item->data->GetBodyState() != BodyState::IDLE)
+		if (item->data->asteroid->GetBodyState() != BodyState::IDLE)
 		{
-			currentAnimAsteroid = explosionAsteroidAnim;
+			item->data->currentAnimAsteroid = explosionAsteroidAnim;
 		}
-		else currentAnimAsteroid = idleAsteroidAnim;
-		rect3 = currentAnimAsteroid->GetCurrentFrame();
-		if (item->data->GetBodyState() != BodyState::DEAD)
+
+		rect3 = item->data->currentAnimAsteroid->GetCurrentFrame();
+		if (item->data->asteroid->GetBodyState() != BodyState::DEAD)
 		{
 			//app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x),
 				//METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
 
-			app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->GetAxis().x) - METERS_TO_PIXELS(item->data->GetRadio()) - 31,
-				METERS_TO_PIXELS(item->data->GetAxis().y) - METERS_TO_PIXELS(item->data->GetRadio()) - 33, &rect3, 1, item->data->GetRotation());
+			app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->asteroid->GetAxis().x) - METERS_TO_PIXELS(item->data->asteroid->GetRadio()) - 31,
+				METERS_TO_PIXELS(item->data->asteroid->GetAxis().y) - METERS_TO_PIXELS(item->data->asteroid->GetRadio()) - 33, &rect3, 1, item->data->asteroid->GetRotation());
 
 		}
 	}
-	SDL_Rect rectMoon = { 0,0, 100, 100 };
-	app->render->DrawTexture(imgBgSpace, 0, 0, &rectMoon); //Bug solved
+
 	return ret;
 }
 
@@ -242,23 +245,27 @@ void Scene::CreateWalls(Body* body, fPoint position, float w, float h)
 
 void Scene::CreateEntity()
 {
-	Body* b = new Body;
+	Asteroids* b = new Asteroids;
 	asteroids.Add(b);
 
-	ListItem<Body*>* item = asteroids.start;
-	ListItem<Body*>* itemPrev;
+	ListItem<Asteroids*>* item = asteroids.start;
+	ListItem<Asteroids*>* itemPrev;
 
 	fPoint pos;
 	fPoint posM;
 	float distanceBetweenAxis;
+	
 	// Create as many bodies as	numAsteroids 
 	for (int i = 0; i < numAsteroids; item = item->next, i++)
 	{
+		Body* newAsteroid = new Body;
+		item->data->asteroid = newAsteroid;
+		item->data->currentAnimAsteroid = idleAsteroidAnim;
 		// Randomize the massa of bodies for everyone is different
 		int m = rand() % 100 + 200;
-		item->data->SetMass(m);
-		item->data->SetClassType(BodyClass::ASTEROIDS);
-		item->data->SetRadio(PIXEL_TO_METERS(50));
+		item->data->asteroid->SetMass(m);
+		item->data->asteroid->SetClassType(BodyClass::ASTEROIDS);
+		item->data->asteroid->SetRadio(PIXEL_TO_METERS(50));
 
 		// Randomize position of spawn
 		pos.x = rand() % WINDOW_W - 100 + 100;
@@ -266,10 +273,10 @@ void Scene::CreateEntity()
 		// But this position must be different to the rest asteroids
 		for (itemPrev = item; itemPrev != NULL; itemPrev = itemPrev->prev)
 		{
-			posM = { itemPrev->data->GetAxis().x - PIXEL_TO_METERS(pos.x), itemPrev->data->GetAxis().y - PIXEL_TO_METERS(pos.y) };
+			posM = { itemPrev->data->asteroid->GetAxis().x - PIXEL_TO_METERS(pos.x), itemPrev->data->asteroid->GetAxis().y - PIXEL_TO_METERS(pos.y) };
 			distanceBetweenAxis = app->physics->CalculateModule(posM);
 			// If this asteroid is collision with other calculate again the position of the new asteroid
-			if (itemPrev->data->GetRadio() + item->data->GetRadio() > distanceBetweenAxis - 1)
+			if (itemPrev->data->asteroid->GetRadio() + item->data->asteroid->GetRadio() > distanceBetweenAxis - 1)
 			{
 				pos.x = rand() % WINDOW_W - 100 + 100;
 				pos.y = rand() % 3500 + 2000;
@@ -278,37 +285,47 @@ void Scene::CreateEntity()
 			// In this way, never there will be asteroids in the same position and can buid a procedural level 
 		}
 		
-		item->data->SetPosition({ PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y) });
-		item->data->SetAxisCM(item->data->GetPosition());
+		item->data->asteroid->SetPosition({ PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y) });
+		item->data->asteroid->SetAxisCM(item->data->asteroid->GetPosition());
 
 		// The asteroids also move and collide with each other
 		float velX = rand() % 4 - 2;
 		//float velY = rand() % 2;
 		//item->data->SetVelocity({ velX,velY });
-		if (velX < 0) item->data->AddTorque(-60);
-		if (velX > 0) item->data->AddTorque(60);
-		item->data->SetCoeficientDrag(0.47);
-		item->data->SetSurface(2);
+		if (velX < 0) item->data->asteroid->AddTorque(-60);
+		if (velX > 0) item->data->asteroid->AddTorque(60);
+		item->data->asteroid->SetCoeficientDrag(0.47);
+		item->data->asteroid->SetSurface(2);
 
-		app->physics->CreateBody(item->data);
-		Body* b = new Body;
-		asteroids.Add(b);
+		app->physics->CreateBody(item->data->asteroid);
+		if (i < numAsteroids-1)
+		{
+			Asteroids* b = new Asteroids;
+			asteroids.Add(b);
+		}
 	}
 }
 
 void Scene::ComprobeStateAsteroids()
 {
-	ListItem<Body*>* item = asteroids.start;
+	ListItem<Asteroids*>* item = asteroids.start;
 	for (int i = 0; i < numAsteroids; item = item->next, i++)
 	{
-		switch (item->data->GetBodyState())
+		switch (item->data->asteroid->GetBodyState())
 		{
 		case BodyState::HIT:
-			item->data->SetBodyState(BodyState::DEADING);
+			item->data->asteroid->SetBodyState(BodyState::DEADING);
 			break;
 
 		case BodyState::DEADING:
-			if (currentAnimAsteroid->HasFinished())item->data->SetBodyState(BodyState::DEAD);
+			item->data->asteroid->SetBodyType(BodyType::STATIC_BODY);
+			item->data->asteroid->SetSleep(true);
+			app->audio->PlayFx(-1,explosionFx);
+			if (item->data->currentAnimAsteroid->HasFinished())
+			{
+				item->data->asteroid->SetBodyState(BodyState::DEAD);
+				item->data->currentAnimAsteroid->Reset();
+			}
 			break;
 		}
 	}
@@ -328,6 +345,7 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(imgAsteroids);
 	app->tex->UnLoad(propulsionPlatform.texture);
 	app->tex->UnLoad(propulsionPlatform.textureLaser);
+	app->audio->Unload1Fx(explosionFx);
 
 	//delete currentAnimAsteroid;
 	delete idleAsteroidAnim;

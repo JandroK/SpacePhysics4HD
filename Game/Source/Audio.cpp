@@ -189,7 +189,7 @@ bool Audio::UnloadFxs()
 
 
 // Play WAV
-bool Audio::PlayFx(unsigned int id, int volume)
+bool Audio::PlayFx(int channel, unsigned int id, int volume)
 {
 	bool ret = false;
 
@@ -203,7 +203,7 @@ bool Audio::PlayFx(unsigned int id, int volume)
 		else
 			Mix_VolumeChunk(fx[id], volume);
 
-		Mix_PlayChannel(-1, fx[id], 0);
+		Mix_PlayChannel(channel, fx[id], 0);
 		ret = true;
 	}
 

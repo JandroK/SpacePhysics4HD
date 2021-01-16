@@ -74,7 +74,7 @@ private:
 	Body* wallDown;
 
 	int numAsteroids = 40;
-	List<Body*> asteroids;
+	List<Asteroids*> asteroids;
 
 	static const int numPoints = 4;
 	fPoint pointsCollision[numPoints];
@@ -88,9 +88,10 @@ private:
 	SDL_Rect rectPlatform;
 
 	AnimationPlatform propulsionPlatform;
-	Animation* currentAnimAsteroid;
 	Animation* idleAsteroidAnim;
 	Animation* explosionAsteroidAnim;
+
+	uint explosionFx;
 
 	int win = 0;
 	bool lose = false;

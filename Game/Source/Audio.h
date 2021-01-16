@@ -33,7 +33,7 @@ public:
 	bool UnloadFxs();
 
 	// Play a previously loaded WAV
-	bool PlayFx(unsigned int fx, int volume = 100);
+	bool PlayFx(int channel, unsigned int fx, int volume = 100);
 
 private:
 

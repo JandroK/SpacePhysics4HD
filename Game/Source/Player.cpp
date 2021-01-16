@@ -244,7 +244,7 @@ bool Player::PostUpdate()
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9);
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h);
 		app->render->DrawTexture(playerData.texLaserFly, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h);
-		app->audio->PlayFx(turboSmallFx, 100);
+		app->audio->PlayFx(-1,turboSmallFx, 100);
 		break;
 
 	case TURBO:
@@ -253,18 +253,22 @@ bool Player::PostUpdate()
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x, posPropulsor.y - 30, &rectPlayer, 1, angle, rectPlayer.w / 2, -rectPlayer.h + 9 + 34);
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x - 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 + 23, -rectPlayer.h + 34);
 		app->render->DrawTexture(playerData.texLaserTurbo, posPropulsor.x + 23, posPropulsor.y - 21, &rectPlayer, 1, angle, rectPlayer.w / 2 - 23, -rectPlayer.h + 34);
-		app->audio->PlayFx(turboBigFx, 60);
+		app->audio->PlayFx(-1,turboBigFx, 60);
 		break;
 
 	case HIT:
 		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x - 12, positionPlayer.y - 10, &rectPlayer, 1, ship->GetRotation());
-		if (playerData.currentAnimation->HasFinished()) playerData.state = State::IDLE;
-		app->audio->PlayFx(damageFx);
+		if (playerData.currentAnimation->HasFinished())
+		{
+			playerData.state = State::IDLE; 
+			playerData.currentAnimation->Reset();
+		}
+		app->audio->PlayFx(-1,damageFx);
 		break;
 
 	case DEADING:
 		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x, positionPlayer.y, &rectPlayer, 1, ship->GetRotation());
-		app->audio->PlayFx(deadFx);
+		app->audio->PlayFx(-1,deadFx);
 		if (playerData.currentAnimation->HasFinished())
 		{
 			playerData.state = DEAD;
