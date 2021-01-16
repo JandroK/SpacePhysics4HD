@@ -17,6 +17,12 @@ struct AnimationPlatform
 	SDL_Texture* textureLaser;
 };
 
+struct Asteroids
+{
+	Body* asteroid;
+	Animation* currentAnimAsteroid;
+};
+
 class Scene : public SceneControl
 {
 public:
@@ -38,6 +44,8 @@ public:
 
 	// Called each loop iteration
 	bool Update(float dt);
+
+	void ComprobeStateAsteroids();
 
 	// Called before all Updates
 	bool PostUpdate();
@@ -80,7 +88,9 @@ private:
 	SDL_Rect rectPlatform;
 
 	AnimationPlatform propulsionPlatform;
-	Animation* idleAnim;
+	Animation* currentAnimAsteroid;
+	Animation* idleAsteroidAnim;
+	Animation* explosionAsteroidAnim;
 
 	int win = 0;
 	bool lose = false;
