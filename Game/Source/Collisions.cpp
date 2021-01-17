@@ -196,6 +196,7 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		}
 		if(sphere)bodyA->SetBodyState(BodyState::HIT);
 		if (bodyA->GetClassType() == BodyClass::PLAYER) bodyA->SetBodyState(BodyState::HIT);
+		if (velCriticA > 20) bodyA->SetBodyState(BodyState::DEADING);
 	}
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
 	{
@@ -209,6 +210,7 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 		}
 		if (sphere) bodyB->SetBodyState(BodyState::HIT);
 		if(bodyB->GetClassType()==BodyClass::PLAYER) bodyB->SetBodyState(BodyState::HIT);
+		if (velCriticB > 20) bodyB->SetBodyState(BodyState::DEADING);
 	}
 }
 
@@ -283,13 +285,13 @@ void Collisions::CollisionFlatSurfaceY(Body* body)
 	float lostEnergy = 0.6;
 	body->SetVelocity({ bodyVelocity.x * lostEnergy, bodyVelocity.y * -lostEnergy });
 	float velCritic = CalculateModule(body->GetVelocity());
-	if (velCritic < 0.2 )//|| velCriticB > 30)
+	if (velCritic < 0.2 )
 	{
 		body->SetAcceleration({ 0,0 });
 		body->SetAccelerationAngular(0);
 		if (body->GetClassType() != BodyClass::ASTEROIDS)body->SetSleep(true);
 	}
-	if (velCritic > 30) body->SetBodyState(BodyState::DEADING);
+	if (velCritic > 20) body->SetBodyState(BodyState::DEADING);
 }
 
 float Collisions::CalculateModule(fPoint distance)

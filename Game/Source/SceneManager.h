@@ -13,7 +13,7 @@ class SceneLogo;
 class SceneIntro;
 class Scene;
 class SceneWin;
-//class SceneLose;
+class SceneLose;
 
 class SceneManager : public Module
 {
@@ -81,7 +81,7 @@ public:
 	SceneIntro* sceneIntro;
 	Scene* scene;
 	SceneWin* sceneWin;
-	//SceneLose* sceneLose;
+	SceneLose* sceneLose;
 
 	SceneControl* sceneControl;
 

@@ -110,6 +110,7 @@
     <ClCompile Include="Source\Render.cpp" />
     <ClCompile Include="Source\SceneIntro.cpp" />
     <ClCompile Include="Source\SceneLogo.cpp" />
+    <ClCompile Include="Source\SceneLose.cpp" />
     <ClCompile Include="Source\SceneManager.cpp" />
     <ClCompile Include="Source\SceneWin.cpp" />
     <ClCompile Include="Source\Space4HD.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="Source\SceneControl.h" />
     <ClInclude Include="Source\SceneIntro.h" />
     <ClInclude Include="Source\SceneLogo.h" />
+    <ClInclude Include="Source\SceneLose.h" />
     <ClInclude Include="Source\SceneManager.h" />
     <ClInclude Include="Source\SceneWin.h" />
     <ClInclude Include="Source\Space4HD.h" />

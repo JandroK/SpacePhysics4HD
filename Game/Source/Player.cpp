@@ -388,7 +388,7 @@ void Player::PlayerControls(float dt)
 		playerData.state = State::TURBO;
 		if(playerData.fuel>1)ship->AddForces({ playerData.vecDir.x * 4000, playerData.vecDir.y * 4000 });
 		else ship->AddForces({ playerData.vecDir.x * 1000, playerData.vecDir.y * 1000 });
-		playerData.fuel -= 2;
+		playerData.fuel -= 1.5;
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{

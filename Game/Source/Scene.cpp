@@ -138,7 +138,7 @@ bool Scene::Update(float dt)
 	}
 
 	if(app->sceneManager->scene->win == 2)TransitionToScene(SceneType::WIN);
-	if(app->sceneManager->scene->lose == true)TransitionToScene(SceneType::INTRO); //Change to Lose
+	if(app->sceneManager->scene->lose == true)TransitionToScene(SceneType::LOSE);
 
 	return true;
 }

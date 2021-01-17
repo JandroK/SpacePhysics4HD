@@ -4,7 +4,7 @@
 #include "SceneIntro.h"
 #include "Scene.h"
 #include "SceneWin.h"
-//#include "SceneLose.h"
+#include "SceneLose.h"
 
 #include "Input.h"
 #include "Render.h"
@@ -27,13 +27,13 @@ SceneManager::SceneManager(Input* input, Render* render, Textures* tex) : Module
 	sceneIntro = new SceneIntro();
 	scene = new Scene();
 	sceneWin = new SceneWin();
-	//sceneLose = new SceneLose();
+	sceneLose = new SceneLose();
 
 	AddScene(sceneLogo, false);
 	AddScene(sceneIntro, false);
 	AddScene(scene, false);
 	AddScene(sceneWin, false);
-	//AddScene(sceneLose, false);
+	AddScene(sceneLose, false);
 
 	onTransition = false;
 	fadeOutCompleted = false;
@@ -81,7 +81,7 @@ bool SceneManager::PreUpdate()
 bool SceneManager::Update(float dt)
 {
 	bool ret = true;
-	if (!pause && (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) && (current->name == "scene" || current->name == "sceneLevel2"))
+	if (!pause && (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) && (current->name == "scene"))
 		pause = !pause;
 
 	if (!onTransition)
@@ -140,7 +140,7 @@ bool SceneManager::Update(float dt)
 		case SceneType::INTRO: next = new SceneIntro(); break;
 		case SceneType::LEVEL1: next = new Scene(); break;
 		case SceneType::WIN: next = new SceneWin(); break;
-		//case SceneType::LOSE: next = new SceneLose(); break;
+		case SceneType::LOSE: next = new SceneLose(); break;
 		default: break;
 		}
 

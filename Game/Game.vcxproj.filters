@@ -66,6 +66,9 @@
     <ClCompile Include="Source\HUD.cpp">
       <Filter>Gameplay</Filter>
     </ClCompile>
+    <ClCompile Include="Source\SceneLose.cpp">
+      <Filter>Gameplay\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\App.h" />
@@ -161,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="Source\HUD.h">
       <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SceneLose.h">
+      <Filter>Gameplay\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
