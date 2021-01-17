@@ -7,6 +7,7 @@
 #include "SDL/include/SDL.h"
 
 class Font;
+
 class HUD : public Module
 {
 public:
@@ -27,14 +28,19 @@ public:
 
 private:
 	
+	void Lerp(float min, float max, Uint8 &value, bool &onOff, float &velocity);
+
+	SDL_Texture *miniShipTex;
+
+	SDL_Rect miniShipRect = {0,0,0,0};
+
 	char hudText[64]={0};
 	Font* font;
-	SDL_Color ColorLerp;
-	Uint8 colorValue;
+	SDL_Color ColorLerp = {0,0,0,0};
+	Uint8 colorValue = 0;
 	float velocityLerp = 9;
-	bool lerp;
-	int gravity = 0;
+	bool lerp = false;
+	float gravity = 0;
+	bool startFly = false;
 };
-
-
 #endif // !__HUD_H__
