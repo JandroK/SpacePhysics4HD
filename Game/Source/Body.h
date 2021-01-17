@@ -21,7 +21,8 @@ enum class BodyClass
 	NOTHING = 0,
 	PLAYER,
 	ASTEROIDS,
-	PLATFORMS
+	PLATFORMS,
+	SEA
 };
 
 enum class BodyState

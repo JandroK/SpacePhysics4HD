@@ -52,6 +52,7 @@ bool HUD::PostUpdate()
 	int drawPosY = 20;
 	int size = 64;
 	gravity = app->player->GetBody()->GetGravity() / 100;
+	float velocityY = 0;
 	{
 		if (gravity < -0.5f)
 		{
@@ -90,7 +91,9 @@ bool HUD::PostUpdate()
 
 
 		drawPosY += size;
-		sprintf_s(hudText, size, "V Velocity: %.2f", abs(app->player->GetBody()->GetVelocity().y));
+		velocityY = abs(app->player->GetBody()->GetVelocity().y);
+		if (app->player->GetBody()->GetSleep())velocityY = 0;
+		sprintf_s(hudText, size, "V Velocity: %.2f", velocityY);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
 

@@ -39,6 +39,15 @@ fPoint PhysicsEngine::ForceAeroDrag(fPoint dirVelocity, float density, float vel
 	return fd;
 }
 
+fPoint PhysicsEngine::ForceHydroBuoy(Body* body, float volume)
+{
+	fPoint forceBuoyance;
+	forceBuoyance.x = 0;
+	forceBuoyance.y = 1 * abs(body->GetGravity()) * volume;
+	forceBuoyance.y *= -1;
+	return forceBuoyance;
+}
+
 void PhysicsEngine::VelocityVerletLinear(Body* body, float dt)
 {
 	float posX = body->GetPosition().x + body->GetVelocity().x * dt + 0.5 * body->GetAcceleration().x * dt * dt;
@@ -157,13 +166,15 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 			if (item->data->GetClassType()==BodyClass::ASTEROIDS || item2->data->GetClassType() == BodyClass::ASTEROIDS) sphere = true;
 			// No ckeck collison if two bodies are static Body
 			if (item->data->GetType() == BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
-			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis&& sphere)
+			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && sphere)
 			{
 				Collision(item->data, item2->data);
 			}
 			else if (!sphere && !staticBody)
 			{
-				CollisionSquare(item->data, item2->data);
+				float volume = 0;
+				volume = CollisionSquare(item->data, item2->data);
+				if (volume != 0) item2->data->AddForces(ForceHydroBuoy(item2->data, volume));
 			}
 		}
 	}

@@ -14,7 +14,7 @@ public:
 
 	fPoint ForceGrav(float mass, float hight); // masa del objeto y distancia a la superfície del planeta
 	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd);
-	//fPoint ForceHydroBuoy();
+	fPoint ForceHydroBuoy(Body* body, float volume);
 	//fPoint ForceAeroLift();
 	//fPoint ForceHydroDrag();
 
