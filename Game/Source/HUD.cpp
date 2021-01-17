@@ -73,8 +73,26 @@ bool HUD::PostUpdate()
 	int drawPosY = 20;
 	int size = 64;
 	float velocityY = 0;
-	drawPosY -= size;
+	int letersN = 0;
 
+	//---------- MISSION
+	{
+		velocityY = abs(app->player->GetBody()->GetVelocity().y);
+		if (app->player->GetBody()->GetSleep())velocityY = 0;
+
+		if (app->sceneManager->scene->GetWin() == 0) {
+			sprintf_s(hudText, 30, "Go to the Moon");
+			letersN = 13;
+		}
+		else {
+			sprintf_s(hudText, 30, "Returns to Earth");
+			letersN = 14;
+		}
+		app->render->DrawText(font, hudText, WINDOW_W - (32 * letersN), drawPosY, size, 0, { 255, 255, 255, 255 });
+	}
+
+	//---------- INFORMATION
+	drawPosY -= size;
 	// Gravity
 	{
 		drawPosY += size;
@@ -126,7 +144,6 @@ bool HUD::PostUpdate()
 		app->render->DrawText(font, "%", drawPosX + (9 * 32), drawPosY, size, 0, { 255, shieldColorValue, shieldColorValue, 255 });
 
 	}
-
 
 	// Visual altimeter
 	{	
