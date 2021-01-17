@@ -120,6 +120,7 @@ private:
 	uint turboSmallFx;
 	uint deadFx;
 	uint damageFx;
+	uint danger;
 
 	State lastState;
 };

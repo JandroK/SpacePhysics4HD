@@ -48,6 +48,7 @@ bool Player::Start()
 	turboSmallFx = app->audio->LoadFx("Assets/Audio/Fx/turbo_small.wav");
 	damageFx = app->audio->LoadFx("Assets/Audio/Fx/hit_metal_rock.wav");
 	deadFx = app->audio->LoadFx("Assets/Audio/Fx/player_dead.wav");
+	danger = app->audio->LoadFx("Assets/Audio/Fx/player_in_danger.wav");
 
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
@@ -172,6 +173,10 @@ bool Player::Awake(pugi::xml_node& config)
 
 bool Player::PreUpdate() 
 {
+	if (playerData.fuel < 225 || ship->GetLives() < 2)
+	{
+		app->audio->PlayFx(-1,danger);
+	}	
 	return true;
 }
 
@@ -476,7 +481,7 @@ void Player::GodModeControls(float dt)
 
 void Player::CheckGameOver()
 {
-	if (playerData.state==DEAD)
+	if (playerData.state==DEAD || playerData.fuel <= 0 )
 	{
 		app->sceneManager->scene->SetLose(true);
 	}
@@ -526,6 +531,7 @@ bool Player::CleanUp()
 	app->audio->Unload1Fx(turboSmallFx);
 	app->audio->Unload1Fx(damageFx);
 	app->audio->Unload1Fx(deadFx);
+	app->audio->Unload1Fx(danger);
 	active = false;
 
 	delete idleAnim;
