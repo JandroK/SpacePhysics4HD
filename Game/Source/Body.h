@@ -81,7 +81,7 @@ public:
 	float GetRotation() const { return  RADTODEG * angularPosition; };
 	fPoint GetForces() { return forces; };
 	float GetTorque() { return torque; };
-	int GetGravity() { return gravity; };
+	float GetGravity() { return gravity; };
 
 	// Seters
 	void SetMass(float _mass) { mass = _mass; };
@@ -91,7 +91,7 @@ public:
 	void SetVelocity(fPoint _velocity) { velocity = _velocity; };
 	void SetAcceleration(fPoint _acceleration) { acceleration = _acceleration; };
 	void SetAxisCM(fPoint axis) { axisCM = axis; };
-	void SetGravity(int _gravity) { gravity = _gravity; };
+	void SetGravity(float _gravity) { gravity = _gravity; };
 	void SetPendingToDelete(bool _delete) { pendingToDelete = _delete; };
 
 	void SetPositionAngular(float angle) { angularPosition = angle; };
@@ -125,7 +125,7 @@ private:
 	float radio = 0;
 	float densityFluid = 1.225f;
 	fPoint velocityFluid = { 0,8 };
-	int gravity = 0;
+	float gravity = 0;
 	bool pendingToDelete = false;
 
 	// Properties linal
