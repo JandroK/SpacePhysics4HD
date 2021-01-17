@@ -53,6 +53,7 @@ bool Scene::Start()
 	explosionAsteroidAnim = new Animation();
 	propulsionPlatform.laserFront = new Animation();
 	propulsionPlatform.laserBack = new Animation();
+	waterAnim = new Animation();
 
 	// Load textures and music
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
@@ -62,7 +63,7 @@ bool Scene::Start()
 	imgAsteroids = app->tex->Load("Assets/Textures/asteroids_explosion.png");
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
-	// Add texture to sea -------------------------
+	imgWater = app->tex->Load("Assets/Textures/water_anim.png");
 	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
 	explosionFx = app->audio->LoadFx("Assets/Audio/Fx/explosion_asteroid.wav");
 
@@ -95,6 +96,14 @@ bool Scene::Start()
 	}
 	propulsionPlatform.laserBack->loop = true;
 	propulsionPlatform.laserBack->speed = 0.2;
+
+	// Animation Water
+	for (int  i = 0; i < 14; i++)
+	{
+		waterAnim->PushBack({0, 0 + (371*i), 1920,371});
+	}
+	waterAnim->loop = true;
+	waterAnim->speed = 0.2;
 
 	// Set values of the bodies
 	CreateWalls(platform, { 742, 10400 }, 440, 150, BodyClass::PLATFORMS);
@@ -131,6 +140,8 @@ bool Scene::Update(float dt)
 	explosionAsteroidAnim->speed = dt * 3;
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
+	waterAnim->Update();
+
 	ListItem<Asteroids*>* item;
 	// Update all animations asteroids
 	for (item = asteroids.start; item != NULL; item = item->next)
@@ -152,6 +163,7 @@ bool Scene::PostUpdate()
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
 	SDL_Rect rect3; // Asteroid anim
+	SDL_Rect rect4 = waterAnim->GetCurrentFrame();
 	/*SDL_Rect rectPlatform = {METERS_TO_PIXELS(platform->GetPosition().x),METERS_TO_PIXELS(platform->GetPosition().y),
 		METERS_TO_PIXELS(platform->GetWidth()),METERS_TO_PIXELS(platform->GetHight())};*/
 
@@ -161,19 +173,20 @@ bool Scene::PostUpdate()
 
 	app->player->PostUpdate();
 	app->render->DrawTexture(imgClouds, 0,6620);
+	app->render->DrawTexture(imgWater, 0,10711, &rect4);
 	app->render->DrawTexture(propulsionPlatform.texture, propulsionPlatform.position.x, propulsionPlatform.position.y);
 	app->render->DrawTexture(propulsionPlatform.textureLaser, 390, 10504, &rect,1,23.5);
 	app->render->DrawTexture(propulsionPlatform.textureLaser, 505, 10544, &rect2,1,22);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10504, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10542, &rect2,1,-22);
 
-	DrawStaticBodies(platform);
-	/*DrawStaticBodies(platformMoon);
+	/*DrawStaticBodies(platform);
+	DrawStaticBodies(platformMoon);
 	DrawStaticBodies(moon);
 	DrawStaticBodies(wallLeft);
 	DrawStaticBodies(wallDown);
-	DrawStaticBodies(wallDown);*/
-	DrawStaticBodies(sea);
+	DrawStaticBodies(wallDown);
+	DrawStaticBodies(sea);*/
 
 	ListItem<Asteroids*>* item;
 	// Draw all asteroids
@@ -345,6 +358,7 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(imgPlatformMoon);
 	app->tex->UnLoad(imgClouds);
 	app->tex->UnLoad(imgAsteroids);
+	app->tex->UnLoad(imgWater);
 	app->tex->UnLoad(propulsionPlatform.texture);
 	app->tex->UnLoad(propulsionPlatform.textureLaser);
 	app->audio->Unload1Fx(explosionFx);
@@ -352,6 +366,7 @@ bool Scene::CleanUp()
 	//delete currentAnimAsteroid;
 	delete idleAsteroidAnim;
 	delete explosionAsteroidAnim;
+	delete waterAnim;
 	delete propulsionPlatform.laserBack;
 	delete propulsionPlatform.laserFront;
 

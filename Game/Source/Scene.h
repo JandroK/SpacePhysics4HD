@@ -86,11 +86,13 @@ private:
 	SDL_Texture* imgClouds;
 	SDL_Texture* imgPlatformMoon;
 	SDL_Texture* imgAsteroids;
+	SDL_Texture* imgWater;
 	SDL_Rect rectPlatform;
 
 	AnimationPlatform propulsionPlatform;
 	Animation* idleAsteroidAnim;
 	Animation* explosionAsteroidAnim;
+	Animation* waterAnim;
 
 	uint explosionFx;
 

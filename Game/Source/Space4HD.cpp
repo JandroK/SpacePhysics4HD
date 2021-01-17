@@ -188,6 +188,7 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 				if (volume != 0)
 				{
 					item2->data->AddForces(ForceHydroBuoy(item2->data, volume));
+					item2->data->AddForces({ 300,0 }); //Force wave to right
 					//item2->data->AddForces(ForceHydroDrag(item2->data->GetVelocity(), {0.5,0}));
 				}
 					
