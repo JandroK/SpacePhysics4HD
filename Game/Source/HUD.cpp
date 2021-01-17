@@ -49,7 +49,7 @@ bool HUD::PostUpdate()
 	int drawPosX = 10;
 	int drawPosY = 20;
 	int size = 64;
-	
+	float velocityY = 0;
 	{
 		// Funcion para devolver la fuerza G que le afecta a la nave 
 		sprintf_s(hudText, 64, "G-Force: %.2f", 34.21f); 
@@ -62,7 +62,9 @@ bool HUD::PostUpdate()
 		app->render->DrawText(font, "%", drawPosX+(7*32), drawPosY, size, 0, { 255, 255, 255, 255 });
 
 		drawPosY += size;
-		sprintf_s(hudText, size, "V Velocity: %.2f", abs(app->player->GetBody()->GetVelocity().y));
+		velocityY = abs(app->player->GetBody()->GetVelocity().y);
+		if (app->player->GetBody()->GetSleep())velocityY = 0;
+		sprintf_s(hudText, size, "V Velocity: %.2f", velocityY);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
 

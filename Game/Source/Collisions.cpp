@@ -134,9 +134,9 @@ bool Collisions::IsInsidePolygons(fPoint polygon[],int n, fPoint polygon2[], int
 	return false;  // Same as (count%2 == 1) 
 }
 
-bool Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
+float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 {
-	bool ret = false;
+	bool volume = 0;
 	fPoint point;
 	for (int i = 0; i < bodyB->GetNumPoints(); i++)
 	{
@@ -144,11 +144,29 @@ bool Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 		if (point.x > bodyA->GetPointsCollisionWorld()[0].x && point.x < bodyA->GetPointsCollisionWorld()[1].x
 			&& point.y > bodyA->GetPointsCollisionWorld()[0].y && point.y < bodyA->GetPointsCollisionWorld()[3].y)
 		{ 
-			Descliping(bodyB, point, bodyA->GetPointsCollisionWorld());
-			return true;
+			if (bodyA->GetClassType() == BodyClass::PLATFORMS)
+			{
+				Descliping(bodyB, point, bodyA->GetPointsCollisionWorld());
+				return 0;
+			}
+			else if (bodyA->GetClassType() == BodyClass::SEA)
+			{
+				// Calculate hight submerged of body
+				float hSubmerged = point.y;
+				for (int j = i; j < bodyB->GetNumPoints(); j++)
+				{
+					if (hSubmerged < bodyB->GetPointsCollisionWorld()[i].y)
+							hSubmerged = bodyB->GetPointsCollisionWorld()[i].y;
+				}
+				// if hight submerged is more bigger than the maximum height hight submerged = maximum height
+				if (hSubmerged > bodyB->GetHight())hSubmerged = bodyB->GetHight();
+				// Calculate volume
+				volume = hSubmerged * bodyB->GetSurface();
+
+			}
 		}
 	}
-	return ret;
+	return volume;
 }
 
 void Collisions::Collision(Body* bodyA, Body* bodyB)
