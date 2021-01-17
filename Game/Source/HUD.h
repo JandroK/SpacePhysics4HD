@@ -26,10 +26,14 @@ public:
 	bool CleanUp();
 
 private:
-
+	
 	char hudText[64]={0};
 	Font* font;
-
+	SDL_Color ColorLerp;
+	Uint8 colorValue;
+	float velocityLerp = 9;
+	bool lerp;
+	int gravity = 0;
 };
 
 

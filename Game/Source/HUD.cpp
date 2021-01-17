@@ -30,7 +30,9 @@ bool HUD::Awake(pugi::xml_node&)
 bool HUD::Start()
 {
 	font = new Font("Assets/Fonts/cyberverse.xml");
-	
+	ColorLerp = { 255,255,255,255 };
+	colorValue = ColorLerp.g;
+	lerp = true;
 	return true;
 }
 
@@ -49,23 +51,51 @@ bool HUD::PostUpdate()
 	int drawPosX = 10;
 	int drawPosY = 20;
 	int size = 64;
-	
+	gravity = app->player->GetBody()->GetGravity() / 100;
 	{
+		if (gravity < -0.5f)
+		{
+			gravity += 4;
+		}
+
 		// Funcion para devolver la fuerza G que le afecta a la nave 
-		sprintf_s(hudText, 64, "G-Force: %.2f", 34.21f); 
+		sprintf_s(hudText, 64, "G-Force: %.2f", gravity);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 
 		drawPosY += size;
 
-		sprintf_s(hudText, size, "Fuel: %3.0f", abs((app->player->playerData.fuel * 100) / 1500));
-		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
-		app->render->DrawText(font, "%", drawPosX+(7*32), drawPosY, size, 0, { 255, 255, 255, 255 });
+		float fuel = abs((app->player->playerData.fuel * 100) / 1500);
+		sprintf_s(hudText, size, "Fuel: %3.0f",fuel);
+		if (fuel > 15){
+			app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
+			app->render->DrawText(font, "%", drawPosX + (7 * 32), drawPosY, size, 0, { 255, 255, 255, 255 });
+		}
+		else
+		{
+
+			if (lerp) {
+				colorValue -= velocityLerp;
+				if (colorValue <= 15)lerp = false;
+			}
+			else { 
+				colorValue += velocityLerp; 
+				if (colorValue > 235)lerp = true;
+			}
+
+			LOG("%d",colorValue);
+
+			app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
+			app->render->DrawText(font, "%", drawPosX + (7 * 32), drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
+		}
+
 
 		drawPosY += size;
 		sprintf_s(hudText, size, "V Velocity: %.2f", abs(app->player->GetBody()->GetVelocity().y));
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
 
+
+	
 	{	// Visual altimeter
 		int tall = 12;
 		float wRect = (10538 - (WINDOW_H / 2)) / tall;
