@@ -15,6 +15,7 @@ public:
 	fPoint ForceGrav(float mass, float hight); // masa del objeto y distancia a la superfície del planeta
 	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd);
 	fPoint ForceHydroBuoy(Body* body, float volume);
+	fPoint ForceHydroDrag(fPoint velBody, fPoint velSea);
 	//fPoint ForceAeroLift();
 	//fPoint ForceHydroDrag();
 
@@ -37,11 +38,10 @@ public:
 	float GetCurrentGravity() { return gravity; };
 
 	// Seters
-	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; slopeEarth = -gravityEarth / rangeRadiusPlanetA; };
-	void SetGravityPlanetB(float gravity) { gravityMoon = gravity; slopeMoon = -gravityMoon / rangeRadiusPlanetB; };
 	void SetPositionAndRangePlanetA(float position, float radius) { positionPlanetA = position, rangeRadiusPlanetA = radius; };
 	void SetPositionAndRangePlanetB(float position, float radius) { positionPlanetB = position, rangeRadiusPlanetB = radius; };
-
+	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; slopeEarth = -gravityEarth / rangeRadiusPlanetA; };
+	void SetGravityPlanetB(float gravity) { gravityMoon = gravity; slopeMoon = -gravityMoon / rangeRadiusPlanetB; };
 	bool CleanUp();
 
 private:

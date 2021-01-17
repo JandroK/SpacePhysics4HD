@@ -48,6 +48,17 @@ fPoint PhysicsEngine::ForceHydroBuoy(Body* body, float volume)
 	return forceBuoyance;
 }
 
+fPoint PhysicsEngine::ForceHydroDrag(fPoint velBody, fPoint velSea)
+{
+	fPoint forceDrag;
+	fPoint dirVelocity = NormalizeVector(velBody);
+	float velRelative = CalculateModule(velBody - velSea);
+	float forceDragModule = 0.5 * velRelative;
+	forceDrag.x = -forceDragModule * dirVelocity.x;
+	forceDrag.y = -forceDragModule * dirVelocity.y;
+	return fPoint();
+}
+
 void PhysicsEngine::VelocityVerletLinear(Body* body, float dt)
 {
 	float posX = body->GetPosition().x + body->GetVelocity().x * dt + 0.5 * body->GetAcceleration().x * dt * dt;
@@ -174,7 +185,12 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 			{
 				float volume = 0;
 				volume = CollisionSquare(item->data, item2->data);
-				if (volume != 0) item2->data->AddForces(ForceHydroBuoy(item2->data, volume));
+				if (volume != 0)
+				{
+					item2->data->AddForces(ForceHydroBuoy(item2->data, volume));
+					//item2->data->AddForces(ForceHydroDrag(item2->data->GetVelocity(), {0.5,0}));
+				}
+					
 			}
 		}
 	}

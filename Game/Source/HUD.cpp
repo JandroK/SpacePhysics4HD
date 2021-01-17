@@ -61,7 +61,7 @@ bool HUD::PostUpdate()
 
 	// Gravity
 	{
-		gravity = app->player->GetBody()->GetGravity() / 100;
+		gravity = app->player->GetBody()->GetGravity() / app->player->GetBody()->GetMass();
 		if (gravity == 0.f && startFly == false)gravity = 8.11f;
 		else startFly = true;
 		if (gravity < -0.5f) gravity += 4;

@@ -52,7 +52,7 @@ bool Player::Start()
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
-	float posY = 10538;
+	float posY = 10282;
 
 	// Set properties of the ship
 	ship->SetMass(100);
@@ -289,6 +289,7 @@ bool Player::PostUpdate()
 			ship->SetAccelerationAngular(0);
 			ship->SetBodyState(BodyState::DEAD);
 			ship->SetBodyType(BodyType::STATIC_BODY);
+			ship->SetSleep(true);
 		}
 		break;
 	default:
@@ -321,7 +322,7 @@ void Player::SpeedAnimationCheck(float dt)
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
 	damageAnim->speed = (dt * 12) ;
-	deadAnim->speed = (dt * 6) ;
+	deadAnim->speed = (dt * 7) ;
 }
 
 void Player::CameraPlayer()
@@ -535,8 +536,6 @@ bool Player::CleanUp()
 
 	delete playerData.pointsCollision;
 	delete playerData.pointsCollisionWorld;
-
-	//delete ship;
 
 	return true;
 }

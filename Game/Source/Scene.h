@@ -52,7 +52,7 @@ public:
 
 
 	// Create Entities
-	void CreateWalls(Body* body, fPoint position, float w, float h);
+	void CreateWalls(Body* body, fPoint position, float w, float h, BodyClass bodyClass);
 	void CreateEntity();
 	void DrawStaticBodies(Body* wallDown);
 
@@ -72,6 +72,7 @@ private:
 	Body* wallLeft;
 	Body* wallRight;
 	Body* wallDown;
+	Body* sea;
 
 	int numAsteroids = 40;
 	List<Asteroids*> asteroids;

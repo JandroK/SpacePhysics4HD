@@ -136,7 +136,6 @@ bool Collisions::IsInsidePolygons(fPoint polygon[],int n, fPoint polygon2[], int
 
 float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 {
-	bool volume = 0;
 	fPoint point;
 	for (int i = 0; i < bodyB->GetNumPoints(); i++)
 	{
@@ -153,20 +152,22 @@ float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 			{
 				// Calculate hight submerged of body
 				float hSubmerged = point.y;
-				for (int j = i; j < bodyB->GetNumPoints(); j++)
+				for (int j = i+1; j < bodyB->GetNumPoints(); j++)
 				{
-					if (hSubmerged < bodyB->GetPointsCollisionWorld()[i].y)
-							hSubmerged = bodyB->GetPointsCollisionWorld()[i].y;
+					if (hSubmerged < bodyB->GetPointsCollisionWorld()[j].y)
+							hSubmerged = bodyB->GetPointsCollisionWorld()[j].y;
 				}
+				hSubmerged = abs(hSubmerged- bodyA->GetPointsCollisionWorld()[0].y);
+				hSubmerged = PIXEL_TO_METERS(hSubmerged);
 				// if hight submerged is more bigger than the maximum height hight submerged = maximum height
 				if (hSubmerged > bodyB->GetHight())hSubmerged = bodyB->GetHight();
 				// Calculate volume
-				volume = hSubmerged * bodyB->GetSurface();
+				return hSubmerged * bodyB->GetSurface();
 
 			}
 		}
 	}
-	return volume;
+	return 0;
 }
 
 void Collisions::Collision(Body* bodyA, Body* bodyB)
