@@ -57,7 +57,7 @@ bool HUD::PostUpdate()
 
 		drawPosY += size;
 
-		sprintf_s(hudText, size, "Fuel: %3.0f", (app->player->playerData.fuel * 100) / 1500);
+		sprintf_s(hudText, size, "Fuel: %3.0f", abs((app->player->playerData.fuel * 100) / 1500));
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 		app->render->DrawText(font, "%", drawPosX+(7*32), drawPosY, size, 0, { 255, 255, 255, 255 });
 

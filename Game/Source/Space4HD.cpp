@@ -75,9 +75,7 @@ void PhysicsEngine::ApplyForcesWorld(ListItem<Body*>*& item)
 			Body* p = item->data;
 			fPoint fGrav = ForceGrav(p->GetMass(), p->GetPosition().y);
 			item->data->AddForces(fGrav);
-			if (fGrav.y > 0) item->data->SetOrientationGravity(1);
-			else if (fGrav.y < 0) item->data->SetOrientationGravity(-1);
-			else item->data->SetOrientationGravity(0);
+			item->data->SetGravity(fGrav.y);
 
 			// If there isn't gravity neither there is wind, but if body get in the surface of the earth the wind is restored
 			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({ 0,0 });
