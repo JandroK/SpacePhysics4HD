@@ -162,7 +162,7 @@ float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 				// if hight submerged is more bigger than the maximum height hight submerged = maximum height
 				if (hSubmerged > bodyB->GetHight())hSubmerged = bodyB->GetHight();
 				// Calculate volume
-				return hSubmerged * bodyB->GetSurface();
+				return hSubmerged * bodyB->GetSurface()/10; // 10 = FUYM
 
 			}
 		}
