@@ -35,10 +35,19 @@ bool HUD::Start()
 	SDL_QueryTexture(miniShipTex,NULL,NULL,&miniShipRect.w,&miniShipRect.h);
 	
 	font = new Font("Assets/Fonts/cyberverse.xml");
-	ColorLerp = { 255,255,255,255 };
-	colorValue = ColorLerp.g;
-	lerp = true;
+	fuelColorValue = 255;
+	fuelLerp = true;
+
+	shieldColorValue = 255;
+	shieldLerp = true;
+
 	startFly = false;
+
+	miliseconds = 0;
+	miliseconds2 = 0;
+	seconds = 0;
+	minuts = 0;
+
 	return true;
 }
 
@@ -49,6 +58,12 @@ bool HUD::PreUpdate()
 
 bool HUD::Update(float dt)
 {
+	if (startFly)
+	{
+		miliseconds = timer.Read() - minuts * 60000;
+		Chronometer();
+	}
+	
 	return true;
 }
 
@@ -58,12 +73,17 @@ bool HUD::PostUpdate()
 	int drawPosY = 20;
 	int size = 64;
 	float velocityY = 0;
+	drawPosY -= size;
 
 	// Gravity
 	{
+		drawPosY += size;
 		gravity = app->player->GetBody()->GetGravity() / app->player->GetBody()->GetMass();
 		if (gravity == 0.f && startFly == false)gravity = 8.11f;
-		else startFly = true;
+		else if (startFly == false) { 
+			startFly = true; 
+			timer.Start();
+		}
 		if (gravity < -0.5f) gravity += 4;
 		sprintf_s(hudText, 64, "G-Force: %.2f", gravity);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
@@ -78,35 +98,35 @@ bool HUD::PostUpdate()
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
 
+	// Time
+	{
+		drawPosY += size;
+		sprintf_s(hudText, size, "Time: %d:%02d:%02d", minuts, miliseconds / 100, miliseconds2);
+		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
+
+	}
+
 	// FUEL
 	{
 		drawPosY += size;
 		float fuel = abs((app->player->playerData.fuel * 100) / 1500);
 		sprintf_s(hudText, size, "Fuel: %3.0f", fuel);
-		if (fuel > 15)
-		{
-			app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
-			app->render->DrawText(font, "%", drawPosX + (7 * 32), drawPosY, size, 0, { 255, 255, 255, 255 });
-		}
-		else
-		{
-			Lerp(15, 235, colorValue, lerp, velocityLerp);
-
-			LOG("%d", colorValue);
-
-			app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
-			app->render->DrawText(font, "%", drawPosX + (7 * 32), drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
-		}
+		if (fuel < 15) Lerp(15, 235, fuelColorValue, fuelLerp, velocityLerp);
+		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, fuelColorValue, fuelColorValue, 255 });
+		app->render->DrawText(font, "%", drawPosX + (7 * 32), drawPosY, size, 0, { 255, fuelColorValue, fuelColorValue, 255 });
 	}
 
 	// Lives / Shield
 	{
 		drawPosY += size;
-		sprintf_s(hudText, size, "Shields: %3d", app->player->GetBody()->GetLives() * 10);
-		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
-		app->render->DrawText(font, "%", drawPosX + (9 * 32), drawPosY, size, 0, { 255, colorValue, colorValue, 255 });
+		int shield = app->player->GetBody()->GetLives() * 10;
+		sprintf_s(hudText, size, "Shields: %3d", shield);
+		if (shield <= 20) Lerp(15, 235, shieldColorValue, shieldLerp, velocityLerp);
+		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, shieldColorValue, shieldColorValue, 255 });
+		app->render->DrawText(font, "%", drawPosX + (9 * 32), drawPosY, size, 0, { 255, shieldColorValue, shieldColorValue, 255 });
 
 	}
+
 
 	// Visual altimeter
 	{	
@@ -146,5 +166,21 @@ void HUD::Lerp(float min, float max, Uint8 &value, bool &onOff, float &velocity)
 	{
 		value += velocity;
 		if (value >= max)onOff = true;
+	}
+}
+
+void HUD::Chronometer()
+{
+	if (miliseconds >= 60000)
+	{
+		minuts++;
+	}
+	miliseconds = miliseconds * 0.1;
+
+	int centenas = 0;
+	if (miliseconds >= 100)
+	{
+		centenas = miliseconds / 100;
+		miliseconds2 = miliseconds - (centenas * 100);
 	}
 }

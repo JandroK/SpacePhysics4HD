@@ -30,17 +30,32 @@ private:
 	
 	void Lerp(float min, float max, Uint8 &value, bool &onOff, float &velocity);
 
+	void Chronometer();
+
+
 	SDL_Texture *miniShipTex;
 
 	SDL_Rect miniShipRect = {0,0,0,0};
 
 	char hudText[64]={0};
 	Font* font;
-	SDL_Color ColorLerp = {0,0,0,0};
-	Uint8 colorValue = 0;
+
+	Uint8 shieldColorValue = 0;
+	bool shieldLerp = false;
+
+	Uint8 fuelColorValue = 0;
+	bool fuelLerp = false;
+
 	float velocityLerp = 9;
-	bool lerp = false;
+
 	float gravity = 0;
 	bool startFly = false;
+
+	Timer timer;
+	uint miliseconds = 0;
+	uint miliseconds2 = 0;
+	uint seconds = 0;
+	uint minuts = 0;
+	Timer auxTimePause;
 };
 #endif // !__HUD_H__
