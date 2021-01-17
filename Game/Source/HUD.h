@@ -28,7 +28,7 @@ public:
 
 private:
 	
-	void Lerp(float min, float max, Uint8 &value, bool &onOff, float &velocity);
+	void Lerp(float min, float max, Uint8 &value, bool &onOff, float velocity);
 
 	void Chronometer();
 
@@ -39,6 +39,9 @@ private:
 
 	char hudText[64]={0};
 	Font* font;
+
+	Uint8 missionColorValue = 0;
+	bool missionLerp = false;
 
 	Uint8 shieldColorValue = 0;
 	bool shieldLerp = false;

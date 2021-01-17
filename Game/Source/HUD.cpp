@@ -35,6 +35,10 @@ bool HUD::Start()
 	SDL_QueryTexture(miniShipTex,NULL,NULL,&miniShipRect.w,&miniShipRect.h);
 	
 	font = new Font("Assets/Fonts/cyberverse.xml");
+	
+	missionColorValue = 255;
+	missionLerp = false;
+	
 	fuelColorValue = 255;
 	fuelLerp = true;
 
@@ -85,10 +89,13 @@ bool HUD::PostUpdate()
 			letersN = 13;
 		}
 		else {
+			if (missionColorValue <= 235 || !missionLerp) Lerp(15, 235, missionColorValue, missionLerp, 5);
+			else missionColorValue = 255;
+			
 			sprintf_s(hudText, 30, "Returns to Earth");
 			letersN = 14;
 		}
-		app->render->DrawText(font, hudText, WINDOW_W - (32 * letersN), drawPosY, size, 0, { 255, 255, 255, 255 });
+		app->render->DrawText(font, hudText, WINDOW_W - (32 * letersN), drawPosY, size, 0, { 255, missionColorValue, missionColorValue, 255 });
 	}
 
 	//---------- INFORMATION
@@ -172,7 +179,7 @@ bool HUD::CleanUp()
 	return true;
 }
 
-void HUD::Lerp(float min, float max, Uint8 &value, bool &onOff, float &velocity)
+void HUD::Lerp(float min, float max, Uint8 &value, bool &onOff, float velocity)
 {
 	if (onOff)
 	{

@@ -488,8 +488,7 @@ void Player::CheckGameOver()
 }
 void Player::CheckWin()
 {
-	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3
-		&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
+	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3)//	&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
 	{
 		if (METERS_TO_PIXELS(ship->GetPosition().y) > 560 && METERS_TO_PIXELS(ship->GetPosition().y) < 580
 			&& app->sceneManager->scene->GetWin() != 1)
