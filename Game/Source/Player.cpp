@@ -296,7 +296,7 @@ bool Player::PostUpdate()
 		break;
 	}
 
-	int x1 = ship->GetPointsCollisionWorld()[0].x;
+	/*int x1 = ship->GetPointsCollisionWorld()[0].x;
 	int y1 = ship->GetPointsCollisionWorld()[0].y;
 	int x2 = ship->GetPointsCollisionWorld()[1].x;
 	int y2 = ship->GetPointsCollisionWorld()[1].y;
@@ -310,7 +310,7 @@ bool Player::PostUpdate()
 	int x4 = METERS_TO_PIXELS(ship->GetAxis().x);
 	int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
 
-	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);*/
 
 	return true;
 }
@@ -492,7 +492,7 @@ void Player::CheckWin()
 			app->sceneManager->scene->SetWin(1);
 		}
 			
-		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10600 && METERS_TO_PIXELS(ship->GetPosition().y) > 10400
+		if (METERS_TO_PIXELS(ship->GetPosition().y) < 10300 && METERS_TO_PIXELS(ship->GetPosition().y) > 10200
 			&& app->sceneManager->scene->GetWin() != 0 && app->sceneManager->scene->GetWin() != 2)
 		{
 			app->sceneManager->scene->SetWin(2);
