@@ -25,7 +25,7 @@ struct PlayerData
 	Animation* currentAnimation;
 	uint lives = 5;
 	uint respawns = 0;
-	uint fuel = 0;
+	float fuel = 0;
 	//uint *stateShoot = 0;
 	//iPoint* shootPosition;
 	//iPoint* shootPointsCollision;

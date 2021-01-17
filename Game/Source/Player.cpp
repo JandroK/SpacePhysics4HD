@@ -97,7 +97,7 @@ bool Player::Start()
 	playerData.state = IDLE;
 
 	playerData.respawns = 3;
-	playerData.fuel = 0;
+	playerData.fuel = 1500;
 	playerData.lives = 3;
 
 	idleAnim->loop = true;
@@ -178,7 +178,7 @@ bool Player::PreUpdate()
 bool Player::Update(float dt) 
 {
 	// Active GodMode, this mode allows to move without physics
-	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
 	{
 		godMode = !godMode;
 
@@ -192,8 +192,21 @@ bool Player::Update(float dt)
 	SpeedAnimationCheck(dt);
 	if (playerData.state != State::DEADING && playerData.state != State::DEAD && playerData.state != State::HIT)
 	{
-		if (!godMode)PlayerControls(dt);
+
+		if (!godMode) 
+		{
+			if (playerData.fuel >= 0)
+			{
+				PlayerControls(dt);
+			}
+			else
+			{
+				playerData.fuel = 0;
+				playerData.state = State::IDLE;
+			}
+		}
 		else GodModeControls(dt);
+
 	}
 	CameraPlayer();
 
@@ -307,7 +320,7 @@ void Player::SpeedAnimationCheck(float dt)
 	flyAnim->speed = (dt * 9) ;
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
-	damageAnim->speed = (dt * 5) ;
+	damageAnim->speed = (dt * 12) ;
 	deadAnim->speed = (dt * 6) ;
 }
 
@@ -374,6 +387,7 @@ void Player::PlayerControls(float dt)
 		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::TURBO;
 		ship->AddForces({ playerData.vecDir.x * 4000, playerData.vecDir.y * 4000 });
+		playerData.fuel -= 1.5;
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
@@ -381,6 +395,7 @@ void Player::PlayerControls(float dt)
 		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::FLY;
 		ship->AddForces({ playerData.vecDir.x * 2000, playerData.vecDir.y * 2000 });
+		playerData.fuel -= 1;
 	}
 	else playerData.state = State::IDLE;
 
