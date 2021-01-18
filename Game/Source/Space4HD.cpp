@@ -98,12 +98,12 @@ void PhysicsEngine::ApplyForcesWorld(ListItem<Body*>*& item)
 			item->data->SetGravity(fGrav.y);
 
 			// If there isn't gravity neither there is wind, but if body get in the surface of the earth the wind is restored
-			if (CalculateModule(fGrav) == 0) p->SetVelocityFluid({ 0,0 });
-			else if (fGrav.y > 0) p->SetVelocityFluid({ 0,8 });
+			if (fGrav.y > 0) p->SetVelocityFluid({ 0,8 });
+			else p->SetVelocityFluid({ 0,0 });
 
 			float velRelative = CalculateModule(p->GetVelocity() - p->GetVelocityFluid());
 			item->data->AddForces(ForceAeroDrag(p->GetVelocity(), p->GetDensityFluid(), velRelative, p->GetSurface(), p->GetCoeficientDrag()));
-
+			
 			// Add ineria to asteroids
 			if (item->data->GetVelocity().x < 0 && item->data->GetClassType() == BodyClass::ASTEROIDS) item->data->AddTorque(-10);
 			else if (item->data->GetVelocity().x > 0 && item->data->GetClassType() == BodyClass::ASTEROIDS) item->data->AddTorque(10);

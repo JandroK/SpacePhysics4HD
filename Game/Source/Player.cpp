@@ -183,7 +183,7 @@ bool Player::PreUpdate()
 bool Player::Update(float dt) 
 {
 	// Active GodMode, this mode allows to move without physics
-	if (app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN)
 	{
 		godMode = !godMode;
 
@@ -301,7 +301,7 @@ bool Player::PostUpdate()
 		break;
 	}
 
-	/*int x1 = ship->GetPointsCollisionWorld()[0].x;
+	int x1 = ship->GetPointsCollisionWorld()[0].x;
 	int y1 = ship->GetPointsCollisionWorld()[0].y;
 	int x2 = ship->GetPointsCollisionWorld()[1].x;
 	int y2 = ship->GetPointsCollisionWorld()[1].y;
@@ -315,7 +315,7 @@ bool Player::PostUpdate()
 	int x4 = METERS_TO_PIXELS(ship->GetAxis().x);
 	int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
 
-	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);*/
+	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
 
 	return true;
 }
@@ -332,7 +332,7 @@ void Player::SpeedAnimationCheck(float dt)
 
 void Player::CameraPlayer()
 {
-	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetPosition().y) - WINDOW_H / 2);
+	app->render->camera.y = -(METERS_TO_PIXELS(ship->GetAxis().y) - WINDOW_H / 2);
 	if (app->render->camera.y > 0) app->render->camera.y = 0;
 	if (app->render->camera.y < -11081+ WINDOW_H) app->render->camera.y = -11081 + WINDOW_H;
 }
@@ -445,13 +445,26 @@ void Player::GodModeControls(float dt)
 	else velGodMode = PIXEL_TO_METERS(10);
 
 	if (app->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+	{
+		ship->SetAxisCM({ ship->GetAxis().x, ship->GetAxis().y - velGodMode });
 		ship->SetPosition({ ship->GetPosition().x, ship->GetPosition().y - velGodMode });
+	}	
 	if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+	{
+		ship->SetAxisCM({ ship->GetAxis().x, ship->GetAxis().y + velGodMode });
 		ship->SetPosition({ ship->GetPosition().x, ship->GetPosition().y + velGodMode });
+	}
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	{
+		ship->SetAxisCM({ ship->GetAxis().x - velGodMode, ship->GetAxis().y });
 		ship->SetPosition({ ship->GetPosition().x - velGodMode, ship->GetPosition().y });
+	}
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+	{
+		ship->SetAxisCM({ ship->GetAxis().x + velGodMode, ship->GetAxis().y });
 		ship->SetPosition({ ship->GetPosition().x + velGodMode, ship->GetPosition().y });
+	}
+		
 }
 
 //void Player::MovePlayer(float dt)
