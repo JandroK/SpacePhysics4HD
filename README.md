@@ -19,7 +19,11 @@ a nuclear engine to protect yourself from the sun's radiation because the sun is
  - Asteroids have inertia
  - Animations of waves and propulsion air platform
  - Player animation depending on your state
- - Audio feedback of player propulsion, player hit and player dead 
+ - Audio feedback:
+   + Player propulsion
+   + Player hit
+   + Player in danger
+   + Player dead
  - HUD contain: 
    + Current force gravity
    + Vertical velocity
