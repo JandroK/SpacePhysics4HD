@@ -287,14 +287,14 @@ bool Player::PostUpdate()
 	case DEADING:
 		app->render->DrawTexture(playerData.texHitDead, positionPlayer.x, positionPlayer.y, &rectPlayer, 1, ship->GetRotation());
 		app->audio->PlayFx(-1,deadFx);
+		ship->SetBodyType(BodyType::STATIC_BODY);
+		ship->SetAcceleration({ 0, 0 });
+		ship->SetAccelerationAngular(0);
+		ship->SetSleep(true);
 		if (playerData.currentAnimation->HasFinished())
 		{
 			playerData.state = DEAD;
-			ship->SetAcceleration({ 0, 0 });
-			ship->SetAccelerationAngular(0);
-			ship->SetBodyState(BodyState::DEAD);
-			ship->SetBodyType(BodyType::STATIC_BODY);
-			ship->SetSleep(true);
+			ship->SetBodyState(BodyState::DEAD);	
 		}
 		break;
 	default:
@@ -327,7 +327,7 @@ void Player::SpeedAnimationCheck(float dt)
 	turboAnim->speed = (dt * 9) ;
 	turboVelocityAnim->speed = (dt * 15) ;
 	damageAnim->speed = (dt * 12) ;
-	deadAnim->speed = (dt * 7) ;
+	deadAnim->speed = (dt * 8) ;
 }
 
 void Player::CameraPlayer()

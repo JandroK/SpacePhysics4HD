@@ -103,13 +103,13 @@ bool HUD::PostUpdate()
 	// Gravity
 	{
 		drawPosY += size;
-		gravity = app->player->GetBody()->GetGravity() / app->player->GetBody()->GetMass();
-		if (gravity == 0.f && startFly == false)gravity = 8.11f;
+		gravity = abs(app->player->GetBody()->GetGravity());
+		if (gravity == 0.f && startFly == false)gravity = 770;
 		else if (startFly == false) { 
 			startFly = true; 
 			timer.Start();
 		}
-		if (gravity < -0.5f) gravity += 4;
+		//if (gravity < -0.5f) gravity += 4;
 		sprintf_s(hudText, 64, "G-Force: %.2f", gravity);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
