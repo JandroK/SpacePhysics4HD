@@ -20,7 +20,8 @@ a nuclear engine to protect yourself from the sun's radiation because the sun is
  - Animations of waves and propulsion air platform
  - Player animation depending on your state
  - Audio feedback:
-   + Player propulsion
+   + Player propulsion normal
+   + Player propulsion TURBO
    + Player hit
    + Player in danger
    + Player dead
