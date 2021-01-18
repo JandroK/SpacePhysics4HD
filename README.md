@@ -21,12 +21,12 @@ a nuclear engine to protect yourself from the sun's radiation because the sun is
  - Player animation depending on your state
  - Audio feedback of player propulsion, player hit and player dead 
  - HUD contain: 
-  + Current force gravity
-  + Vertical velocity
-  + Fuel in %
-  + Shield in %
-  + The name of the current mission
-  + A distance progression bar
+   + Current force gravity
+   + Vertical velocity
+   + Fuel in %
+   + Shield in %
+   + The name of the current mission
+   + A distance progression bar
  - Game story
  
 ## Controls
