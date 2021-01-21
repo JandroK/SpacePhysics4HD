@@ -12,7 +12,7 @@ Physics::~Physics()
 bool Physics::Start()
 {
 	active = true;
-	// Definimos un nuevo mundo
+	// Crate a new world
 	world = new PhysicsEngine();
 	world->SetPositionAndRangePlanetA(PIXEL_TO_METERS(11081), PIXEL_TO_METERS(5500));
 	world->SetPositionAndRangePlanetB(PIXEL_TO_METERS(0), PIXEL_TO_METERS(2000));
@@ -29,6 +29,7 @@ bool Physics::PreUpdate()
 
 bool Physics::Update(float dt)
 {
+	// Update the physics world
 	world->Step(dt);
 
 	return true;
@@ -36,19 +37,6 @@ bool Physics::Update(float dt)
 
 bool Physics::PostUpdate()
 {
-	return true;
-}
-
-bool Physics::CleanUp()
-{
-	if (active)
-	{
-		bodies.Clear();
-		world->CleanUp();
-		delete world;
-	}
-	
-	active = false;
 	return true;
 }
 
@@ -99,3 +87,16 @@ fPoint Physics::RotateVector(fPoint vector, fPoint axis, float angle)
 	float posY = (vector.x * sin(angle)) + (vector.y * cos(angle)) + METERS_TO_PIXELS(axis.y);//Change basis
 	return fPoint({ posX, posY });
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+
+bool Physics::CleanUp()
+{
+	if (active)
+	{
+		bodies.Clear();
+		world->CleanUp();
+		delete world;
+	}
+	
+	active = false;
+	return true;
+}

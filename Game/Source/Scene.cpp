@@ -48,14 +48,14 @@ bool Scene::Start()
 	wallDown = new Body;
 	sea = new Body;
 
-	//currentAnimAsteroid = new Animation();
+	// Create new Animations
 	idleAsteroidAnim = new Animation();
 	explosionAsteroidAnim = new Animation();
 	propulsionPlatform.laserFront = new Animation();
 	propulsionPlatform.laserBack = new Animation();
 	waterAnim = new Animation();
 
-	// Load textures and music
+	// Load textures
 	imgBgEarth = app->tex->Load("Assets/Textures/bg_earth.png");
 	imgBgSpace = app->tex->Load("Assets/Textures/bg_space.png");
 	imgPlatformMoon = app->tex->Load("Assets/Textures/platformMoon.png");
@@ -64,9 +64,12 @@ bool Scene::Start()
 	propulsionPlatform.texture= app->tex->Load("Assets/Textures/platform.png");
 	propulsionPlatform.textureLaser= app->tex->Load("Assets/Textures/laser_platform.png");
 	imgWater = app->tex->Load("Assets/Textures/water_anim.png");
+
+	// Load music anf Fx
 	app->audio->PlayMusic("Assets/Audio/Music/galactic_empire.ogg");
 	explosionFx = app->audio->LoadFx("Assets/Audio/Fx/explosion_asteroid.wav");
 
+	// Get dimensions of texture
 	SDL_QueryTexture(propulsionPlatform.texture, NULL, NULL, &rectPlatform.w, &rectPlatform.h);
 	propulsionPlatform.position = { WINDOW_W / 2 - (rectPlatform.w >> 1), 10316 };
 
@@ -115,6 +118,7 @@ bool Scene::Start()
 	CreateWalls(sea, {0,10720}, WINDOW_W, 360, BodyClass::SEA);
 	CreateEntity();
 
+	// Active Palyer and HUD
 	app->player->Init();
 	app->player->Start();
 
@@ -137,18 +141,21 @@ bool Scene::PreUpdate()
 bool Scene::Update(float dt)
 {
 	ComprobeStateAsteroids();
+
+	// Update de animations
 	explosionAsteroidAnim->speed = dt * 3;
 	propulsionPlatform.laserFront->Update();
 	propulsionPlatform.laserBack->Update();
 	waterAnim->Update();
 
-	ListItem<Asteroids*>* item;
 	// Update all animations asteroids
+	ListItem<Asteroids*>* item;
 	for (item = asteroids.start; item != NULL; item = item->next)
 	{
 		item->data->currentAnimAsteroid->Update();
 	}
 
+	// Check win or lose
 	if(app->sceneManager->scene->win == 2)TransitionToScene(SceneType::WIN);
 	if(app->sceneManager->scene->lose == true)TransitionToScene(SceneType::LOSE);
 
@@ -160,17 +167,16 @@ bool Scene::PostUpdate()
 {
 	bool ret = true;
 
+	// Get current frame of the texture
 	SDL_Rect rect = propulsionPlatform.laserFront->GetCurrentFrame();
 	SDL_Rect rect2 = propulsionPlatform.laserBack->GetCurrentFrame();
 	SDL_Rect rect3; // Asteroid anim
 	SDL_Rect rect4 = waterAnim->GetCurrentFrame();
-	/*SDL_Rect rectPlatform = {METERS_TO_PIXELS(platform->GetPosition().x),METERS_TO_PIXELS(platform->GetPosition().y),
-		METERS_TO_PIXELS(platform->GetWidth()),METERS_TO_PIXELS(platform->GetHight())};*/
 
+	// Draw textures
 	app->render->DrawTexture(imgBgEarth, 0,7346);
 	app->render->DrawTexture(imgBgSpace, 0,0);
 	app->render->DrawTexture(imgPlatformMoon, 647, 390);
-
 	app->player->PostUpdate();
 	app->render->DrawTexture(imgClouds, 0,6620);
 	app->render->DrawTexture(imgWater, 0,10711, &rect4);
@@ -180,16 +186,20 @@ bool Scene::PostUpdate()
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1412, 10504, &rect,1,-23.5);
 	app->render->DrawTextureFlip(propulsionPlatform.textureLaser, 1315, 10542, &rect2,1,-22);
 
-	/*DrawStaticBodies(platform);
-	DrawStaticBodies(platformMoon);
-	DrawStaticBodies(moon);
-	DrawStaticBodies(wallLeft);
-	DrawStaticBodies(wallDown);
-	DrawStaticBodies(wallDown);
-	DrawStaticBodies(sea);*/
+	// Draw collision Box
+	if (app->sceneManager->GetViewCollisions())
+	{
+		DrawStaticBodies(platform);
+		DrawStaticBodies(platformMoon);
+		DrawStaticBodies(moon);
+		DrawStaticBodies(wallLeft);
+		DrawStaticBodies(wallDown);
+		DrawStaticBodies(wallDown);
+		DrawStaticBodies(sea);
+	}
 
-	ListItem<Asteroids*>* item;
 	// Draw all asteroids
+	ListItem<Asteroids*>* item;
 	for (item = asteroids.start; item != NULL; item = item->next)
 	{
 		if (item->data->asteroid->GetBodyState() != BodyState::IDLE)
@@ -200,12 +210,13 @@ bool Scene::PostUpdate()
 		rect3 = item->data->currentAnimAsteroid->GetCurrentFrame();
 		if (item->data->asteroid->GetBodyState() != BodyState::DEAD)
 		{
-			//app->render->DrawCircle2(METERS_TO_PIXELS(item->data->GetAxis().x),
-				//METERS_TO_PIXELS(item->data->GetAxis().y), METERS_TO_PIXELS(item->data->GetRadio()));
-
+			if (app->sceneManager->GetViewCollisions())
+			{
+				app->render->DrawCircle2(METERS_TO_PIXELS(item->data->asteroid->GetAxis().x),
+					METERS_TO_PIXELS(item->data->asteroid->GetAxis().y), METERS_TO_PIXELS(item->data->asteroid->GetRadio()));
+			}
 			app->render->DrawTexture(imgAsteroids, METERS_TO_PIXELS(item->data->asteroid->GetAxis().x) - METERS_TO_PIXELS(item->data->asteroid->GetRadio()) - 31,
 				METERS_TO_PIXELS(item->data->asteroid->GetAxis().y) - METERS_TO_PIXELS(item->data->asteroid->GetRadio()) - 33, &rect3, 1, item->data->asteroid->GetRotation());
-
 		}
 	}
 
@@ -230,6 +241,7 @@ void Scene::DrawStaticBodies(Body* body)
 
 void Scene::CreateWalls(Body* body, fPoint position, float w, float h, BodyClass bodyClass)
 {
+	// Set the values to new body
 	body->SetMass(100000);
 	body->SetBodyType(BodyType::STATIC_BODY);
 	body->SetClassType(bodyClass);
@@ -303,16 +315,15 @@ void Scene::CreateEntity()
 		item->data->asteroid->SetPosition({ PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y) });
 		item->data->asteroid->SetAxisCM(item->data->asteroid->GetPosition());
 
-		// The asteroids also move and collide with each other
+		// The asteroids have inertia and collide with each other
 		float velX = rand() % 4 - 2;
-		//float velY = rand() % 2;
-		//item->data->SetVelocity({ velX,velY });
 		if (velX < 0) item->data->asteroid->AddTorque(-60);
 		if (velX > 0) item->data->asteroid->AddTorque(60);
 		item->data->asteroid->SetCoeficientDrag(0.47);
 		item->data->asteroid->SetSurface(2);
 
 		app->physics->CreateBody(item->data->asteroid);
+		// This  conditional is so that at the end of the loop it doesn't create an empty body 
 		if (i < numAsteroids-1)
 		{
 			Asteroids* b = new Asteroids;
@@ -363,7 +374,6 @@ bool Scene::CleanUp()
 	app->tex->UnLoad(propulsionPlatform.textureLaser);
 	app->audio->Unload1Fx(explosionFx);
 
-	//delete currentAnimAsteroid;
 	delete idleAsteroidAnim;
 	delete explosionAsteroidAnim;
 	delete waterAnim;
@@ -371,10 +381,10 @@ bool Scene::CleanUp()
 	delete propulsionPlatform.laserFront;
 
 	asteroids.Clear();
-
 	app->player->CleanUp();
 	app->physics->CleanUp();
 	app->hud->CleanUp();
+
 	active = false;
 
 	return true;

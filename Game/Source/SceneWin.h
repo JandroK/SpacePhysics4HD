@@ -31,11 +31,7 @@ public:
 	// Called before quitting
 	bool CleanUp();
 
-	int GetNumThisScene()
-	{
-		return 0;
-	};
-
+	int GetNumThisScene() { return 0; };
 
 private:
 

@@ -23,12 +23,14 @@ SceneManager::SceneManager(Input* input, Render* render, Textures* tex) : Module
 {
 	name.Create("scene_manager");
 
+	// Create new scenes
 	sceneLogo = new SceneLogo();
 	sceneIntro = new SceneIntro();
 	scene = new Scene();
 	sceneWin = new SceneWin();
 	sceneLose = new SceneLose();
 
+	// Add scene to the list
 	AddScene(sceneLogo, false);
 	AddScene(sceneIntro, false);
 	AddScene(scene, false);
@@ -64,15 +66,13 @@ bool SceneManager::Start()
 	current->Start();
 	next = nullptr;
 
-	//guiFont = app->fonts->Load("Assets/Textures/GUI/font_gui.png", "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 2, 195, 48);
-
 	return true;
 }
 
 // Called each loop iteration
 bool SceneManager::PreUpdate()
 {
-	if (input->GetKey(SDL_SCANCODE_F8) == KEY_DOWN) ViewRectangles = !ViewRectangles;
+	if (input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN) viewCollisions = !viewCollisions;
 
 	return true;
 }
@@ -81,8 +81,6 @@ bool SceneManager::PreUpdate()
 bool SceneManager::Update(float dt)
 {
 	bool ret = true;
-	if (!pause && (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) && (current->name == "scene"))
-		pause = !pause;
 
 	if (!onTransition)
 	{
@@ -102,11 +100,6 @@ bool SceneManager::Update(float dt)
 
 				current->CleanUp();	// Unload current screen
 				next->Start();	// Load next screen
-				//if (current->isContinue)app->LoadGameRequest();
-				//else if (next->name == "scene" )// Save
-				//{
-				//	app->SaveGameRequest();
-				//}
 				RELEASE(current);	// Free current pointer
 				current = next;		// Assign next pointer
 				next = nullptr;
@@ -147,11 +140,13 @@ bool SceneManager::Update(float dt)
 		current->transitionRequired = false;
 	}
 
+	// If player press F1 the Scene 1 is load again
 	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 	{
 		current->TransitionToScene(SceneType::LEVEL1);
 		lastLevel = 1;
 	}
+	// If player press ESC the game is closed
 	if (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN)
 		ret = false;
 
@@ -183,21 +178,7 @@ bool SceneManager::CleanUp()
 {
 	LOG("Freeing scene");
 	if (current != nullptr) current->CleanUp();
-	//app->fonts->UnLoad(guiFont);
 
-	return true;
-}
-
-bool SceneManager::LoadState(pugi::xml_node& data)
-{
-	if (current->lastLevel == 1)current = scene;
-	current->LoadState(data);
-	return true;
-}
-
-bool SceneManager::SaveState(pugi::xml_node& data) const
-{
-	current->SaveState(data);
 	return true;
 }
 

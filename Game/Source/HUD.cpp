@@ -109,7 +109,6 @@ bool HUD::PostUpdate()
 			startFly = true; 
 			timer.Start();
 		}
-		//if (gravity < -0.5f) gravity += 4;
 		sprintf_s(hudText, 64, "G-Force: %.2f", gravity);
 		app->render->DrawText(font, hudText, drawPosX, drawPosY, size, 0, { 255, 255, 255, 255 });
 	}
@@ -168,16 +167,6 @@ bool HUD::PostUpdate()
 	return true;
 }
 
-bool HUD::CleanUp()
-{
-	if (!active)
-		return true;
-	active = false;
-
-	delete font;
-
-	return true;
-}
 
 void HUD::Lerp(float min, float max, Uint8 &value, bool &onOff, float velocity)
 {
@@ -207,4 +196,15 @@ void HUD::Chronometer()
 		centenas = miliseconds / 100;
 		miliseconds2 = miliseconds - (centenas * 100);
 	}
+}
+
+bool HUD::CleanUp()
+{
+	if (!active)
+		return true;
+	active = false;
+
+	delete font;
+
+	return true;
 }

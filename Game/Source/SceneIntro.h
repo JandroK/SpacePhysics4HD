@@ -39,11 +39,6 @@ public:
 	// Called before quitting
 	bool CleanUp();
 
-	bool LoadState(pugi::xml_node& data);
-	bool SaveState(pugi::xml_node& data)const;
-
-	void ComprobeState(int id);
-
 private:
 
 	SDL_Texture* bgIntro;
@@ -52,9 +47,6 @@ private:
 	float imgX = 0, imgY = 0;
 	int imgW = 0, imgH = 0;
 	bool transition;
-
-	pugi::xml_document sceneFile;
-	pugi::xml_node sceneStateFile;
 };
 
 #endif // __SCENEINTRO_H__

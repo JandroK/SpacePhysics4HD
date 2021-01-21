@@ -26,9 +26,6 @@ struct PlayerData
 	uint lives = 5;
 	uint respawns = 0;
 	float fuel = 0;
-	//uint *stateShoot = 0;
-	//iPoint* shootPosition;
-	//iPoint* shootPointsCollision;
 	SDL_Rect rectPlayer = {0,0,0,0};
 
 	SDL_Texture* texture;
@@ -38,8 +35,8 @@ struct PlayerData
 	SDL_Texture* texHitDead;
 
 	static const int numPoints = 3;
-	fPoint* pointsCollision;// [numPoints] ;// = { { 0, -74 },{86, 42},{ -86, 42 } };
-	fPoint* pointsCollisionWorld;// [numPoints] ;// = { { 0, -74 },{86, 42},{ -86, 42 } };
+	fPoint* pointsCollision;
+	fPoint* pointsCollisionWorld;
 	fPoint vecDir = { 0,0 };
 };
 
@@ -65,10 +62,6 @@ public:
 
 	bool PostUpdate();
 
-	//void SetHit();
-	//void CoinPlus() { playerData.fuel++; };
-	//void LivePlus() { playerData.respawns++; };
-
 	bool CleanUp();
 
 	Body* GetBody() { return ship; };
@@ -81,16 +74,8 @@ private:
 
 	void PlayerMoveAnimation();
 
-	//void MovePlayer( float dt);
-
 	void PlayerControls(float dt);
 	void GodModeControls(float dt);
-
-
-	// Load state game
-	//bool LoadState(pugi::xml_node& data);
-	// Save state game
-	//bool SaveState(pugi::xml_node& data)const;
 
 public:
 
@@ -112,7 +97,6 @@ private:
 	Animation* damageAnim;
 	Animation* deadAnim;
 
-	pugi::xml_document playerFile;
 	SString folder;
 	iPoint tmp;
 

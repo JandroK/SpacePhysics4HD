@@ -31,10 +31,12 @@ bool SceneLogo::Start()
 {
 	app->SetLastScene((Module*)this);
 
+	// Load textures and Music
 	img = app->tex->Load("Assets/Textures/scene_logo.png");
 	introFx = app->audio->LoadFx("Assets/Audio/Fx/intro.wav");
 	app->audio->PlayFx(-1,introFx, 100);
 
+	// Get dimensions of texture
 	SDL_QueryTexture(img, NULL, NULL, &imgW, &imgH);
 	app->render->camera.x = app->render->camera.y = 0;
 	logo = { imgX,imgY,imgW,imgH };
@@ -70,7 +72,7 @@ bool SceneLogo::Update(float dt)
 	}
 	else if (state == 2)
 	{
-		// Waiting for 3 seconds
+		// Waiting for 4.5 seconds
 		timeCounter += dt;
 		if (timeCounter >= 4.5f) state = 3;
 	}

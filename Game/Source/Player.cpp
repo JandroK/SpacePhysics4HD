@@ -31,6 +31,7 @@ bool Player::Start()
 	// Create new ship
 	ship = new Body;
 
+	// Create new animations
 	idleAnim = new Animation();
 	flyAnim = new Animation();
 	turboAnim = new Animation();
@@ -50,6 +51,7 @@ bool Player::Start()
 	deadFx = app->audio->LoadFx("Assets/Audio/Fx/player_dead.wav");
 	danger = app->audio->LoadFx("Assets/Audio/Fx/player_in_danger.wav");
 
+	// Get dimensions of texture
 	SDL_QueryTexture(playerData.texture,NULL ,NULL, &playerData.rectPlayer.w, &playerData.rectPlayer.h);
 
 	float posX = (WINDOW_W / 2) - (playerData.rectPlayer.w / 2);
@@ -64,6 +66,7 @@ bool Player::Start()
 	ship->SetCoeficientDrag(0.82);
 	ship->SetSurface(8);
 
+	// Create the points matrix
 	playerData.pointsCollision = new fPoint[playerData.numPoints];
 	playerData.pointsCollisionWorld = new fPoint[playerData.numPoints];
 
@@ -83,6 +86,7 @@ bool Player::Start()
 	}
 	ship->SetCollisions(playerData.pointsCollision, playerData.pointsCollisionWorld, playerData.numPoints);
 
+	// Set properties of the ship
 	playerData.vecDir = { playerData.pointsCollisionWorld[0].x - ship->GetAxis().x , playerData.pointsCollisionWorld[0].y - ship->GetAxis().y };
 	float radio = app->physics->CalculateModule(playerData.vecDir); 
 	playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
@@ -93,6 +97,7 @@ bool Player::Start()
 	ship->SetAxisCM({ PIXEL_TO_METERS(ship->GetAxis().x), PIXEL_TO_METERS(ship->GetAxis().y) });
 	ship->SetSleep(true);
 
+	// Add body to the engine
 	app->physics->CreateBody(ship);
 	
 	playerData.state = IDLE;
@@ -101,6 +106,7 @@ bool Player::Start()
 	playerData.fuel = 1500;
 	playerData.lives = 3;
 
+	// Load animations
 	idleAnim->loop = true;
 	flyAnim->loop = true;
 	turboAnim->loop = true;
@@ -118,6 +124,7 @@ bool Player::Start()
 
 	for (int i = 0; i < 2; i++)
 		turboVelocityAnim->PushBack({ 0 ,0 + (237 * i), 207, 237 });
+
 	for (int j = 0; j < 2; j++)
 	{
 		for (int i = 0; i < 2; i++)
@@ -142,37 +149,9 @@ bool Player::Awake(pugi::xml_node& config)
 	return true;
 }
 
-//bool Player::LoadState(pugi::xml_node& player) 
-//{
-//	bool ret=true;
-//	float posX = player.child("position").attribute("x").as_int(ship->GetPosition().x);
-//	float posY = player.child("position").attribute("y").as_int(ship->GetPosition().y);
-//	playerData.respawns = player.child("lives").attribute("num_respawns").as_int(playerData.respawns);
-//	playerData.fuel = player.child("fuel").attribute("count").as_int(playerData.fuel);
-//
-//	ship->SetPosition({ posX,posY });
-//	return ret;
-//}
-//
-//bool Player::SaveState(pugi::xml_node& player) const
-//{
-//	pugi::xml_node positionPlayer = player.child("position");
-//	pugi::xml_node coinsPlayer = player.child("coins");
-//	pugi::xml_node respawnsPlayer = player.child("lives");
-//	
-//	fPoint pos;
-//	positionPlayer.attribute("x").set_value(pos.x);
-//	positionPlayer.attribute("y").set_value(pos.y);
-//	coinsPlayer.attribute("count").set_value(playerData.fuel);
-//	respawnsPlayer.attribute("num_respawns").set_value(playerData.respawns);
-//
-//	ship->SetPosition(pos);
-//	
-//	return true;
-//}
-
 bool Player::PreUpdate() 
 {
+	// Ckeck if player is in danger
 	if (playerData.fuel < 225 || ship->GetLives() < 2)
 	{
 		app->audio->PlayFx(-1,danger);
@@ -191,13 +170,15 @@ bool Player::Update(float dt)
 		else ship->SetBodyType(BodyType::DYNAMIC_BODY);
 		ship->SetVelocity({ 0,0 });
 	}
-	playerData.currentAnimation->Update();
 
+	// Update animations
+	playerData.currentAnimation->Update();
 	PlayerMoveAnimation();
 	SpeedAnimationCheck(dt);
+
+	// If player is alive
 	if (playerData.state != State::DEADING && playerData.state != State::DEAD && playerData.state != State::HIT)
 	{
-
 		if (!godMode) 
 		{
 			if (playerData.fuel >= 0)
@@ -213,13 +194,8 @@ bool Player::Update(float dt)
 		else GodModeControls(dt);
 
 	}
-	CameraPlayer();
 
-	/*if (playerData.state == ATTACK && playerData.currentAnimation->HasFinished())
-	{
-		playerData.state = IDLE;
-		atakAnim->Reset();
-	}*/
+	CameraPlayer();
 
 	// Comprobe Win/Lose
 	CheckWin();
@@ -232,8 +208,10 @@ bool Player::PostUpdate()
 {
 	PlayerMoveAnimation();
 
+	// Get positions spaceship
 	fPoint positionPlayer = { METERS_TO_PIXELS(ship->GetAxis().x) - playerData.rectPlayer.w/2, 
 							  METERS_TO_PIXELS(ship->GetAxis().y) - playerData.rectPlayer.h / 2 };
+
 	SDL_Rect rectPlayer;
 	rectPlayer = playerData.currentAnimation->GetCurrentFrame();
 
@@ -301,21 +279,25 @@ bool Player::PostUpdate()
 		break;
 	}
 
-	int x1 = ship->GetPointsCollisionWorld()[0].x;
-	int y1 = ship->GetPointsCollisionWorld()[0].y;
-	int x2 = ship->GetPointsCollisionWorld()[1].x;
-	int y2 = ship->GetPointsCollisionWorld()[1].y;
-	int x3 = ship->GetPointsCollisionWorld()[2].x;
-	int y3 = ship->GetPointsCollisionWorld()[2].y;
+	// Draw collisions
+	if (app->sceneManager->GetViewCollisions())
+	{
+		int x1 = ship->GetPointsCollisionWorld()[0].x;
+		int y1 = ship->GetPointsCollisionWorld()[0].y;
+		int x2 = ship->GetPointsCollisionWorld()[1].x;
+		int y2 = ship->GetPointsCollisionWorld()[1].y;
+		int x3 = ship->GetPointsCollisionWorld()[2].x;
+		int y3 = ship->GetPointsCollisionWorld()[2].y;
 
-	app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
-	app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
-	app->render->DrawLine(x3, y3, x1, y1, 255, 0, 0);
+		app->render->DrawLine(x1, y1, x2, y2, 255, 0, 0);
+		app->render->DrawLine(x2, y2, x3, y3, 255, 0, 0);
+		app->render->DrawLine(x3, y3, x1, y1, 255, 0, 0);
 
-	int x4 = METERS_TO_PIXELS(ship->GetAxis().x);
-	int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
+		int x4 = METERS_TO_PIXELS(ship->GetAxis().x);
+		int y4 = METERS_TO_PIXELS(ship->GetAxis().y);
 
-	app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+		app->render->DrawLine(x4, y4, x1, y1, 255, 0, 0);
+	}
 
 	return true;
 }
@@ -392,8 +374,12 @@ void Player::PlayerControls(float dt)
 		playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - METERS_TO_PIXELS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - METERS_TO_PIXELS(ship->GetAxis().y) };
 		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::TURBO;
+
+		// Add forces
 		if(playerData.fuel>1)ship->AddForces({ playerData.vecDir.x * 4000, playerData.vecDir.y * 4000 });
 		else ship->AddForces({ playerData.vecDir.x * 1000, playerData.vecDir.y * 1000 });
+
+		// Fuel--
 		playerData.fuel -= 1.5;
 	}
 	else if(app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
@@ -401,21 +387,26 @@ void Player::PlayerControls(float dt)
 		playerData.vecDir = { ship->GetPointsCollisionWorld()[0].x - METERS_TO_PIXELS(ship->GetAxis().x), ship->GetPointsCollisionWorld()[0].y - METERS_TO_PIXELS(ship->GetAxis().y) };
 		playerData.vecDir = app->physics->NormalizeVector(playerData.vecDir);
 		playerData.state = State::FLY;
+
+		// Add forces
 		if (playerData.fuel > 1)ship->AddForces({ playerData.vecDir.x * 2000, playerData.vecDir.y * 2000 });
 		else ship->AddForces({ playerData.vecDir.x * 500, playerData.vecDir.y * 500 });
+
+		// Fuel--
 		playerData.fuel -= 1;
 	}
 	else playerData.state = State::IDLE;
 
+	// Add torque for rotate the ship
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
 		ship->AddTorque(400);
 	}
-
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
 		ship->AddTorque(-400);
 	}
+
 	// If the player donesn't apply torque and there is wind, the velocity angular is reduced
 	if (ship->GetGravity() != 0 && !app->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN 
 		&& !app->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN )
@@ -426,12 +417,14 @@ void Player::PlayerControls(float dt)
 		if(ship->GetVelocityAngular() > 0)
 			ship->AddTorque(-200);		
 	}
+
+	// Add Torque for stabilize the ship, this system help player to land
 	if (app->input->GetKey(SDL_SCANCODE_S) != KEY_DOWN )
 	{
 		int gravityDirection = 0;
 		if (ship->GetGravity() > 0)gravityDirection = 1;
 		else if (ship->GetGravity() < 0)gravityDirection = -1;
-		// Add Torque for stabilize the ship, this system help player to land
+		
 		if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y > 0.1f)
 			ship->AddTorque(300 * gravityDirection);
 		else if (ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y < -0.1f)
@@ -463,34 +456,8 @@ void Player::GodModeControls(float dt)
 	{
 		ship->SetAxisCM({ ship->GetAxis().x + velGodMode, ship->GetAxis().y });
 		ship->SetPosition({ ship->GetPosition().x + velGodMode, ship->GetPosition().y });
-	}
-		
+	}	
 }
-
-//void Player::MovePlayer(float dt)
-//{
-//	switch (playerData.state)
-//	{
-//	case IDLE:
-//		// Future conditions in state IDLE...
-//		break;	
-//
-//	case FLY:
-//		// Move in state WALK 
-//		
-//		// Future conditions in state FLY...
-//		break;
-//
-//	case TURBO:
-//		// Move in state TURBO 
-//		
-//		// Future conditions in state TURBO...
-//		break;
-//
-//	default:
-//		break;
-//	}
-//}
 
 void Player::CheckGameOver()
 {
@@ -501,7 +468,8 @@ void Player::CheckGameOver()
 }
 void Player::CheckWin()
 {
-	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3)//	&& app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && ship->GetSleep())
+	// If player land on the platform moon and after in Earth player win
+	if (abs(ship->GetPointsCollisionWorld()[2].y - ship->GetPointsCollisionWorld()[1].y) < 0.3)
 	{
 		if (METERS_TO_PIXELS(ship->GetPosition().y) > 560 && METERS_TO_PIXELS(ship->GetPosition().y) < 580
 			&& app->sceneManager->scene->GetWin() != 1)
@@ -516,16 +484,6 @@ void Player::CheckWin()
 		}	
 	}
 }
-
-//void Player::SetHit()
-//{
-//	if (playerData.respawns > 0 && playerData.state != HIT && !godMode) 
-//	{
-//		playerData.respawns--;
-//		playerData.state = HIT;
-//		//app->audio->PlayFx(damageFx);
-//	}
-//}
 
 bool Player::CleanUp()
 {
@@ -544,16 +502,16 @@ bool Player::CleanUp()
 	app->audio->Unload1Fx(damageFx);
 	app->audio->Unload1Fx(deadFx);
 	app->audio->Unload1Fx(danger);
-	active = false;
 
 	delete idleAnim;
 	delete flyAnim;
 	delete turboAnim;
 	delete turboVelocityAnim;
 	delete damageAnim;
-
 	delete playerData.pointsCollision;
 	delete playerData.pointsCollisionWorld;
+
+	active = false;
 
 	return true;
 }

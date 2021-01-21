@@ -137,6 +137,7 @@ bool Collisions::IsInsidePolygons(fPoint polygon[],int n, fPoint polygon2[], int
 float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 {
 	fPoint point;
+	// Comprobe if some point of BodyB is inside of Body A
 	for (int i = 0; i < bodyB->GetNumPoints(); i++)
 	{
 		point = bodyB->GetPointsCollisionWorld()[i];
@@ -145,12 +146,13 @@ float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 		{ 
 			if (bodyA->GetClassType() == BodyClass::PLATFORMS)
 			{
+				// If the BodyA is a platform descliping the other body
 				Descliping(bodyB, point, bodyA->GetPointsCollisionWorld());
 				return 0;
 			}
 			else if (bodyA->GetClassType() == BodyClass::SEA)
 			{
-				// Calculate hight submerged of body
+				// If a body collison with the sea calculate hight submerged of body
 				float hSubmerged = point.y;
 				for (int j = i+1; j < bodyB->GetNumPoints(); j++)
 				{
@@ -159,11 +161,14 @@ float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 				}
 				hSubmerged = abs(hSubmerged- bodyA->GetPointsCollisionWorld()[0].y);
 				hSubmerged = PIXEL_TO_METERS(hSubmerged);
-				// if hight submerged is more bigger than the maximum height hight submerged = maximum height
+
+				// If hight submerged is more bigger than the maximum height hight submerged = maximum height
 				if (hSubmerged > bodyB->GetHight())hSubmerged = bodyB->GetHight();
 				// Calculate volume
-				return hSubmerged * bodyB->GetSurface()/10; // 10 = FUYM
-
+				float FUYM = 0.1;
+				return hSubmerged * bodyB->GetSurface() * FUYM;
+				// FUYM because we want a smaller volume so that it floats more, 
+				// and we don't change the surface because the force drag need this surface
 			}
 		}
 	}
@@ -173,7 +178,9 @@ float Collisions::CollisionSquare(Body* bodyA, Body* bodyB)
 void Collisions::Collision(Body* bodyA, Body* bodyB)
 {
 	bool sphere = false;
-	if (bodyA->GetClassType()==BodyClass::ASTEROIDS && bodyB->GetClassType() == BodyClass::ASTEROIDS) sphere = true;
+	if (bodyA->GetClassType()==BodyClass::ASTEROIDS && bodyB->GetClassType() == BodyClass::ASTEROIDS) 
+		sphere = true;
+	
 	// Get velocities and axis of bodies
 	fPoint velBodyA = bodyA->GetVelocity();
 	fPoint velBodyB = bodyB->GetVelocity();
@@ -204,15 +211,17 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 	if (bodyA->GetType() == BodyType::DYNAMIC_BODY)
 	{
 		bodyA->SetVelocity(newVelA);
-		// If newVelocity is smaller than 0.2 or it's bigger than 30m/s the body sleep=true
-		// Because the body is still or it has stamped  
+
+		// If newVelocity is smaller than 0.2 the body sleep=true  
 		float velCriticA = CalculateModule(newVelA);
-		if (velCriticA < 0.2)// || velCriticA > 30)
+		if (velCriticA < 0.2)
 		{
 			if (bodyA->GetClassType() != BodyClass::ASTEROIDS)bodyA->SetSleep(true);
 			bodyA->SetVelocity({ 0,0 });
 			bodyA->SetAcceleration({ 0,0 });
 		}
+
+		// Change the satate of Body
 		if(sphere)bodyA->SetBodyState(BodyState::HIT);
 		if (bodyA->GetClassType() == BodyClass::PLAYER) bodyA->SetBodyState(BodyState::HIT);
 		if (velCriticA > 20) bodyA->SetBodyState(BodyState::DEADING);
@@ -220,6 +229,8 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 	if (bodyB->GetType() == BodyType::DYNAMIC_BODY)
 	{
 		bodyB->SetVelocity(newVelB);
+
+		// If newVelocity is smaller than 0.2 the body sleep=true 
 		float velCriticB = CalculateModule(newVelB);
 		if (velCriticB < 0.2)// || velCriticB > 30)
 		{
@@ -227,12 +238,16 @@ void Collisions::Collision(Body* bodyA, Body* bodyB)
 			bodyB->SetVelocity({ 0,0 });
 			bodyB->SetAcceleration({ 0,0 });
 		}
+
+		// Change the satate of Body
 		if (sphere) bodyB->SetBodyState(BodyState::HIT);
 		if(bodyB->GetClassType()==BodyClass::PLAYER) bodyB->SetBodyState(BodyState::HIT);
 		if (velCriticB > 20) bodyB->SetBodyState(BodyState::DEADING);
 	}
 }
 
+// This function isn't used in the code but we didn't want to just use the black box
+// Thereforce we have also calculated the collisions with angles
 void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 {
 	// Calculate the direction of the collision between axis
@@ -256,13 +271,11 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 
 		bodyA->SetVelocity({ vXaRotate, vYaRotate });
 		float velCriticA = CalculateModule({ vXaRotate, vYaRotate });
-		if (velCriticA < 0.2 )//|| velCriticA > 30)
+		if (velCriticA < 0.2 )
 		{
 			if (bodyA->GetClassType() != BodyClass::ASTEROIDS)bodyA->SetSleep(true);
 			bodyA->SetAcceleration({ 0,0 });
 			bodyA->SetAccelerationAngular(0);
-			//bodyA->SetVelocity({ 0,0 });
-			//bodyA->SetAcceleration({ 0,0 });
 		}
 	}
 
@@ -278,17 +291,16 @@ void Collisions::CollisionShpere(Body* bodyA, Body* bodyB)
 
 		bodyB->SetVelocity({ vXbRotate, vYbRotate });
 		float velCriticB = CalculateModule({ vXbRotate, vYbRotate });
-		if (velCriticB < 0.2)// || velCriticB > 30)
+		if (velCriticB < 0.2)
 		{
 			if(bodyB->GetClassType() != BodyClass::ASTEROIDS)bodyB->SetSleep(true);
 			bodyB->SetAcceleration({ 0,0 });
 			bodyB->SetAccelerationAngular(0);
-			//bodyB->SetVelocity({ 0,0 });
-			//bodyB->SetAcceleration({ 0,0 });
 		}
 	}
 }
 
+// Functions for resolve shocks
 void Collisions::CollisionFlatSurfaceX(Body* body)
 {
 	// Flip the direction of axis X and reduce vector lenght 
@@ -296,7 +308,6 @@ void Collisions::CollisionFlatSurfaceX(Body* body)
 	float lostEnergy = 1;
 	body->SetVelocity({ bodyVelocity.x * -lostEnergy, bodyVelocity.y * lostEnergy });
 }
-
 void Collisions::CollisionFlatSurfaceY(Body* body)
 {
 	// Flip the direction of axis Y and reduce vector lenght 

@@ -11,24 +11,23 @@ public:
 
 	void AddBody(Body* body);
 	void DeleteBody(Body* body);
+	bool CleanUp();
 
-	fPoint ForceGrav(float mass, float hight); // masa del objeto y distancia a la superfície del planeta
+	//Forces implmented + manual forces/torques
+	fPoint ForceGrav(float mass, float hight); // Mass of the object and distance to the surface of the planet
 	fPoint ForceAeroDrag(fPoint dirVelocity, float density, float velRelative, float surface, float cd);
 	fPoint ForceHydroBuoy(Body* body, float volume);
 	fPoint ForceHydroDrag(fPoint velBody, fPoint velSea);
-	//fPoint ForceAeroLift();
-	//fPoint ForceHydroDrag();
 
 	// Accelerations
 	void CalculateAcceleration(Body* body);
 	void CalculateAngularAcceleration(Body* body);
 
-	void Step(float dt); //Step physics: apply current physics & integrate & solve collisions advance one frame
+	void Step(float dt); //Apply current physics & integrate & solve collisions advance one frame
 	void ApplyForcesWorld(ListItem<Body*>*& item);
 	void Integrator(ListItem<Body*>*& item, float dt);
 	void ComprobeCollisions(ListItem<Body*>*& item);
 	void ComprobeState(ListItem<Body*>*& item);
-	//Remember to reset current forces/momentum of each body.
 
 	// Integrator
 	void VelocityVerletLinear(Body* body, float dt);
@@ -42,22 +41,21 @@ public:
 	void SetPositionAndRangePlanetB(float position, float radius) { positionPlanetB = position, rangeRadiusPlanetB = radius; };
 	void SetGravityPlanetA(float gravity) { gravityEarth = gravity; slopeEarth = -gravityEarth / rangeRadiusPlanetA; };
 	void SetGravityPlanetB(float gravity) { gravityMoon = gravity; slopeMoon = -gravityMoon / rangeRadiusPlanetB; };
-	bool CleanUp();
 
 private:
 
-	// Gravedades iniciales
+	// Initial gravity
 	float gravityEarth = 10;
 	float gravityMoon = 2;
 	float gravity = 0;
 
-	// Posiciones iniciales de la superfície de los planetas y el rango de alcance de su campo gravitatorio
+	// Initial positions of the surface of the planets and the range of their gravitational field
 	float positionPlanetA = 0;
 	float positionPlanetB = 0;
 	float rangeRadiusPlanetA = 0;
 	float rangeRadiusPlanetB = 0;
 
-	// Inclinación de la recta: gravedad en la superfície entre la altura máxima a la afecta la gravedad
+	// Inclination of the line: gravity on the surface between the maximum height affected by gravity
 	float slopeEarth = 0;
 	float slopeMoon = 0; 
 

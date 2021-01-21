@@ -39,18 +39,16 @@ bool SceneIntro::Start()
 	app->SetLastScene((Module*)this);
 	transition = false;
 
-	app->audio->PlayMusic("Assets/Audio/Music/imperial_march.ogg");
+	// Load textures and Music
 	bgIntro = app->tex->Load("Assets/Textures/scene_intro.png");
 	bgText = app->tex->Load("Assets/Textures/burn_mission.png");
+	app->audio->PlayMusic("Assets/Audio/Music/imperial_march.ogg");
 
-
+	// Get dimensions of texture
 	SDL_QueryTexture(bgText, NULL, NULL, &imgW, &imgH);
 	app->render->camera.x = app->render->camera.y = 0;
 	imgX = WINDOW_W / 2 - imgW / 2;
 	imgY = WINDOW_H;
-	//ComprobeState(2);
-
-	//app->sceneManager->SetPause(false);
 
 	return true;
 }
@@ -64,6 +62,7 @@ bool SceneIntro::Update(float dt)
 {
 	bool ret = true;
 
+	// If player press the sapce or the text has left the secene transition to Level1
 	if (app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN || imgY + imgH < 0)
 	{
 		TransitionToScene(SceneType::LEVEL1);
@@ -95,41 +94,8 @@ bool SceneIntro::CleanUp()
 
 	bgIntro = nullptr;
 	active = false;
-	return true;
-}
-
-bool SceneIntro::LoadState(pugi::xml_node& data)
-{
-	lastLevel = data.child("level").attribute("lvl").as_int(0);
-	//if (app->removeGame)lastLevel = 0;
-	return true;
-}
-
-bool SceneIntro::SaveState(pugi::xml_node& data) const
-{
-	data.child("level").attribute("lvl").set_value(lastLevel);
 
 	return true;
-}
-
-void SceneIntro::ComprobeState(int id)
-{
-	bool ret = true;
-	pugi::xml_parse_result result = sceneFile.load_file("save_game.xml");
-
-	// Check result for loading errors
-	if (result == NULL)
-	{
-		LOG("Could not load map xml file savegame.xml. pugi error: %s", result.description());
-		ret = false;
-	}
-	else
-	{
-		sceneStateFile = sceneFile.first_child();
-		sceneStateFile = sceneStateFile.child("scene_manager");
-		if (id == 2)LoadState(sceneStateFile);
-	}
-	sceneFile.reset();
 }
 
 

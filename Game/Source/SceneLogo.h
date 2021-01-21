@@ -31,7 +31,6 @@ public:
 	// Called before quitting
 	bool CleanUp();
 
-
 private:
 
 	SDL_Rect logo;
@@ -42,8 +41,6 @@ private:
 	int state;
 	float timeCounter;
 	float logoAlpha;
-
-
 };
 
 #endif // __SCENELOGO_H__

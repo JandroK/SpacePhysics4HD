@@ -33,10 +33,12 @@ bool SceneLose::Start()
 	app->SetLastScene((Module*)this);
 	transition = false;
 
-	app->audio->PlayMusic("Assets/Audio/Music/music_lose.ogg");
+	// Load textures and Music
 	img = app->tex->Load("Assets/Textures/lose_screen.png");
 	imgTex = app->tex->Load("Assets/Textures/mission_failed.png");
+	app->audio->PlayMusic("Assets/Audio/Music/music_lose.ogg");
 
+	// Get dimensions of texture
 	SDL_QueryTexture(imgTex, NULL, NULL, &imgW, &imgH);
 	app->render->camera.x = app->render->camera.y = 0;
 	imgX = WINDOW_W / 2 - imgW / 2;
@@ -52,6 +54,7 @@ bool SceneLose::PreUpdate()
 
 bool SceneLose::Update(float dt)
 {
+	// If player press the sapce or the text has left the secene transition to Level1
 	if (app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN || imgY + imgH < 0)
 	{
 		TransitionToScene(SceneType::LEVEL1);
@@ -80,9 +83,10 @@ bool SceneLose::CleanUp()
 	Mix_HaltMusic();
 	app->tex->UnLoad(img);
 	app->tex->UnLoad(imgTex);
+
 	img = nullptr;
 	imgTex = nullptr;
-
 	active = false;
+
 	return true;
 }

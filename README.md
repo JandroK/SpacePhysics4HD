@@ -39,11 +39,13 @@ a nuclear engine to protect yourself from the sun's radiation because the sun is
  - S for speed up the ship (apply force)
  - SHIFT for activate the turbo (apply more force)
  - A / D for rotate the ship (apply torque)
+ - ESC to exit the game
 
 ## KEY Debug
 
  - F1 for restart Level1
  - F2 for active/desactive God Mode
+ - F3 for enable/disable the view collisions
 
 ## Developers
 

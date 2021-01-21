@@ -1,15 +1,15 @@
 #include "Space4HD.h"
 
+// Second law of Newtow F = m*a
 void PhysicsEngine::CalculateAcceleration(Body* body)
 {
-	// Second law of Newtow F = m*a
 	body->SetAcceleration({ body->GetForces().x / body->GetMass(),body->GetForces().y / body->GetMass() });
 }
 void PhysicsEngine::CalculateAngularAcceleration(Body* body)
 {
 	float inercia = body->GetMass() * body->GetRadio() * body->GetRadio();
 	body->SetAccelerationAngular(body->GetTorque() / inercia);
-	// item->data->GetRadio() devuelve la distancia del CM al punto de aplicación de la fuerza
+	// item->data->GetRadio() returns the distance from the CM to the point of application of the force
 }
 
 fPoint PhysicsEngine::ForceGrav(float mass, float hight)
@@ -47,7 +47,6 @@ fPoint PhysicsEngine::ForceHydroBuoy(Body* body, float volume)
 	forceBuoyance.y *= -1;
 	return forceBuoyance;
 }
-
 fPoint PhysicsEngine::ForceHydroDrag(fPoint velBody, fPoint velSea)
 {
 	fPoint forceDrag;
@@ -59,6 +58,7 @@ fPoint PhysicsEngine::ForceHydroDrag(fPoint velBody, fPoint velSea)
 	return fPoint();
 }
 
+// Integrator
 void PhysicsEngine::VelocityVerletLinear(Body* body, float dt)
 {
 	float posX = body->GetPosition().x + body->GetVelocity().x * dt + 0.5 * body->GetAcceleration().x * dt * dt;
@@ -75,6 +75,7 @@ void PhysicsEngine::VelocityVerletAngular(Body* body, float dt)
 	body->SetVelocityAngular(body->GetVelocityAngular()+body->GetAccelerationAngular()*dt);
 }
 
+// Resolve physics
 void PhysicsEngine::Step(float dt)
 {
 	ListItem<Body*>* item;
@@ -155,7 +156,7 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 				break;
 			}
 		}
-		if (ret == false) break; // If all bodies are sleep the collisions are not checked
+		if (ret == false) break; // If all bodies are sleep the collisions aren't checked
 		for (item2 = item->next; item2 != NULL; item2 = item2->next)
 		{
 			// Find a body that is awake starting since the next body
@@ -172,9 +173,11 @@ void PhysicsEngine::ComprobeCollisions(ListItem<Body*>*& item)
 			float distanceBetweenAxis = CalculateModule(item->data->GetAxis() - item2->data->GetAxis());
 			bool sphere = false;
 			bool staticBody = false;
+
 			// If one of thw two is circular the collisions are checked using their radius
 			// Else the collisions are checked using their matrix of points
 			if (item->data->GetClassType()==BodyClass::ASTEROIDS || item2->data->GetClassType() == BodyClass::ASTEROIDS) sphere = true;
+			
 			// No ckeck collison if two bodies are static Body
 			if (item->data->GetType() == BodyType::STATIC_BODY && item2->data->GetType() == BodyType::STATIC_BODY) staticBody = true;
 			if (item->data->GetRadio() + item2->data->GetRadio() > distanceBetweenAxis && sphere)
@@ -236,14 +239,7 @@ void PhysicsEngine::DeleteBody(Body* body)
 
 bool PhysicsEngine::CleanUp()
 {
-	/*ListItem<Body*>* item;
-
-	for (item = bodies.start; item != NULL; item = item->next)
-	{
-		delete[] item->data->GetPointsCollision();
-		delete[] item->data->GetPointsCollisionWorld();
-	}*/
-
 	bodies.Clear();
+
 	return true;
 }

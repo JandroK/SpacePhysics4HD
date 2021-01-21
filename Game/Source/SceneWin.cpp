@@ -33,10 +33,12 @@ bool SceneWin::Start()
 	app->SetLastScene((Module*)this);
 	transition = false;
 
+	// Load textures and Music
 	img = app->tex->Load("Assets/Textures/win_screen.png");
 	bgText = app->tex->Load("Assets/Textures/tex_win.png");
 	app->audio->PlayMusic("Assets/Audio/Music/music_win.ogg");
 
+	// Get dimensions of texture
 	SDL_QueryTexture(bgText, NULL, NULL, &imgW, &imgH);
 	app->render->camera.x = app->render->camera.y = 0;
 	imgX = WINDOW_W / 2 - imgW / 2;
@@ -52,6 +54,7 @@ bool SceneWin::PreUpdate()
 
 bool SceneWin::Update(float dt)
 {
+	// If player press the sapce or the text has left the secene transition to Level1
 	if (app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN || imgY + imgH < 0)
 	{
 		TransitionToScene(SceneType::LEVEL1);
@@ -79,9 +82,11 @@ bool SceneWin::CleanUp()
 	Mix_HaltMusic();
 	app->tex->UnLoad(img);
 	app->tex->UnLoad(bgText);
+
 	img = nullptr;
 	bgText = nullptr;
 	active = false;
+
 	return true;
 }
 
