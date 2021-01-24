@@ -287,14 +287,6 @@ bool Render::DrawCircle2( int centreX, int centreY, int radius)
 		DrawLine(centreX + y, centreY + x, centreX - y, centreY - x, 255,0,0);
 		DrawLine(centreX - y, centreY - x, centreX - y, centreY + x, 255,0,0);
 		DrawLine(centreX - y, centreY + x, centreX + x, centreY - y, 255,0,0);
-		/*SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
-		SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
-		SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
-		SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
-		SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
-		SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
-		SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
-		SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);*/
 		
 		if (error <= 0)
 		{
